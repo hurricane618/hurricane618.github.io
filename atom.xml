@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>风之栖息地</title>
+  
+  <subtitle>habitat of gale</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="https://hurricane618.me/"/>
+  <updated>2018-06-26T03:10:58.119Z</updated>
+  <id>https://hurricane618.me/</id>
+  
+  <author>
+    <name>hurricane618</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>新的开始</title>
+    <link href="https://hurricane618.me/2018/06/26/new-start/"/>
+    <id>https://hurricane618.me/2018/06/26/new-start/</id>
+    <published>2018-06-26T03:10:58.000Z</published>
+    <updated>2018-06-26T03:10:58.119Z</updated>
+    
+    <content type="html"><![CDATA[<p>之前的博客荒废掉了，所以在github上开一个新的博客希望能够坚持下去吧。也不讲太多矫情的话了，撸起袖子就是肝。</p><p>一开始会更新的比较慢，hexo的博客还需要一段时间适应，之后会逐渐加快。</p><p><img src="/img/new-start/67863722_p0.png" alt="67863722"></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;之前的博客荒废掉了，所以在github上开一个新的博客希望能够坚持下去吧。也不讲太多矫情的话了，撸起袖子就是肝。&lt;/p&gt;
+&lt;p&gt;一开始会更新的比较慢，hexo的博客还需要一段时间适应，之后会逐渐加快。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/img/new-start/6786
+      
+    
+    </summary>
+    
+      <category term="杂谈" scheme="https://hurricane618.me/categories/%E6%9D%82%E8%B0%88/"/>
+    
+    
+      <category term="闲聊" scheme="https://hurricane618.me/tags/%E9%97%B2%E8%81%8A/"/>
+    
+  </entry>
+  
+</feed>
