@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://hurricane618.me/"/>
-  <updated>2018-06-30T04:58:02.091Z</updated>
+  <updated>2018-07-01T13:05:16.921Z</updated>
   <id>https://hurricane618.me/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>phpmyadmin4.8.1 后台LFI</title>
+    <link href="https://hurricane618.me/2018/07/01/phpmyadmin4-8-1-background-LFI/"/>
+    <id>https://hurricane618.me/2018/07/01/phpmyadmin4-8-1-background-LFI/</id>
+    <published>2018-07-01T13:02:15.000Z</published>
+    <updated>2018-07-01T13:05:16.921Z</updated>
+    
+    <content type="html"><![CDATA[<p>之前ChaMd5团队报出来的phpmyadmin的文件包含漏洞，今天就来分析复现一下。</p><h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p><img src="/img/phpmyadmin4.8.1-background-LFI/1.png" alt="1"></p><p>漏洞的输入点是 <code>include $_REQUEST[&#39;target&#39;];</code>出现了文件包含这种危险操作，那么有很大概率出现问题。</p><p>我们只要绕过57、58、59行的检测就可以成功控制包含文件。</p><p>第57行用正则匹配开头为index的路径，只要路径开头没有index即可。</p><p>第58行检索输入中是否有黑名单的字符，黑名单在第50行，可以看到 import.php和export.php，只要参数中没这两个php就行。</p><p>第59行要看Core类的方法checkPageValidity。</p><p><img src="/img/phpmyadmin4.8.1-background-LFI/2.png" alt="2"></p><p>第452行的第三个if判断，检查了输入中的白名单，如果有这些php就直接返回true。</p><p><img src="/img/phpmyadmin4.8.1-background-LFI/3.png" alt="3"></p><p>没什么用，继续看下面的操作。mb_substr截取字符串从开始的位置到?处的字符串，再次检索白名单。</p><p>虽然可以在url中加入?来通过这个判断，但是随后的include因为有?，所以就无法包含我们控制的文件。</p><p>之后，重点来了，在465行出现了一个url解码操作。由于这里解码之后又重复了一遍上面的截取操作，所以这里我们就可以让?编码两次来绕过白名单检测，之后返回到include的时候也能包含我们想要的文件。最后的payload如下：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1/phpmyadmin/index.php?target=db_sql.php%253f/../../../../../tongfang.txt</span><br></pre></td></tr></table></figure><p>db_sql.php是白名单中的一个，然后用两次URl编码过的?截断，两次URL编码的?在php的urldecode后会变成?，从而绕过检测，之后include文件时，服务器会认为db_sql.php%3f是一个目录，然后包含最后的文件。</p><p><img src="/img/phpmyadmin4.8.1-background-LFI/4.png" alt="4"></p><h2 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h2><ol><li>利用创建新的表，在表的字段中放入Webshell，然后包含数据库文件</li><li>执行<code>SELECT &#39;&lt;?php phpinfo(); ?&gt;&#39;</code>,然后包含php的session文件</li></ol><p>推荐用第二种方法更加隐蔽并且不需要猜测数据库文件路径，效果如下：</p><p><img src="/img/phpmyadmin4.8.1-background-LFI/5.png" alt="5"></p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总的来说这个漏洞需要在登录phpmyadmin之后才能利用，所以只要密码强度够，暂时就不会有太大危险，但还是推荐尽快升级。另外如果是在session中写了Webshell，用菜刀连的时候必须要有phpmyadmin的session才行……</p><h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://mp.weixin.qq.com/s?__biz=MzIzMTc1MjExOQ==&amp;mid=2247485036&amp;idx=1&amp;sn=8e9647906c5d94f72564dec5bc51a2ab&amp;chksm=e89e2eb4dfe9a7a28bff2efebb5b2723782dab660acff074c3f18c9e7dca924abdf3da618fb4&amp;mpshare=1&amp;scene=23&amp;srcid=0701Pk3Qg7hDrUSsZWD5dffq#rd" target="_blank" rel="noopener">ChaMd5的文章</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;之前ChaMd5团队报出来的phpmyadmin的文件包含漏洞，今天就来分析复现一下。&lt;/p&gt;
+&lt;h2 id=&quot;分析&quot;&gt;&lt;a href=&quot;#分析&quot; class=&quot;headerlink&quot; title=&quot;分析&quot;&gt;&lt;/a&gt;分析&lt;/h2&gt;&lt;p&gt;&lt;img src=&quot;/img/phpm
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="https://hurricane618.me/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+      <category term="代码审计" scheme="https://hurricane618.me/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
+    
+  </entry>
   
   <entry>
     <title>CSP绕过总结</title>
