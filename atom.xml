@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://hurricane618.me/"/>
-  <updated>2018-07-03T08:31:06.005Z</updated>
+  <updated>2018-07-08T15:58:48.905Z</updated>
   <id>https://hurricane618.me/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>google-ctf-beginner-js-safe-1</title>
+    <link href="https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/"/>
+    <id>https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/</id>
+    <published>2018-07-08T15:58:48.000Z</published>
+    <updated>2018-07-08T15:58:48.905Z</updated>
+    
+    <content type="html"><![CDATA[<p>周末看了看GoogleCTF的beginner题目，感觉有些题目还不错，这里就先分析其中一道题JS Safe。</p><h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><p><img src="/image/google-ctf-beginner-js-safe-1/0.png" alt=""></p><h2 id="分析与操作"><a href="#分析与操作" class="headerlink" title="分析与操作"></a>分析与操作</h2><p>这道题有点high，作为一个JS调试新手，着实爽了一把。题目给了一个Html网页，里面有两段JS代码，看来是JS代码分析的题目。</p><p><img src="/image/google-ctf-beginner-js-safe-1/1.png" alt=""></p><p>我们先看其中的一段，前两个是解密用的参数，看到open_safe这个函数，password必须是CTF{xxxx}的格式，读取其中的数据代入判断。<br>if中把我们的输入代入了x函数。</p><p><img src="/image/google-ctf-beginner-js-safe-1/2.png" alt=""></p><p>我们的password会在env的g参数中被编码，a是读数组数据，b是创建函数，c是加操作，d是ascii码转换。</p><p>之后，根据code中的字母在env中操作属性。最后有个等待值更新的异步操作。<br>其中重点就是那个for循环对env的操作，但是代码这个又很难看懂…… 所以只能用console.log来dump出来看看细节。而我们想知道我们的password被用来干什么了。</p><p>在for循环中加上一些代码来锁定g参数的位置。</p><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="regexp">/g/</span>.test(code.substr(i,<span class="number">4</span>)))&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i);</span><br><span class="line">    <span class="built_in">console</span>.log(env);</span><br><span class="line">    <span class="built_in">console</span>.log(code.substr(i,<span class="number">4</span>));</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p><img src="/image/google-ctf-beginner-js-safe-1/3.png" alt=""></p><p>定位在了876出现了g，然后看env里面有些啥。</p><p><img src="/image/google-ctf-beginner-js-safe-1/4.png" alt=""></p><p>有趣的东西，出现了之前js代码中的subtle，digst，sha-256，而且在最后的数组中是sha-256和我们的输入编码，这其实就可以推测这里是要对我们的输入计算sha-256hash。为了看更多细节，我们继续加入一些代码调试。</p><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(i&gt;=<span class="number">876</span>)&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i);</span><br><span class="line">    <span class="built_in">console</span>.log(lhs + <span class="string">"="</span> + fn + <span class="string">"("</span> + arg1 + <span class="string">":"</span> +env[arg1] + <span class="string">","</span> + arg2 + <span class="string">":"</span> +env[arg2] + <span class="string">")"</span>);</span><br><span class="line">    <span class="built_in">console</span>.log(lhs + <span class="string">"="</span> + env[fn] + <span class="string">"("</span> + env[arg1] + <span class="string">","</span> + env[arg2] + <span class="string">")"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(i == <span class="number">980</span>)&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(env);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>看看这之间有什么操作</p><p><img src="/image/google-ctf-beginner-js-safe-1/5.png" alt=""></p><p>果不其然，在876-884中完成了对我们输入的hash计算。</p><p><img src="/image/google-ctf-beginner-js-safe-1/6.png" alt=""></p><p>在940处，把我们计算出的hash变成数组，存入<code>env[Ѿ]</code>中。</p><p><img src="/image/google-ctf-beginner-js-safe-1/7.png" alt=""></p><p>可以很清楚的看到，在960取出了我们hash过后的第一个值，然后与230异或，异或后的值与h进行or操作后赋值给h，随后开始下一次循环。</p><p>从之前的js代码中的if就可以知道h必须为0才能跳过判断。所以异或的值必须为0，也就是说必须要和对应的值相同。这样我们就得到了一串hash计算后的数组 <code>230,104,96,84,111,24,205,187,205,134,179,94,24,181,37,191,252,103,247,114,198,80,206,223,227,255,122,0,38,250,29,238</code></p><p>最终我们把这串字符转16进制拼接得到 <code>e66860546f18cdbbcd86b35e18b525bffc67f772c650cedfe3ff7a0026fa1dee</code></p><p>这个是我们输入的字符的hash值，找个hash值破解网站，得到 Passw0rd! ，所以最终flag为<code>CTF{Passw0rd!}</code></p><p>至于剩下的代码，它是用于解密数据的，我们输入正确就会解密成功，输出是下一题的入口。感觉是一道题被拆分成了几块……</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>一道比较基础但是又很考察基本功的题，从中学习到了很多。</p><p>最后我想说一下的是那个SubtleCrypto.digest()方法我一开始没怎么搞懂，他是怎么把utf-8的编码数组hash计算的。之后找到了它的实现原理，所以也就懂了，为什么要一开始先utf-8编码才进行hash计算。</p><p><code>https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest</code></p><p>经过这次JS分析，感觉学习专门的JS调试迫在眉睫…… ，有变量监听和事件监听，会给调试工作带来很大便利。</p><h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/BOAKGP/CTF-Writeups/tree/master/Google%20CTF%202018%20Quals%20Beginners%20Quest/JS%20safe</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;周末看了看GoogleCTF的beginner题目，感觉有些题目还不错，这里就先分析其中一道题JS Safe。&lt;/p&gt;
+&lt;h2 id=&quot;题目&quot;&gt;&lt;a href=&quot;#题目&quot; class=&quot;headerlink&quot; title=&quot;题目&quot;&gt;&lt;/a&gt;题目&lt;/h2&gt;&lt;p&gt;&lt;img sr
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="https://hurricane618.me/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+      <category term="CTF" scheme="https://hurricane618.me/tags/CTF/"/>
+    
+  </entry>
   
   <entry>
     <title>phpmyadmin4.8.1 后台LFI</title>
