@@ -4,16 +4,16 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>Google CTF Beginner JS Safe 1 复现 | 风之栖息地</title>
+    <title>巅峰极客CTF 部分Web复现 | 风之栖息地</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
     
     <meta name="author" content="hurricane618">
     
-    <meta name="description" content="周末看了看GoogleCTF的beginner题目，感觉有些题目还不错，这里就先分析其中一道题JS Safe。
-题目
-分析与操作这道题有点high，作为一个JS调试新手，着实爽了一把。题目给了一个Html网页，里面有两段JS代码，看来是JS代码分析的题目。
-
-我们先看其中的一段，前两个是解密用的参数">
+    <meta name="description" content="复现了三道题，其他的都关环境了，记录一下复现的这三道吧。
+A Simple CMS在网上找到的onethink的漏洞分析文章
+https://bbs.ichunqiu.com/thread-4918-1-1.html
+这个是原理相同的，只不过是thinkphp
+https://xz.aliyun.c">
     
     
     
@@ -77,15 +77,15 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2018/07/08/google-ctf-beginner-js-safe-1/" title="Google CTF Beginner JS Safe 1 复现" itemprop="url">Google CTF Beginner JS Safe 1 复现</a>
+      <a href="/2018/08/01/dianfengjikeCTF-web/" title="巅峰极客CTF 部分Web复现" itemprop="url">巅峰极客CTF 部分Web复现</a>
   </h1>
   <p class="article-author">By
     
       <a href="https://hurricane618.me" title="hurricane618">hurricane618</a>
     </p>
   <p class="article-time">
-    <time datetime="2018-07-08T15:58:48.000Z" itemprop="datePublished">2018-07-08</time>
-    Updated:<time datetime="2018-07-19T01:04:59.440Z" itemprop="dateModified">2018-07-19</time>
+    <time datetime="2018-08-01T05:17:19.000Z" itemprop="datePublished">2018-08-01</time>
+    Updated:<time datetime="2018-08-01T05:23:31.869Z" itemprop="dateModified">2018-08-01</time>
     
   </p>
 </header>
@@ -94,40 +94,46 @@
 		
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">Contents</strong>
-		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#题目"><span class="toc-number">1.</span> <span class="toc-text">题目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分析与操作"><span class="toc-number">2.</span> <span class="toc-text">分析与操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">4.</span> <span class="toc-text">Reference</span></a></li></ol>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#A-Simple-CMS"><span class="toc-number">1.</span> <span class="toc-text">A Simple CMS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Baby-Web"><span class="toc-number">2.</span> <span class="toc-text">Baby Web</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#pentest"><span class="toc-number">3.</span> <span class="toc-text">pentest</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">4.</span> <span class="toc-text">Reference</span></a></li></ol>
 		</div>
 		
-		<p>周末看了看GoogleCTF的beginner题目，感觉有些题目还不错，这里就先分析其中一道题JS Safe。</p>
-<h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><img src="/2018/07/08/google-ctf-beginner-js-safe-1/0.png">
-<h2 id="分析与操作"><a href="#分析与操作" class="headerlink" title="分析与操作"></a>分析与操作</h2><p>这道题有点high，作为一个JS调试新手，着实爽了一把。题目给了一个Html网页，里面有两段JS代码，看来是JS代码分析的题目。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/1.png">
-<p>我们先看其中的一段，前两个是解密用的参数，看到open_safe这个函数，password必须是CTF{xxxx}的格式，读取其中的数据代入判断。<br>if中把我们的输入代入了x函数。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/2.png">
-<p>我们的password会在env的g参数中被编码，a是读数组数据，b是创建函数，c是加操作，d是ascii码转换。</p>
-<p>之后，根据code中的字母在env中操作属性。最后有个等待值更新的异步操作。<br>其中重点就是那个for循环对env的操作，但是代码这个又很难看懂…… 所以只能用console.log来dump出来看看细节。而我们想知道我们的password被用来干什么了。</p>
-<p>在for循环中加上一些代码来锁定g参数的位置。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="regexp">/g/</span>.test(code.substr(i,<span class="number">4</span>)))&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i);</span><br><span class="line">    <span class="built_in">console</span>.log(env);</span><br><span class="line">    <span class="built_in">console</span>.log(code.substr(i,<span class="number">4</span>));</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/3.png">
-<p>定位在了876出现了g，然后看env里面有些啥。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/4.png">
-<p>有趣的东西，出现了之前js代码中的subtle，digst，sha-256，而且在最后的数组中是sha-256和我们的输入编码，这其实就可以推测这里是要对我们的输入计算sha-256hash。为了看更多细节，我们继续加入一些代码调试。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(i&gt;=<span class="number">876</span>)&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i);</span><br><span class="line">    <span class="built_in">console</span>.log(lhs + <span class="string">"="</span> + fn + <span class="string">"("</span> + arg1 + <span class="string">":"</span> +env[arg1] + <span class="string">","</span> + arg2 + <span class="string">":"</span> +env[arg2] + <span class="string">")"</span>);</span><br><span class="line">    <span class="built_in">console</span>.log(lhs + <span class="string">"="</span> + env[fn] + <span class="string">"("</span> + env[arg1] + <span class="string">","</span> + env[arg2] + <span class="string">")"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(i == <span class="number">980</span>)&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(env);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>看看这之间有什么操作</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/5.png">
-<p>果不其然，在876-884中完成了对我们输入的hash计算。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/6.png">
-<p>在940处，把我们计算出的hash变成数组，存入<code>env[Ѿ]</code>中。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/7.png">
-<p>可以很清楚的看到，在960取出了我们hash过后的第一个值，然后与230异或，异或后的值与h进行or操作后赋值给h，随后开始下一次循环。</p>
-<p>从之前的js代码中的if就可以知道h必须为0才能跳过判断。所以异或的值必须为0，也就是说必须要和对应的值相同。这样我们就得到了一串hash计算后的数组 <code>230,104,96,84,111,24,205,187,205,134,179,94,24,181,37,191,252,103,247,114,198,80,206,223,227,255,122,0,38,250,29,238</code></p>
-<p>最终我们把这串字符转16进制拼接得到 <code>e66860546f18cdbbcd86b35e18b525bffc67f772c650cedfe3ff7a0026fa1dee</code></p>
-<p>这个是我们输入的字符的hash值，找个hash值破解网站，得到 Passw0rd! ，所以最终flag为<code>CTF{Passw0rd!}</code></p>
-<p>至于剩下的代码，它是用于解密数据的，我们输入正确就会解密成功，输出是下一题的入口。感觉是一道题被拆分成了几块……</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>一道比较基础但是又很考察基本功的题，从中学习到了很多。</p>
-<p>最后我想说一下的是那个SubtleCrypto.digest()方法我一开始没怎么搞懂，他是怎么把utf-8的编码数组hash计算的。之后找到了它的实现原理，所以也就懂了，为什么要一开始先utf-8编码才进行hash计算。</p>
-<p><code>https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest</code></p>
-<p>经过这次JS分析，感觉学习专门的JS调试迫在眉睫…… ，有变量监听和事件监听，会给调试工作带来很大便利。</p>
-<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/BOAKGP/CTF-Writeups/tree/master/Google%20CTF%202018%20Quals%20Beginners%20Quest/JS%20safe</span><br></pre></td></tr></table></figure>  
+		<p>复现了三道题，其他的都关环境了，记录一下复现的这三道吧。</p>
+<h2 id="A-Simple-CMS"><a href="#A-Simple-CMS" class="headerlink" title="A Simple CMS"></a>A Simple CMS</h2><p>在网上找到的onethink的漏洞分析文章</p>
+<p><a href="https://bbs.ichunqiu.com/thread-4918-1-1.html" target="_blank" rel="noopener">https://bbs.ichunqiu.com/thread-4918-1-1.html</a></p>
+<p>这个是原理相同的，只不过是thinkphp</p>
+<p><a href="https://xz.aliyun.com/t/99" target="_blank" rel="noopener">https://xz.aliyun.com/t/99</a></p>
+<p>通过这些我们知道，问题是出在缓存的存储上，我们的用户名被简单的反序列化存储进了缓存文件中。所以要getshell的话我们只需要通过用户名传入webshell。但是这里有个条件，我们必须能猜到缓存文件的名字。</p>
+<p>在题目的根目录下扫到 www.zip 得到题目的源码，在这里我们看到filename的命名规律，以及目录。推测这里的源码和线上是一样的，所以条件满足。</p>
+<img src="/2018/08/01/dianfengjikeCTF-web/1.png">
+<p>我们在本地测试的时候，删除 Application/Install/Data/install.lock 文件，然后通过install.php安装，随后通过在本地生成缓存文件来预测题目的缓存文件，最后代码执行拿flag。</p>
+<p>由于用户名有长度限制，所以分两次注册。第一次<code>%0a%0d$x=$_GET[x];\\</code>，第二次<code>%0a%0deval($x);\\</code></p>
+<p>注册之后必须要登录一下，这样就把webshell写入了缓存文件中了。</p>
+<img src="/2018/08/01/dianfengjikeCTF-web/2.png">
+<p>之后在题目中重复步骤，就可以拿到webshell，执行代码搜索flag</p>
+<img src="/2018/08/01/dianfengjikeCTF-web/3.png">
+<h2 id="Baby-Web"><a href="#Baby-Web" class="headerlink" title="Baby Web"></a>Baby Web</h2><p>这道题一开始想法是通过收集信息社工得到flag……，先是看到<a href="mailto:BabyWeb@my.lol" target="_blank" rel="noopener">BabyWeb@my.lol</a>，然后访问my.lol可以得到一个qq邮箱，结果这个qq没什么东西，思路就断在这里了。</p>
+<p>参考了其他人的writeup，发现要通过这些信息猜测后台，爆破密码……像这种信息量较少的题目，都会有一些扫目录，扫端口，收集子域名之类的操作。</p>
+<p>输入<a href="http://106.75.2.4/babyweb" target="_blank" rel="noopener">http://106.75.2.4/babyweb</a> ，自动跳转到<a href="http://106.75.2.4/babyweb/login.php" target="_blank" rel="noopener">http://106.75.2.4/babyweb/login.php</a> ，看了一个writeup有的队伍能直接根据收集的信息爆破出用户名和密码。。。这操作太强了，我是搞不出来，所以就按照常规操作扫端口。</p>
+<img src="/2018/08/01/dianfengjikeCTF-web/4.png">
+<p>根据扫出来的结果可以看到开放了3306端口，使用hydra爆破之。这个我在一开始的时候爆破的是root用户，结果看提示已经改成另外的用户了……哭唧唧，最后是在writeup的帮助下知道了用户名为babyweb，这个可以通过网站的信息推测出来。</p>
+<p>拿到密码之后，连接数据库。</p>
+<img src="/2018/08/01/dianfengjikeCTF-web/5.png">
+<p>然而并没有某writeup中所说的用户名密码，可能被删了，所以这里就只能直接用writeup中的用户名密码登后台了。</p>
+<p>后台有个简单的文件上传，然后后缀有限制只能是图片后缀，这里上传之后没有路径，但是我们有数据库的数据，根据数据库中的数据我们可以得到上传后文件的文件名再加上img路径就可以知道文件的路径。再看看上传的类型中还有htaccesss，这里就是文件上传的漏洞利用。</p>
+<p>通过上传htaccess文件来让一些后缀得到解析。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;FilesMatch &quot;abc&quot;&gt;</span><br><span class="line">SetHandler application/x-httpd-php</span><br><span class="line">&lt;/FilesMatch&gt;</span><br></pre></td></tr></table></figure>
+<p>最后上传.abc为后缀的webshell即可</p>
+<img src="/2018/08/01/dianfengjikeCTF-web/6.png">
+<h2 id="pentest"><a href="#pentest" class="headerlink" title="pentest"></a>pentest</h2><p>网站使用metinfo模板，在网上搜索一番，看到了几个SQl注入的洞，试了试都不行，索性放弃，看writeup。</p>
+<p>扫描目录扫出file/file.php，能删除文件，然后没有对..过滤导致可以跨目录删除文件…… emmmm 看来是为了比赛额外添加了一个文件删除，这个如果字典没扫出来就根本无法下手了。</p>
+<p>删除文件的路径中有对<code>./</code>的过滤，所以最后删除的路径为<code>...//xxxx/xxx</code><br>扫到这个之后，在之前的metinfo漏洞里面有讲删除install.lock文件，导致重装的问题，再加上metinfo对数据库参数过滤不严的问题，只要数据库配置参数中任意一项填入一句话木马<code>#*/@eval($_REQUEST[xxx]);/*</code>，就可以成功getshell。</p>
+<img src="/2018/08/01/dianfengjikeCTF-web/7.png">
+<p>虽然安装步骤没有走完，但是只要数据库创建成功，就可以通过config/config_db.php拿shell</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="http://url.cn/5HWdbfS" target="_blank" rel="noopener">http://url.cn/5HWdbfS</a></p>
+<p><a href="https://mp.weixin.qq.com/s/DYnLhYpC2eASyouk1YA2zg" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/DYnLhYpC2eASyouk1YA2zg</a></p>
+<p><a href="https://xz.aliyun.com/t/2469" target="_blank" rel="noopener">https://xz.aliyun.com/t/2469</a></p>
+<p><a href="https://www.safeinfo.me/ldgb/75.html" target="_blank" rel="noopener">https://www.safeinfo.me/ldgb/75.html</a></p>
+  
 	</div>
 		<footer class="article-footer clearfix">
 
@@ -146,7 +152,7 @@
 
 <div class="article-share" id="share">
 
-  <div data-url="https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/" data-title="Google CTF Beginner JS Safe 1 复现 | 风之栖息地" data-tsina="" class="share clearfix">
+  <div data-url="https://hurricane618.me/2018/08/01/dianfengjikeCTF-web/" data-title="巅峰极客CTF 部分Web复现 | 风之栖息地" data-tsina="" class="share clearfix">
   </div>
 
 </div>
@@ -155,19 +161,11 @@
 	
 <nav class="article-nav clearfix">
  
- <div class="prev" >
- <a href="/2018/07/18/google-ctf-beginner-part1/" title="Google CTF Beginner Part1">
-  <strong>PREVIOUS:</strong><br/>
-  <span>
-  Google CTF Beginner Part1</span>
-</a>
-</div>
-
 
 <div class="next">
-<a href="/2018/07/01/phpmyadmin4-8-1-background-LFI/"  title="phpmyadmin4.8.1 后台LFI">
+<a href="/2018/07/18/google-ctf-beginner-part1/"  title="Google CTF Beginner Part1">
  <strong>NEXT:</strong><br/> 
- <span>phpmyadmin4.8.1 后台LFI
+ <span>Google CTF Beginner Part1
 </span>
 </a>
 </div>
@@ -201,7 +199,7 @@ s.setAttribute('data-timestamp', +new Date());
 
   <div id="toc" class="toc-aside">
   <strong class="toc-title">Contents</strong>
-  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#题目"><span class="toc-number">1.</span> <span class="toc-text">题目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分析与操作"><span class="toc-number">2.</span> <span class="toc-text">分析与操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">4.</span> <span class="toc-text">Reference</span></a></li></ol>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#A-Simple-CMS"><span class="toc-number">1.</span> <span class="toc-text">A Simple CMS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Baby-Web"><span class="toc-number">2.</span> <span class="toc-text">Baby Web</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#pentest"><span class="toc-number">3.</span> <span class="toc-text">pentest</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">4.</span> <span class="toc-text">Reference</span></a></li></ol>
   </div>
 
 <div id="asidepart">
