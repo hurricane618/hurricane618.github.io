@@ -357,25 +357,27 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href = "/2018/06/26/new-start/" >
+        <a class="abstract-title" href = "/2019/01/10/code-breaking-esay-wp/" >
             
-                <span>新的开始</span>
+                <span>code-breaking easy部分题目writeup</span>
         </a>
         <div class="abstract-content">
-            之前的博客荒废掉了，所以在github上开一个新的博客希望能够坚持下去吧。也不讲太多矫情的话了，撸起袖子就是肝。
-一开始会更新的比较慢，hexo的博客还需要一段时间适应，之后会逐渐加快。
-
+            ph师傅的代码审计CTF题目 https://code-breaking.com
+easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET['arg'] ?? '';if(preg_match('/^[a-z0-9_]*$/isD', $action)) &#123;    show_source(__FILE__);&#125; else &#123;    $action('', $arg);&#125;
+观察正则表达式可以发现正常的函数名都不行，所以很容易联想到要在函数名中加入其它字符，这道...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/26</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/10</span>
             </div>
             <!-- tags  -->
             
             <div class= abstract-tags >
     
-        <a class="post-tag" href="javascript:void(0);" data-tags = "闲聊">闲聊</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags = "CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "代码审计">代码审计</a>
     
 </div>
             
