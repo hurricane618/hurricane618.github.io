@@ -22,7 +22,7 @@
     <meta name="description" content="hurricane618's blog">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <title>风之栖息地|hurricane618&#39;s blog</title>
+    <title>thinkphp 5.0.23 rce分析和复现 · 风之栖息地|hurricane618&#39;s blog</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -214,12 +214,23 @@
 </head>
 
     
+        <body class="post-body">
+    
     
 <header class="header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
     <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >风之栖息地</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">thinkphp 5.0.23 rce分析和复现</a>
+            </div>
+    </div>
     
     <a class="home-link" href=/>风之栖息地</a>
 </header>
@@ -231,24 +242,76 @@
 
 
 
+
+height:50vh;
 ">
     
     <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/)"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
+            
+            thinkphp 5.0.23 rce分析和复现
+            <!-- 404 -->
             
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
             
+            
+            <!-- 404 -->
+            
         </p>
         <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "代码审计">代码审计</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "PHP">PHP</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">664</span>阅读时长: <span class="post-count reading-time">2 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/02/03</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
         
     </div>
 </div>
@@ -349,45 +412,106 @@
 </script>        
         <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
         <div class="container container-unloaded">
-            <main class="main index-page">
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2018/06/30/csp-bypass-summary/" >
-            
-                <span>CSP绕过总结</span>
-        </a>
-        <div class="abstract-content">
-            首发在信安之路上 https://mp.weixin.qq.com/s/z_XmhrTUg_yUfkyAFFfaKQ ，之后文章略有修改。
-CSP绕过总结今年的0CTF预选赛6道web题，其中三道都涉及CSP的知识点，简直可怕。。。这次趁着空闲时间就稍稍总结一下CSP绕过方面的知识，无论是对以后CTF比赛还是工作都很有帮助。
-CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术。它是一种由开发者定义的安全性政策性申明，通过CSP指定可信的内容来源，让WEB处于一个安全的运行环境中。
-一个CSP头由多组CSP策略组成，中间由分号分隔,如下所示：
-...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/30</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "CSP">CSP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "XSS">XSS</a>
-    
-</div>
-            
-        </div>
+            <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>入口是在app::run()，这里有创建http的请求实例，</p>
+<img src="/2019/02/03/thinkphp-5-0-23-rce/1.png">
+<p>随后在后面会有路由检查，从这里跟进函数<code>routeCheck</code>。</p>
+<img src="/2019/02/03/thinkphp-5-0-23-rce/2.png">
+<p>在路由检查中会到路由类的check方法处，继续跟进。</p>
+<img src="/2019/02/03/thinkphp-5-0-23-rce/3.png">
+<p>在check中会有获取当前方法的method</p>
+<img src="/2019/02/03/thinkphp-5-0-23-rce/4.png">
+<p>下面在method中会获取<code>var_method</code>这个伪变量，其实这个就是我们通过post传进的<code>_method</code>，这里进入判断之后会将我们post的值当做Request类的方法调用，这里我们的poc是传入的<code>__construct</code>，这样就会调用它的构造方法，并且参数是post数据。</p>
+<img src="/2019/02/03/thinkphp-5-0-23-rce/5.png">
+<p>继续跟进构造方法，这里的foreach会遍历所有变量，将存在的参数全部覆盖掉，在我们传入的参数中的filter，就把之前的覆盖了，并且在这里传入method为get的原因也是因为之前注册路由是get方法，所以这里要把请求的method覆盖成get，避免报错。</p>
+<img src="/2019/02/03/thinkphp-5-0-23-rce/6.png">
+<p>在这调用完成之后<code>routeCheck</code>将返回<code>method</code>赋值给<code>dispatch</code>。之后会继续在run函数里面执行exec函数。由于type为method执行相应的分支。</p>
+<img src="/2019/02/03/thinkphp-5-0-23-rce/7.png">
+<img src="/2019/02/03/thinkphp-5-0-23-rce/8.png">
+<p>而这里的<code>param</code>方法能获取参数，并且和URL中的参数合并。这里得到的参数就是post数据中的<code>get[]=dir</code></p>
+<img src="/2019/02/03/thinkphp-5-0-23-rce/9.png">
+<p>它的返回调用了<code>input</code>方法，跟进<code>input</code>。</p>
+<img src="/2019/02/03/thinkphp-5-0-23-rce/10.png">
+<img src="/2019/02/03/thinkphp-5-0-23-rce/11.png">
+<p><code>input</code>最后将参数和<code>filter</code>一起传入<code>array_walk_recursive</code>中。其中参数中有我们传的<code>dir</code>，而<code>filter</code>通过<code>getFilter</code>有我们传的<code>system</code>。</p>
+<img src="/2019/02/03/thinkphp-5-0-23-rce/12.png">
+<img src="/2019/02/03/thinkphp-5-0-23-rce/13.png">
+<p>在这之后调用的<code>array_walk_recursive</code>会用<code>filterValue</code>，来处理数据，在这之中用<code>call_user_func</code>。</p>
+<img src="/2019/02/03/thinkphp-5-0-23-rce/14.png">
+<p>这里<code>system</code>和<code>dir</code>分别是filter和value中的值，凑在一起就触发命令执行。</p>
+<p>这里是第一个poc的分析，而第二个poc比较类似，同样是利用input函数，这里利用的点是在param的<code>$this-&gt;method(true)</code>中。</p>
+<p>因为是true所以进入了<code>server(&#39;REQUEST_METHOD&#39;)</code>，最后同样到input中，并且data是server数组，filter同样是system。</p>
+<img src="/2019/02/03/thinkphp-5-0-23-rce/15.png">
+<p>造成的效果都是命令执行。</p>
+<h2 id="复现"><a href="#复现" class="headerlink" title="复现"></a>复现</h2><img src="/2019/02/03/thinkphp-5-0-23-rce/16.png">
+<img src="/2019/02/03/thinkphp-5-0-23-rce/17.png">
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>在调试的过程中也算是学到了很多东西，比如vscode+xdebug的动态调试方案，特别的轻巧，功能点也很完善。关于在验证poc的时候其实出了一些小问题，那就是我的burp发送的post数据和header之前多了一个空行，也就是这个多的空行导致我的poc老是失败……这也是注意小的细节问题，只有在真正调试的时候才会被发现。</p>
+<p>以后还是要多动手实践。接下来几天我会研究一点新的东西，拭目以待吧。</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://paper.seebug.org/787/" target="_blank" rel="noopener">https://paper.seebug.org/787/</a></p>
+<p><a href="https://blog.csdn.net/qq_29647709/article/details/86307859" target="_blank" rel="noopener">https://blog.csdn.net/qq_29647709/article/details/86307859</a></p>
+<p><a href="https://xz.aliyun.com/t/3845" target="_blank" rel="noopener">https://xz.aliyun.com/t/3845</a></p>
+
     </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
+            <p>原文链接：<a href="https://hurricane618.me/2019/02/03/thinkphp-5-0-23-rce/">https://hurricane618.me/2019/02/03/thinkphp-5-0-23-rce/</a>
+            <p>发表日期：<a href="https://hurricane618.me/2019/02/03/thinkphp-5-0-23-rce/">February 3rd 2019, 10:08:15 am</a>
+            <p>更新日期：<a href="https://hurricane618.me/2019/02/03/thinkphp-5-0-23-rce/">February 3rd 2019, 10:16:41 am</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
     
     <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2019/01/27/haozi-xss-challenges/" title= "haozi xss 挑战赛 writeup">
+                    <div class="prevTitle">haozi xss 挑战赛 writeup</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
     
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "https://hurricane618.me/2019/02/03/thinkphp-5-0-23-rce/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "thinkphp 5.0.23 rce分析和复现"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://hurricane618.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
 </main>
             <!-- profile -->
             
@@ -469,6 +593,24 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
 </footer>
     </div>
     <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#分析"><span class="toc-number">1.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#复现"><span class="toc-number">2.</span> <span class="toc-text">复现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#后记"><span class="toc-number">3.</span> <span class="toc-text">后记</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">4.</span> <span class="toc-text">Reference</span></a></li></ol>
+    </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
     <div class="sidebar sidebar-hide">
@@ -759,6 +901,8 @@ jsonContent:
     
     </div>
     <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
      
     </body>
 </html>

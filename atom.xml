@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://hurricane618.me/"/>
-  <updated>2019-01-27T13:40:36.963Z</updated>
+  <updated>2019-02-03T02:16:41.182Z</updated>
   <id>https://hurricane618.me/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>thinkphp 5.0.23 rce分析和复现</title>
+    <link href="https://hurricane618.me/2019/02/03/thinkphp-5-0-23-rce/"/>
+    <id>https://hurricane618.me/2019/02/03/thinkphp-5-0-23-rce/</id>
+    <published>2019-02-03T02:08:15.000Z</published>
+    <updated>2019-02-03T02:16:41.182Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>入口是在app::run()，这里有创建http的请求实例，</p><img src="/2019/02/03/thinkphp-5-0-23-rce/1.png"><p>随后在后面会有路由检查，从这里跟进函数<code>routeCheck</code>。</p><img src="/2019/02/03/thinkphp-5-0-23-rce/2.png"><p>在路由检查中会到路由类的check方法处，继续跟进。</p><img src="/2019/02/03/thinkphp-5-0-23-rce/3.png"><p>在check中会有获取当前方法的method</p><img src="/2019/02/03/thinkphp-5-0-23-rce/4.png"><p>下面在method中会获取<code>var_method</code>这个伪变量，其实这个就是我们通过post传进的<code>_method</code>，这里进入判断之后会将我们post的值当做Request类的方法调用，这里我们的poc是传入的<code>__construct</code>，这样就会调用它的构造方法，并且参数是post数据。</p><img src="/2019/02/03/thinkphp-5-0-23-rce/5.png"><p>继续跟进构造方法，这里的foreach会遍历所有变量，将存在的参数全部覆盖掉，在我们传入的参数中的filter，就把之前的覆盖了，并且在这里传入method为get的原因也是因为之前注册路由是get方法，所以这里要把请求的method覆盖成get，避免报错。</p><img src="/2019/02/03/thinkphp-5-0-23-rce/6.png"><p>在这调用完成之后<code>routeCheck</code>将返回<code>method</code>赋值给<code>dispatch</code>。之后会继续在run函数里面执行exec函数。由于type为method执行相应的分支。</p><img src="/2019/02/03/thinkphp-5-0-23-rce/7.png"><img src="/2019/02/03/thinkphp-5-0-23-rce/8.png"><p>而这里的<code>param</code>方法能获取参数，并且和URL中的参数合并。这里得到的参数就是post数据中的<code>get[]=dir</code></p><img src="/2019/02/03/thinkphp-5-0-23-rce/9.png"><p>它的返回调用了<code>input</code>方法，跟进<code>input</code>。</p><img src="/2019/02/03/thinkphp-5-0-23-rce/10.png"><img src="/2019/02/03/thinkphp-5-0-23-rce/11.png"><p><code>input</code>最后将参数和<code>filter</code>一起传入<code>array_walk_recursive</code>中。其中参数中有我们传的<code>dir</code>，而<code>filter</code>通过<code>getFilter</code>有我们传的<code>system</code>。</p><img src="/2019/02/03/thinkphp-5-0-23-rce/12.png"><img src="/2019/02/03/thinkphp-5-0-23-rce/13.png"><p>在这之后调用的<code>array_walk_recursive</code>会用<code>filterValue</code>，来处理数据，在这之中用<code>call_user_func</code>。</p><img src="/2019/02/03/thinkphp-5-0-23-rce/14.png"><p>这里<code>system</code>和<code>dir</code>分别是filter和value中的值，凑在一起就触发命令执行。</p><p>这里是第一个poc的分析，而第二个poc比较类似，同样是利用input函数，这里利用的点是在param的<code>$this-&gt;method(true)</code>中。</p><p>因为是true所以进入了<code>server(&#39;REQUEST_METHOD&#39;)</code>，最后同样到input中，并且data是server数组，filter同样是system。</p><img src="/2019/02/03/thinkphp-5-0-23-rce/15.png"><p>造成的效果都是命令执行。</p><h2 id="复现"><a href="#复现" class="headerlink" title="复现"></a>复现</h2><img src="/2019/02/03/thinkphp-5-0-23-rce/16.png"><img src="/2019/02/03/thinkphp-5-0-23-rce/17.png"><h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>在调试的过程中也算是学到了很多东西，比如vscode+xdebug的动态调试方案，特别的轻巧，功能点也很完善。关于在验证poc的时候其实出了一些小问题，那就是我的burp发送的post数据和header之前多了一个空行，也就是这个多的空行导致我的poc老是失败……这也是注意小的细节问题，只有在真正调试的时候才会被发现。</p><p>以后还是要多动手实践。接下来几天我会研究一点新的东西，拭目以待吧。</p><h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://paper.seebug.org/787/" target="_blank" rel="noopener">https://paper.seebug.org/787/</a></p><p><a href="https://blog.csdn.net/qq_29647709/article/details/86307859" target="_blank" rel="noopener">https://blog.csdn.net/qq_29647709/article/details/86307859</a></p><p><a href="https://xz.aliyun.com/t/3845" target="_blank" rel="noopener">https://xz.aliyun.com/t/3845</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;分析&quot;&gt;&lt;a href=&quot;#分析&quot; class=&quot;headerlink&quot; title=&quot;分析&quot;&gt;&lt;/a&gt;分析&lt;/h2&gt;&lt;p&gt;入口是在app::run()，这里有创建http的请求实例，&lt;/p&gt;
+&lt;img src=&quot;/2019/02/03/thinkphp-5-0-
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="https://hurricane618.me/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+      <category term="代码审计" scheme="https://hurricane618.me/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
+    
+      <category term="PHP" scheme="https://hurricane618.me/tags/PHP/"/>
+    
+  </entry>
   
   <entry>
     <title>haozi xss 挑战赛 writeup</title>

@@ -357,29 +357,35 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href = "/2018/06/30/csp-bypass-summary/" >
+        <a class="abstract-title" href = "/2019/02/03/thinkphp-5-0-23-rce/" >
             
-                <span>CSP绕过总结</span>
+                <span>thinkphp 5.0.23 rce分析和复现</span>
         </a>
         <div class="abstract-content">
-            首发在信安之路上 https://mp.weixin.qq.com/s/z_XmhrTUg_yUfkyAFFfaKQ ，之后文章略有修改。
-CSP绕过总结今年的0CTF预选赛6道web题，其中三道都涉及CSP的知识点，简直可怕。。。这次趁着空闲时间就稍稍总结一下CSP绕过方面的知识，无论是对以后CTF比赛还是工作都很有帮助。
-CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术。它是一种由开发者定义的安全性政策性申明，通过CSP指定可信的内容来源，让WEB处于一个安全的运行环境中。
-一个CSP头由多组CSP策略组成，中间由分号分隔,如下所示：
-...
+            分析入口是在app::run()，这里有创建http的请求实例，
+
+随后在后面会有路由检查，从这里跟进函数routeCheck。
+
+在路由检查中会到路由类的check方法处，继续跟进。
+
+在check中会有获取当前方法的method
+
+下面在method中会获取var_method这个伪变量，其实这个就是我们通过post传进的_method，这里进入判断之后会将我们post的值当做Request类的方法调用，这里我们的poc是传入的__construct，这样就会调用它的构造方法，并且参数是post数据。
+
+继续跟进构造方法，这里的foreach会遍历所有变量，将存在的参数全部覆盖掉，在...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/30</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/02/03</span>
             </div>
             <!-- tags  -->
             
             <div class= abstract-tags >
     
-        <a class="post-tag" href="javascript:void(0);" data-tags = "CSP">CSP</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags = "代码审计">代码审计</a>
     
-        <a class="post-tag" href="javascript:void(0);" data-tags = "XSS">XSS</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags = "PHP">PHP</a>
     
 </div>
             
