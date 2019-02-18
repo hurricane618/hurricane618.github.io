@@ -78,6 +78,8 @@
     <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
     
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
     <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
 /* This file is meant as a standalone workflow for
 - testing support for link[rel=preload]
@@ -212,10 +214,8 @@
 </head>
 
     
-        <body class="home-body">
     
-    
-<header class="header index-header">
+<header class="header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
@@ -231,34 +231,21 @@
 
 
 
-
-height:50vh;
 ">
     
     <!-- 主页  -->
-    
-    
-    <!-- 文章页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/intro/index-bg1.jpg)"></div>
+    <div class="site-intro-img" style="background-image: url(/)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
             
-            风之栖息地
-            <!-- 文章页  -->
-            
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
-            
-            
-                habitat of wind
-            
-            <!-- 文章页  -->
             
         </p>
         <!-- 文章页meta -->
@@ -370,355 +357,29 @@ height:50vh;
     
     
     <article class="index-post">
-        <a class="abstract-title" href = "/2019/02/18/yingshi-camera-firmware-extract/" >
+        <a class="abstract-title" href = "/2018/06/30/csp-bypass-summary/" >
             
-                <span>萤石某摄像头的安全分析--固件提取</span>
+                <span>CSP绕过总结</span>
         </a>
         <div class="abstract-content">
-            由于之前考研一直没有时间搞，现在终于有空来做一些小实验。
-固件提取方式比较主流的提取方式有以下几种：
-
-官网或者找客服索要固件
-在线升级的时候抓包得到下载地址
-拆flash芯片，用编程器读取芯片内容（也可以使用烧录夹直接获取flash，但是有些时候有保护引脚就只能拆芯片）
-用硬件电路的调试接口和固件的bootloader获取固件
-从串口进入系统之后，打包固件
-
-首先，这个摄像头现在没有升级操作，官网也没有固件。烧录夹现在还用的不熟练，在分析之后决定用硬件调试接口来获取固件。
-TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.pediy.com/thread-246...
+            首发在信安之路上 https://mp.weixin.qq.com/s/z_XmhrTUg_yUfkyAFFfaKQ ，之后文章略有修改。
+CSP绕过总结今年的0CTF预选赛6道web题，其中三道都涉及CSP的知识点，简直可怕。。。这次趁着空闲时间就稍稍总结一下CSP绕过方面的知识，无论是对以后CTF比赛还是工作都很有帮助。
+CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术。它是一种由开发者定义的安全性政策性申明，通过CSP指定可信的内容来源，让WEB处于一个安全的运行环境中。
+一个CSP头由多组CSP策略组成，中间由分号分隔,如下所示：
+...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/02/18</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/30</span>
             </div>
             <!-- tags  -->
             
             <div class= abstract-tags >
     
-        <a class="post-tag" href="javascript:void(0);" data-tags = "IOT">IOT</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2019/02/03/thinkphp-5-0-23-rce/" >
-            
-                <span>thinkphp 5.0.23 rce分析和复现</span>
-        </a>
-        <div class="abstract-content">
-            分析入口是在app::run()，这里有创建http的请求实例，
-
-随后在后面会有路由检查，从这里跟进函数routeCheck。
-
-在路由检查中会到路由类的check方法处，继续跟进。
-
-在check中会有获取当前方法的method
-
-下面在method中会获取var_method这个伪变量，其实这个就是我们通过post传进的_method，这里进入判断之后会将我们post的值当做Request类的方法调用，这里我们的poc是传入的__construct，这样就会调用它的构造方法，并且参数是post数据。
-
-继续跟进构造方法，这里的foreach会遍历所有变量，将存在的参数全部覆盖掉，在...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/02/03</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "代码审计">代码审计</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "PHP">PHP</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2019/01/27/haozi-xss-challenges/" >
-            
-                <span>haozi xss 挑战赛 writeup</span>
-        </a>
-        <div class="abstract-content">
-            0x00123function render (input) &#123;  return '&lt;div&gt;' + input + '&lt;/div&gt;'&#125;
-没什么说的，div标签+没过滤直接插 &lt;img src=1 onerror=alert(1)&gt;
-0x01123function render (input) &#123;  return '&lt;textarea&gt;' + input + '&lt;/textarea&gt;'&#125;
-输入点在&lt;textarea&gt;这种标签中，需要闭合标签，在插入payload。&lt;/te...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/27</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
+        <a class="post-tag" href="javascript:void(0);" data-tags = "CSP">CSP</a>
     
         <a class="post-tag" href="javascript:void(0);" data-tags = "XSS">XSS</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2019/01/24/code-breaking-lumenserial/" >
-            
-                <span>code-breaking lumenserial 复现</span>
-        </a>
-        <div class="abstract-content">
-            题目分析php的laravel框架的审计题目。这里记录一下复现过程。整体思路是venenof7师傅的。
-先来看入口，不知道他们怎么就找到了这个请求……
-/server/editor?action=Catchimage&amp;source[]=phar:///var/www/html/upload/image/
-我在黑盒测试的时候只找到了action，完全没有source的影子，个人感觉是结合白盒测试出来的。这里对应的源代码如下：
-12345678910111213141516171819202122232425protected function doCatchimage(Reques...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/24</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "代码审计">代码审计</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2019/01/10/code-breaking-esay-wp/" >
-            
-                <span>code-breaking easy部分题目writeup</span>
-        </a>
-        <div class="abstract-content">
-            ph师傅的代码审计CTF题目 https://code-breaking.com
-easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET['arg'] ?? '';if(preg_match('/^[a-z0-9_]*$/isD', $action)) &#123;    show_source(__FILE__);&#125; else &#123;    $action('', $arg);&#125;
-观察正则表达式可以发现正常的函数名都不行，所以很容易联想到要在函数名中加入其它字符，这道...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/10</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "代码审计">代码审计</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2018/08/15/google-ctf-beginner-part2/" >
-            
-                <span>Google CTF Beginner Part2</span>
-        </a>
-        <div class="abstract-content">
-            Holey Beep(PWN)Holey Beep是CVE-2018-0492，详细的漏洞细节 https://sigint.sh/#/holeybeep 。一开始以为要用这个的exp，结果一看给的二进制文件，似乎不太对……我们需要得到/secret_cake_recipe的内容，然而权限不够，所以这里应该是拿来越权的。
-
-我们看到第一个if是一个通过信号触发的条件，第二个if知道了程序需要参数，然后会open一个写死的路径，之后将输入的参数代入ioctl(device,0x4B2F,参数)，出现问题就会打印报错信息，然后关闭打开的文件。循环上面的操作把所有的参数都跑一遍。
-信号触发的i...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/15</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2018/08/01/dianfengjikeCTF-web/" >
-            
-                <span>巅峰极客CTF 部分Web复现</span>
-        </a>
-        <div class="abstract-content">
-            复现了三道题，其他的都关环境了，记录一下复现的这三道吧。
-A Simple CMS在网上找到的onethink的漏洞分析文章
-https://bbs.ichunqiu.com/thread-4918-1-1.html
-这个是原理相同的，只不过是thinkphp
-https://xz.aliyun.com/t/99
-通过这些我们知道，问题是出在缓存的存储上，我们的用户名被简单的反序列化存储进了缓存文件中。所以要getshell的话我们只需要通过用户名传入webshell。但是这里有个条件，我们必须能猜到缓存文件的名字。
-在题目的根目录下扫到 www.zip 得到题目的源码，在这里我们看到f...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/01</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2018/07/18/google-ctf-beginner-part1/" >
-            
-                <span>Google CTF Beginner Part1</span>
-        </a>
-        <div class="abstract-content">
-            会陆陆续续的把GoogleCTF题目的相关复现整理出来，这里先放一部分。通过这次Beginner训练还是了解到了许多之前没接触过的，比如PWN题中的libc地址问题。
-LETTER(MISC)原理说出来都很简单，考察的是PDF中表层的覆盖其实还是可读的，所以我们选中需要的内容复制粘贴出来就可以了
-
-复制粘贴大法
-
-OCR is cool!(MISC)一道题考察图片转文字之后，运用古典加密解决问题。学到新的知识OCR，PDF或者图片转文本的技术。
-在线转换链接
-
-之后在凯撒加密中破解，因为题目中包含着凯撒，提示也是很明显了。
-
-MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/18</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2018/07/08/google-ctf-beginner-js-safe-1/" >
-            
-                <span>Google CTF Beginner JS Safe 1 复现</span>
-        </a>
-        <div class="abstract-content">
-            周末看了看GoogleCTF的beginner题目，感觉有些题目还不错，这里就先分析其中一道题JS Safe。
-题目
-分析与操作这道题有点high，作为一个JS调试新手，着实爽了一把。题目给了一个Html网页，里面有两段JS代码，看来是JS代码分析的题目。
-
-我们先看其中的一段，前两个是解密用的参数，看到open_safe这个函数，password必须是CTF{xxxx}的格式，读取其中的数据代入判断。if中把我们的输入代入了x函数。
-
-我们的password会在env的g参数中被编码，a是读数组数据，b是创建函数，c是加操作，d是ascii码转换。
-之后，根据code中的字母在env中...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/08</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2018/07/01/phpmyadmin4-8-1-background-LFI/" >
-            
-                <span>phpmyadmin4.8.1 后台LFI</span>
-        </a>
-        <div class="abstract-content">
-            之前ChaMd5团队报出来的phpmyadmin的文件包含漏洞，今天就来分析复现一下。
-分析
-漏洞的输入点是 include $_REQUEST[&#39;target&#39;];出现了文件包含这种危险操作，那么有很大概率出现问题。
-我们只要绕过57、58、59行的检测就可以成功控制包含文件。
-第57行用正则匹配开头为index的路径，只要路径开头没有index即可。
-第58行检索输入中是否有黑名单的字符，黑名单在第50行，可以看到 import.php和export.php，只要参数中没这两个php就行。
-第59行要看Core类的方法checkPageValidity。
-
-第452行...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/01</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "代码审计">代码审计</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "PHP">PHP</a>
     
 </div>
             
@@ -728,97 +389,11 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     <!-- paginator  -->
     
     <nav class="page-nav">
-        <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">NEXT &#62;</a>
+        <a class="extend prev" rel="prev" href="/categories/技术/">&#60; PREV</a><a class="page-number" href="/categories/技术/">1</a><span class="page-number current">2</span>
     </nav>
     
 </main>
             <!-- profile -->
-            
-            <div class="profile">
-    <img class="profile-avatar" alt="avatar" src= /avatar/441520_1.jpg >
-    <div class="profile-name">hurricane618</div>
-    
-    <div class="profile-signature">
-        May the wind guide you
-    </div>
-    
-    
-    <div class="profile-social">
-        
-    
-        
-            
-                <a href="mailto:zjr666@hotmail.com" class="iconfont-archer email" title=email ></a>
-            
-        
-    
-        
-            
-                <a href="//github.com/hurricane618" class="iconfont-archer github" target="_blank" title=github></a>
-            
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
-        
-            
-                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title=rss></a>
-            
-        
-    
-
-    </div>
-    
-    
-        <div class="friends">
-            <div>FRIENDS</div>
-            
-                
-            
-                
-            
-                
-            
-        </div>
-    
-    
-        <div class="about-me">
-            <a href = "/about" >ABOUT ME</a>
-        </div>
-    
-</div>
             
         </div>
         <footer class="footer footer-unloaded">
