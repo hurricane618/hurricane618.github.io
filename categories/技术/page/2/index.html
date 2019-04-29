@@ -357,6 +357,41 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2018/08/01/dianfengjikeCTF-web/">
+            
+                <span>巅峰极客CTF 部分Web复现</span>
+        </a>
+        <div class="abstract-content">
+            复现了三道题，其他的都关环境了，记录一下复现的这三道吧。
+A Simple CMS在网上找到的onethink的漏洞分析文章
+https://bbs.ichunqiu.com/thread-4918-1-1.html
+这个是原理相同的，只不过是thinkphp
+https://xz.aliyun.com/t/99
+通过这些我们知道，问题是出在缓存的存储上，我们的用户名被简单的反序列化存储进了缓存文件中。所以要getshell的话我们只需要通过用户名传入webshell。但是这里有个条件，我们必须能猜到缓存文件的名字。
+在题目的根目录下扫到 www.zip 得到题目的源码，在这里我们看到f...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/01</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2018/07/18/google-ctf-beginner-part1/">
             
                 <span>Google CTF Beginner Part1</span>
@@ -773,9 +808,24 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 15
+        Total : 16
         </div>
         <!-- search  -->
         
@@ -788,6 +838,11 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span><a class="archive-post-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">2019DDCTF 未解决的web题 writeup</a>
+        </li>
     
     
         <li class="archive-post-item">

