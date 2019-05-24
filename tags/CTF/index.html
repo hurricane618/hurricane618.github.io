@@ -357,6 +357,37 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2019/05/24/2019rctf-some-writeup/">
+            
+                <span>2019RCTF 部分Web的WriteUp</span>
+        </a>
+        <div class="abstract-content">
+            一年一度的RCTF开始了，又能学一波骚操作，RCTF的web题目去年就非常好，今年也特别出色。由于研究所月赛的原因没有参与其中，所以赛后来复现一下。
+nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &#125; else &#123; show_source(__FILE__); &#125;
+一个代码执行，但是肯定没有这么简单，执行phpinfo查看到disable_function之后，发现禁用了已知范围内的所有危险函数，并且还把之前考差过的putenv也禁用了。这样就没有办...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/24</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">
             
                 <span>2019DDCTF 未解决的web题 writeup</span>
@@ -945,9 +976,12 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     
     
     
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 16
+        Total : 17
         </div>
         <!-- search  -->
         
@@ -960,6 +994,11 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/24</span><a class="archive-post-title" href="/2019/05/24/2019rctf-some-writeup/">2019RCTF 部分Web的WriteUp</a>
+        </li>
     
     
         <li class="archive-post-item">
