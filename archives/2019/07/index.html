@@ -362,12 +362,11 @@
                 <span>基础ROP学习</span>
         </a>
         <div class="abstract-content">
-            最近开始入门pwn，在白泽新手oj那里学了一波之后开始自己学剩下的内容。看到atum大佬推荐的三道基础ROP题目，就练习一下，学习思路总结经验。
-r0pbaby一道强化版的入门栈溢出，其中比较有意思的一点是栈溢出需要至少0x440才行，然而这个值为1088，但是题目里面限制了长度最大为1024，所以我们可以知道这里不能用填充数据的方法来实现控制流的劫持。（大雾？）
-
-看了一眼wp才发现……我就是一个sb
-
-在上图我们可以看到如果超过限制的1024就会输出非法提示，在另外一边它会逐字节的读入字符并把它们顺序的保存进nptr这个变量中，在最后使用memcpy函数把保存的字符串复制到saved...
+            最近开始入门pwn，在白泽新手oj那里学了一波之后开始自己学剩下的内容。看到atum大佬推荐的三道基础ROP题目，就练习一下，学习思路总结经验。在网上找题的过程中发现vss基本上绝迹了。。。辛苦一番之后终于找到，为了后面的人也能快速找到题目我就把三道题一起上传了。
+http://hurricane618.me/resource/basic-rop/vss
+http://hurricane618.me/resource/basic-rop/ropasaurusrex
+http://hurricane618.me/resource/basic-rop/r0pbaby
+r0pbaby一道强化版...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
@@ -485,8 +484,6 @@ r0pbaby一道强化版的入门栈溢出，其中比较有意思的一点是栈�
     <div class="sidebar-content sidebar-content-show-archive">
           <div class="sidebar-panel-archives">
     <!-- 在ejs中将archive按照时间排序 -->
-    
-    
     
     
     
