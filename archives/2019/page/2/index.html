@@ -22,7 +22,7 @@
     <meta name="description" content="hurricane618's blog">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Google CTF Beginner JS Safe 1 复现 · 风之栖息地|hurricane618&#39;s blog</title>
+    <title>风之栖息地|hurricane618&#39;s blog</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -214,23 +214,12 @@
 </head>
 
     
-        <body class="post-body">
-    
     
 <header class="header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
     <!-- post页的toggle banner  -->
-    
-    <div class="banner">
-            <div class="blog-title">
-                <a href="/">风之栖息地</a>
-            </div>
-            <div class="post-title">
-                <a href="#" class="post-name">Google CTF Beginner JS Safe 1 复现</a>
-            </div>
-    </div>
     
     <a class="home-link" href="/">风之栖息地</a>
 </header>
@@ -242,74 +231,24 @@
 
 
 
-
-height:50vh;
 ">
     
     <!-- 主页  -->
-    
-    
-    <!-- 404页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
+    <div class="site-intro-img" style="background-image: url(/)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
-            
-            Google CTF Beginner JS Safe 1 复现
-            <!-- 404 -->
             
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
             
-            
-            <!-- 404 -->
-            
         </p>
         <!-- 文章页meta -->
-        
-            <div class="post-intros">
-                <!-- 文章页标签  -->
-                
-                    <div class="post-intro-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-                
-                
-                    <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">907</span>阅读时长: <span class="post-count reading-time">3 min</span></span>
-                    </div>
-                
-                <div class="post-intro-meta">
-                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
-                    <span class="post-intro-time">2018/07/08</span>
-                    
-                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
-                        <span class="iconfont-archer">&#xe602;</span>
-                        <span id="busuanzi_value_page_pv"></span>
-                    </span>
-                    
-                    <span class="shareWrapper">
-                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
-                        <span class="shareText">Share</span>
-                        <ul class="shareList">
-                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
-                                <div class="share-qrcode"></div>
-                            </li>
-                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
-                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
-                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
-                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
-                        </ul>
-                    </span>
-                </div>
-            </div>
         
     </div>
 </div>
@@ -410,104 +349,47 @@ height:50vh;
 </script>        
         <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
         <div class="container container-unloaded">
-            <main class="main post-page">
-    <article class="article-entry">
-        <p>周末看了看GoogleCTF的beginner题目，感觉有些题目还不错，这里就先分析其中一道题JS Safe。</p>
-<h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><img src="/2018/07/08/google-ctf-beginner-js-safe-1/0.png">
-<h2 id="分析与操作"><a href="#分析与操作" class="headerlink" title="分析与操作"></a>分析与操作</h2><p>这道题有点high，作为一个JS调试新手，着实爽了一把。题目给了一个Html网页，里面有两段JS代码，看来是JS代码分析的题目。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/1.png">
-<p>我们先看其中的一段，前两个是解密用的参数，看到open_safe这个函数，password必须是CTF{xxxx}的格式，读取其中的数据代入判断。<br>if中把我们的输入代入了x函数。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/2.png">
-<p>我们的password会在env的g参数中被编码，a是读数组数据，b是创建函数，c是加操作，d是ascii码转换。</p>
-<p>之后，根据code中的字母在env中操作属性。最后有个等待值更新的异步操作。<br>其中重点就是那个for循环对env的操作，但是代码这个又很难看懂…… 所以只能用console.log来dump出来看看细节。而我们想知道我们的password被用来干什么了。</p>
-<p>在for循环中加上一些代码来锁定g参数的位置。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="regexp">/g/</span>.test(code.substr(i,<span class="number">4</span>)))&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i);</span><br><span class="line">    <span class="built_in">console</span>.log(env);</span><br><span class="line">    <span class="built_in">console</span>.log(code.substr(i,<span class="number">4</span>));</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/3.png">
-<p>定位在了876出现了g，然后看env里面有些啥。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/4.png">
-<p>有趣的东西，出现了之前js代码中的subtle，digst，sha-256，而且在最后的数组中是sha-256和我们的输入编码，这其实就可以推测这里是要对我们的输入计算sha-256hash。为了看更多细节，我们继续加入一些代码调试。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(i&gt;=<span class="number">876</span>)&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i);</span><br><span class="line">    <span class="built_in">console</span>.log(lhs + <span class="string">"="</span> + fn + <span class="string">"("</span> + arg1 + <span class="string">":"</span> +env[arg1] + <span class="string">","</span> + arg2 + <span class="string">":"</span> +env[arg2] + <span class="string">")"</span>);</span><br><span class="line">    <span class="built_in">console</span>.log(lhs + <span class="string">"="</span> + env[fn] + <span class="string">"("</span> + env[arg1] + <span class="string">","</span> + env[arg2] + <span class="string">")"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(i == <span class="number">980</span>)&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(env);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>看看这之间有什么操作</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/5.png">
-<p>果不其然，在876-884中完成了对我们输入的hash计算。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/6.png">
-<p>在940处，把我们计算出的hash变成数组，存入<code>env[Ѿ]</code>中。</p>
-<img src="/2018/07/08/google-ctf-beginner-js-safe-1/7.png">
-<p>可以很清楚的看到，在960取出了我们hash过后的第一个值，然后与230异或，异或后的值与h进行or操作后赋值给h，随后开始下一次循环。</p>
-<p>从之前的js代码中的if就可以知道h必须为0才能跳过判断。所以异或的值必须为0，也就是说必须要和对应的值相同。这样我们就得到了一串hash计算后的数组 <code>230,104,96,84,111,24,205,187,205,134,179,94,24,181,37,191,252,103,247,114,198,80,206,223,227,255,122,0,38,250,29,238</code></p>
-<p>最终我们把这串字符转16进制拼接得到 <code>e66860546f18cdbbcd86b35e18b525bffc67f772c650cedfe3ff7a0026fa1dee</code></p>
-<p>这个是我们输入的字符的hash值，找个hash值破解网站，得到 Passw0rd! ，所以最终flag为<code>CTF{Passw0rd!}</code></p>
-<p>至于剩下的代码，它是用于解密数据的，我们输入正确就会解密成功，输出是下一题的入口。感觉是一道题被拆分成了几块……</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>一道比较基础但是又很考察基本功的题，从中学习到了很多。</p>
-<p>最后我想说一下的是那个SubtleCrypto.digest()方法我一开始没怎么搞懂，他是怎么把utf-8的编码数组hash计算的。之后找到了它的实现原理，所以也就懂了，为什么要一开始先utf-8编码才进行hash计算。</p>
-<p><code>https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest</code></p>
-<p>经过这次JS分析，感觉学习专门的JS调试迫在眉睫…… ，有变量监听和事件监听，会给调试工作带来很大便利。</p>
-<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/BOAKGP/CTF-Writeups/tree/master/Google%20CTF%202018%20Quals%20Beginners%20Quest/JS%20safe</span><br></pre></td></tr></table></figure>
-    </article>
-    <!-- license  -->
+            <main class="main index-page">
     
-        <div class="license-wrapper">
-            <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
-            </p><p>原文链接：<a href="https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/">https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/</a>
-            </p><p>发表日期：<a href="https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/">July 8th 2018, 11:58:48 pm</a>
-            </p><p>更新日期：<a href="https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/">July 19th 2018, 9:05:00 am</a>
-            </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href="/2019/01/10/code-breaking-esay-wp/">
+            
+                <span>code-breaking easy部分题目writeup</span>
+        </a>
+        <div class="abstract-content">
+            ph师傅的代码审计CTF题目 https://code-breaking.com
+easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET['arg'] ?? '';if(preg_match('/^[a-z0-9_]*$/isD', $action)) &#123;    show_source(__FILE__);&#125; else &#123;    $action('', $arg);&#125;
+观察正则表达式可以发现正常的函数名都不行，所以很容易联想到要在函数名中加入其它字符，这道...
         </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/10</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
+    
+</div>
+            
+        </div>
+    </article>
     
     <!-- paginator  -->
-    <ul class="post-paginator">
-        <li class="next">
-            
-                <div class="nextSlogan">Next Post</div>
-                <a href="/2018/07/18/google-ctf-beginner-part1/" title="Google CTF Beginner Part1">
-                    <div class="nextTitle">Google CTF Beginner Part1</div>
-                </a>
-            
-        </li>
-        <li class="previous">
-            
-                <div class="prevSlogan">Previous Post</div>
-                <a href="/2018/07/01/phpmyadmin4-8-1-background-LFI/" title="phpmyadmin4.8.1 后台LFI">
-                    <div class="prevTitle">phpmyadmin4.8.1 后台LFI</div>
-                </a>
-            
-        </li>
-    </ul>
-    <!-- 评论插件 -->
-    <!-- 来必力City版安装代码 -->
-
-<!-- City版安装代码已完成 -->
     
-    <div id="disqus_thread"></div>
-    <script>
-        /**
-    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
-        
-        var disqus_config = function () {
-        this.page.url = "https://hurricane618.me/2018/07/08/google-ctf-beginner-js-safe-1/";  // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = "Google CTF Beginner JS Safe 1 复现"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-        };
-        
-        (function () { // DON'T EDIT BELOW THIS LINE
-            var d = document, s = d.createElement('script');
-            s.src = 'https://hurricane618.disqus.com/embed.js';
-            s.setAttribute('data-timestamp', +new Date());
-            (d.head || d.body).appendChild(s);
-        })();
-
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-
+    <nav class="page-nav">
+        <a class="extend prev" rel="prev" href="/archives/2019/">&#60; PREV</a><a class="page-number" href="/archives/2019/">1</a><span class="page-number current">2</span>
+    </nav>
     
-    <!-- partial('_partial/comment/changyan') -->
-    <!--PC版-->
-
-
-    
-    
-
-    <!-- 评论 -->
 </main>
             <!-- profile -->
             
@@ -593,24 +475,6 @@ height:50vh;
 </footer>
     </div>
     <!-- toc -->
-    
-    <div class="toc-wrapper" style=
-    
-
-
-
-
-
-
-
-top:50vh;
-
-    >
-        <div class="toc-catalog">
-            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
-        </div>
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#题目"><span class="toc-number">1.</span> <span class="toc-text">题目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分析与操作"><span class="toc-number">2.</span> <span class="toc-text">分析与操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">4.</span> <span class="toc-text">Reference</span></a></li></ol>
-    </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
     <div class="sidebar sidebar-hide">
@@ -1031,8 +895,6 @@ jsonContent:
     
     </div>
     <!-- async load share.js -->
-    
-        <script src="/scripts/share.js" async></script>    
      
     </body>
 </html>

@@ -357,6 +357,42 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2019/07/26/basic-rop-practice/">
+            
+                <span>基础ROP学习</span>
+        </a>
+        <div class="abstract-content">
+            最近开始入门pwn，在白泽新手oj那里学了一波之后开始自己学剩下的内容。看到atum大佬推荐的三道基础ROP题目，就练习一下，学习思路总结经验。
+r0pbaby一道强化版的入门栈溢出，其中比较有意思的一点是栈溢出需要至少0x440才行，然而这个值为1088，但是题目里面限制了长度最大为1024，所以我们可以知道这里不能用填充数据的方法来实现控制流的劫持。（大雾？）
+
+看了一眼wp才发现……我就是一个sb
+
+在上图我们可以看到如果超过限制的1024就会输出非法提示，在另外一边它会逐字节的读入字符并把它们顺序的保存进nptr这个变量中，在最后使用memcpy函数把保存的字符串复制到saved...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/07/26</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2019/05/24/2019rctf-some-writeup/">
             
                 <span>2019RCTF 部分Web的WriteUp</span>
@@ -670,39 +706,6 @@ TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.p
         </div>
     </article>
     
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/01/10/code-breaking-esay-wp/">
-            
-                <span>code-breaking easy部分题目writeup</span>
-        </a>
-        <div class="abstract-content">
-            ph师傅的代码审计CTF题目 https://code-breaking.com
-easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET['arg'] ?? '';if(preg_match('/^[a-z0-9_]*$/isD', $action)) &#123;    show_source(__FILE__);&#125; else &#123;    $action('', $arg);&#125;
-观察正则表达式可以发现正常的函数名都不行，所以很容易联想到要在函数名中加入其它字符，这道...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/10</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
     <!-- paginator  -->
     
     <nav class="page-nav">
@@ -994,9 +997,18 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 17
+        Total : 18
         </div>
         <!-- search  -->
         
@@ -1009,6 +1021,11 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/26</span><a class="archive-post-title" href="/2019/07/26/basic-rop-practice/">基础ROP学习</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1120,6 +1137,10 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
         <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
     
         <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
+    
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
+        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
     
         <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
     
