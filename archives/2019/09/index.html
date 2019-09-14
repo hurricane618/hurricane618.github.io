@@ -357,111 +357,28 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href="/2019/03/31/2019TCTF-web-writeup/">
+        <a class="abstract-title" href="/2019/09/14/fancy-rop-practice/">
             
-                <span>2019TCTF web writeup</span>
+                <span>花式栈溢出学习</span>
         </a>
         <div class="abstract-content">
-            wallbreaker easy这道题在比赛的时候专注在imagick上面，但是由于是最新版本，以前的bypass漏洞已经修补。。。之后由于复试的原因没有仔细研究，现在开始复现。
-这道题给了一个webshell，密码是backdoor，可以直接用菜刀连接，然而用phpinfo查看禁用函数，发现已经把所有执行命令的函数都ban了，并且知道操作系统是ubuntu18.04.
-
-所以这是一个受限制的webshell绕过disable_function的问题
-bypass disable_function的方法绕过disable_function也是一个老生常谈的问题了。总结一下大概有一下四种：...
+            继续进行着栈溢出的练习，这次是参考了ctf-wiki上面的演示题目，在复现过程中的一些记录。
+over安恒月赛的题目，首先看程序保护，开启了NX，不能写shellcode，同时分析了程序结果发现buffer有0x50，但是输入有0x60也就是说只能覆盖rbp和ret地址，所以必须要改变栈的位置。
+首先是一个trick，里面读入的函数是read，所以读入的数据是不会自动加上\0的，其他的两个函数gets和scanf都会对读入的字符串加上\0截断。利用这个差异性，我们只要填入0x50个非0数据，这样puts就会打印出rbp的值。泄露出栈基址之后，我们就能利用相对偏移来确定题目随意的栈地址。
+...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/31</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/09/14</span>
             </div>
             <!-- tags  -->
             
             <div class="abstract-tags">
     
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
     
-        <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="JAVA">JAVA</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/02/03/thinkphp-5-0-23-rce/">
-            
-                <span>thinkphp 5.0.23 rce分析和复现</span>
-        </a>
-        <div class="abstract-content">
-            分析入口是在app::run()，这里有创建http的请求实例，
-
-随后在后面会有路由检查，从这里跟进函数routeCheck。
-
-在路由检查中会到路由类的check方法处，继续跟进。
-
-在check中会有获取当前方法的method
-
-下面在method中会获取var_method这个伪变量，其实这个就是我们通过post传进的_method，这里进入判断之后会将我们post的值当做Request类的方法调用，这里我们的poc是传入的__construct，这样就会调用它的构造方法，并且参数是post数据。
-
-继续跟进构造方法，这里的foreach会遍历所有变量，将存在的参数全部覆盖掉，在...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/02/03</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2018/07/01/phpmyadmin4-8-1-background-LFI/">
-            
-                <span>phpmyadmin4.8.1 后台LFI</span>
-        </a>
-        <div class="abstract-content">
-            之前ChaMd5团队报出来的phpmyadmin的文件包含漏洞，今天就来分析复现一下。
-分析
-漏洞的输入点是 include $_REQUEST[&#39;target&#39;];出现了文件包含这种危险操作，那么有很大概率出现问题。
-我们只要绕过57、58、59行的检测就可以成功控制包含文件。
-第57行用正则匹配开头为index的路径，只要路径开头没有index即可。
-第58行检索输入中是否有黑名单的字符，黑名单在第50行，可以看到 import.php和export.php，只要参数中没这两个php就行。
-第59行要看Core类的方法checkPageValidity。
-
-第452行...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/01</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
     
 </div>
             

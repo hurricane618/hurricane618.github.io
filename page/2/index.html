@@ -370,6 +370,41 @@ height:50vh;
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2019/01/24/code-breaking-lumenserial/">
+            
+                <span>code-breaking lumenserial 复现</span>
+        </a>
+        <div class="abstract-content">
+            题目分析php的laravel框架的审计题目。这里记录一下复现过程。整体思路是venenof7师傅的。
+先来看入口，不知道他们怎么就找到了这个请求……
+/server/editor?action=Catchimage&amp;source[]=phar:///var/www/html/upload/image/
+我在黑盒测试的时候只找到了action，完全没有source的影子，个人感觉是结合白盒测试出来的。这里对应的源代码如下：
+12345678910111213141516171819202122232425protected function doCatchimage(Reques...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/24</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2019/01/10/code-breaking-esay-wp/">
             
                 <span>code-breaking easy部分题目writeup</span>
@@ -1038,9 +1073,24 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 18
+        Total : 19
         </div>
         <!-- search  -->
         
@@ -1053,6 +1103,11 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/14</span><a class="archive-post-title" href="/2019/09/14/fancy-rop-practice/">花式栈溢出学习</a>
+        </li>
     
     
         <li class="archive-post-item">
