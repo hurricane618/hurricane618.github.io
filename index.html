@@ -370,6 +370,40 @@ height:50vh;
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2019/11/11/cnss-recruit-pwn-1/">
+            
+                <span>CNSS招新题中的一道ROP题</span>
+        </a>
+        <div class="abstract-content">
+            CNSS招新题目中有两道不错的Pwn题，拿来学习一波知识。然而其中有一道是内核ROP，复现了好几天。。还是有点问题，再加上研究生大作业集群来了（完全不能摸鱼，哭唧唧），所以那道内核题能做出来就放博客。
+Sleepy Server这道题checksec发现防御全开，同时给了libseccomp，看来是对libc的调用有一定限制。
+
+可以看到禁用了execve，不能通过直接拿shell获得flag。开始分析整个程序，看看有什么利用点。
+
+比较容易的就能看到buf有一个溢出，但是溢出的数量有限只有0x10字节，随后看到我们输入的用户名和密码被传入一个函数判断，判断的结果正确才会进入漏洞点，我们...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/11/11</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2019/09/14/fancy-rop-practice/">
             
                 <span>花式栈溢出学习</span>
@@ -679,38 +713,6 @@ TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.p
         <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
     
         <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/01/27/haozi-xss-challenges/">
-            
-                <span>haozi xss 挑战赛 writeup</span>
-        </a>
-        <div class="abstract-content">
-            0x00123function render (input) &#123;  return '&lt;div&gt;' + input + '&lt;/div&gt;'&#125;
-没什么说的，div标签+没过滤直接插 &lt;img src=1 onerror=alert(1)&gt;
-0x01123function render (input) &#123;  return '&lt;textarea&gt;' + input + '&lt;/textarea&gt;'&#125;
-输入点在&lt;textarea&gt;这种标签中，需要闭合标签，在插入payload。&lt;/te...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/27</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="XSS">XSS</a>
     
 </div>
             
@@ -1133,9 +1135,14 @@ TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.p
     
     
     
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 19
+        Total : 20
         </div>
         <!-- search  -->
         
@@ -1148,6 +1155,11 @@ TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.p
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/11</span><a class="archive-post-title" href="/2019/11/11/cnss-recruit-pwn-1/">CNSS招新题中的一道ROP题</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1266,11 +1278,11 @@ TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.p
     
         <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
     
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
         <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
     
         <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
-    
-        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
     
         <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
     

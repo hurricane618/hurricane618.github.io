@@ -357,6 +357,38 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2019/01/27/haozi-xss-challenges/">
+            
+                <span>haozi xss 挑战赛 writeup</span>
+        </a>
+        <div class="abstract-content">
+            0x00123function render (input) &#123;  return '&lt;div&gt;' + input + '&lt;/div&gt;'&#125;
+没什么说的，div标签+没过滤直接插 &lt;img src=1 onerror=alert(1)&gt;
+0x01123function render (input) &#123;  return '&lt;textarea&gt;' + input + '&lt;/textarea&gt;'&#125;
+输入点在&lt;textarea&gt;这种标签中，需要闭合标签，在插入payload。&lt;/te...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/27</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="XSS">XSS</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2019/01/24/code-breaking-lumenserial/">
             
                 <span>code-breaking lumenserial 复现</span>
@@ -739,9 +771,14 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
     
     
     
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 19
+        Total : 20
         </div>
         <!-- search  -->
         
@@ -754,6 +791,11 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/11</span><a class="archive-post-title" href="/2019/11/11/cnss-recruit-pwn-1/">CNSS招新题中的一道ROP题</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -872,11 +914,11 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
     
         <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
     
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
         <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
     
         <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
-    
-        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
     
         <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
     
