@@ -419,7 +419,7 @@ height:50vh;
 <h2 id="web-server-mysql-or-in-one-container？"><a href="#web-server-mysql-or-in-one-container？" class="headerlink" title="web server+mysql or in one container？"></a>web server+mysql or in one container？</h2><p>在参考多个知名项目和比赛题目的<code>Dockerfile</code>，<code>docker-compose.yml</code>，<code>start.sh</code>之后，毅然决定使用把服务全部装进一个容器的思路。</p>
 <p>为什么？考虑有以下几点：</p>
 <ol>
-<li>我出的题目是SQLi，需要提前在数据库中插入数据，然而使用直接拉一个Mysql的方式，非常不方便，如果要插入数据必须要再写一个针对Mysql的Dockerfile，那这样还不如直接放在一起。</li>
+<li>我出的题目是SQLi，需要提前在数据库中插入数据，然而使用直接拉一个Mysql的方式，非常不方便，如果要插入数据必须要再写一个针对Mysql的<code>Dockerfile</code>，那这样还不如直接放在一起。</li>
 <li>这道题的数据库和其他题目不共享，单独拉一个的意义不大。</li>
 <li>如果以后要多节点部署这种题目，数据库独立的话能避免队伍之间搅屎。</li>
 </ol>
@@ -459,7 +459,7 @@ height:50vh;
             <p>原文作者：<a href="http://hurricane618.me">hurricane618</a>
             </p><p>原文链接：<a href="http://hurricane618.me/2019/11/27/docker-mysql-problem-check/">http://hurricane618.me/2019/11/27/docker-mysql-problem-check/</a>
             </p><p>发表日期：<a href="http://hurricane618.me/2019/11/27/docker-mysql-problem-check/">November 27th 2019, 11:07:33 pm</a>
-            </p><p>更新日期：<a href="http://hurricane618.me/2019/11/27/docker-mysql-problem-check/">November 27th 2019, 11:16:39 pm</a>
+            </p><p>更新日期：<a href="http://hurricane618.me/2019/11/27/docker-mysql-problem-check/">November 27th 2019, 11:40:31 pm</a>
             </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -876,46 +876,6 @@ top:50vh;
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
         Total : 21
@@ -1069,11 +1029,11 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
     
-        <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
-    
         <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
     
         <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
     
         <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
     
