@@ -78,8 +78,6 @@
     <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
     
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    
     <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
 /* This file is meant as a standalone workflow for
 - testing support for link[rel=preload]
@@ -214,8 +212,10 @@
 </head>
 
     
+        <body class="home-body">
     
-<header class="header">
+    
+<header class="header index-header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
@@ -231,21 +231,34 @@
 
 
 
+
+height:50vh;
 ">
     
     <!-- 主页  -->
+    
+    
+    <!-- 文章页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/)"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/index-bg1.jpg)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
             
+            风之栖息地
+            <!-- 文章页  -->
+            
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
+            
+            
+                habitat of wind
+            
+            <!-- 文章页  -->
             
         </p>
         <!-- 文章页meta -->
@@ -357,343 +370,25 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href="/2019/11/27/docker-mysql-problem-check/">
+        <a class="abstract-title" href="/2018/06/26/new-start/">
             
-                <span>Docker中的Mysql配置问题处理与思考</span>
+                <span>新的开始</span>
         </a>
         <div class="abstract-content">
-            记录一下，我在docker容器中配置Mysql时遇到的坑，以及处理过程中学到的知识。
-起因最近作业量多，任务重结果还是被点名出题（哭唧唧），没办法只能硬着头皮上。有了出题思路之后，和@wh1t3Pig交流之后得知需要使用docker-compose来布置出题环境。啥？卧槽？不能手动布置吗？算了，就当做是对我的考验。所以我开开心心的写好源文件之后，开始准备布置环境，那么到底是直接拉个Mysql，还是直接在容器内部装？在内部装又有各种问题。。。这里就把这些坑记录下来造福后人，同时也有一定的分析。
-web server+mysql or in one container？在参考多个知名项目和比...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/11/27</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="docker">docker</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="Mysql">Mysql</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/11/11/cnss-recruit-pwn-1/">
-            
-                <span>CNSS招新题中的一道ROP题</span>
-        </a>
-        <div class="abstract-content">
-            CNSS招新题目中有两道不错的Pwn题，拿来学习一波知识。然而其中有一道是内核ROP，复现了好几天。。还是有点问题，再加上研究生大作业集群来了（完全不能摸鱼，哭唧唧），所以那道内核题能做出来就放博客。
-Sleepy Server这道题checksec发现防御全开，同时给了libseccomp，看来是对libc的调用有一定限制。
+            之前的博客荒废掉了，所以在github上开一个新的博客希望能够坚持下去吧。也不讲太多矫情的话了，撸起袖子就是肝。
+一开始会更新的比较慢，hexo的博客还需要一段时间适应，之后会逐渐加快。
 
-可以看到禁用了execve，不能通过直接拿shell获得flag。开始分析整个程序，看看有什么利用点。
-
-比较容易的就能看到buf有一个溢出，但是溢出的数量有限只有0x10字节，随后看到我们输入的用户名和密码被传入一个函数判断，判断的结果正确才会进入漏洞点，我们...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/11/11</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/26</span>
             </div>
             <!-- tags  -->
             
             <div class="abstract-tags">
     
-        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/09/14/fancy-rop-practice/">
-            
-                <span>花式栈溢出学习</span>
-        </a>
-        <div class="abstract-content">
-            继续进行着栈溢出的练习，这次是参考了ctf-wiki上面的演示题目，在复现过程中的一些记录。
-over安恒月赛的题目，首先看程序保护，开启了NX，不能写shellcode，同时分析了程序结果发现buffer有0x50，但是输入有0x60也就是说只能覆盖rbp和ret地址，所以必须要改变栈的位置。
-首先是一个trick，里面读入的函数是read，所以读入的数据是不会自动加上\0的，其他的两个函数gets和scanf都会对读入的字符串加上\0截断。利用这个差异性，我们只要填入0x50个非0数据，这样puts就会打印出rbp的值。泄露出栈基址之后，我们就能利用相对偏移来确定题目随意的栈地址。
-...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/09/14</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/07/26/basic-rop-practice/">
-            
-                <span>基础ROP学习</span>
-        </a>
-        <div class="abstract-content">
-            最近开始入门pwn，在白泽新手oj那里学了一波之后开始自己学剩下的内容。看到atum大佬推荐的三道基础ROP题目，就练习一下，学习思路总结经验。在网上找题的过程中发现vss基本上绝迹了。。。辛苦一番之后终于找到，为了后面的人也能快速找到题目我就把三道题一起上传了。
-http://hurricane618.me/resource/basic-rop/vss
-http://hurricane618.me/resource/basic-rop/ropasaurusrex
-http://hurricane618.me/resource/basic-rop/r0pbaby
-r0pbaby一道强化版...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/07/26</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/05/24/2019rctf-some-writeup/">
-            
-                <span>2019RCTF 部分Web的WriteUp</span>
-        </a>
-        <div class="abstract-content">
-            一年一度的RCTF开始了，又能学一波骚操作，RCTF的web题目去年就非常好，今年也特别出色。由于研究所月赛的原因没有参与其中，所以赛后来复现一下。
-nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &#125; else &#123; show_source(__FILE__); &#125;
-一个代码执行，但是肯定没有这么简单，执行phpinfo查看到disable_function之后，发现禁用了已知范围内的所有危险函数，并且还把之前考差过的putenv也禁用了。这样就没有办...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/24</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">
-            
-                <span>2019DDCTF 未解决的web题 writeup</span>
-        </a>
-        <div class="abstract-content">
-            homebrew event loop一道python的代码审计题目，题目的入口点会检测url中携带的参数并且初始化session的值。
-123456789101112def entry_point():	  querystring = urllib.unquote(request.query_string)	  request.event_queue = []	  if querystring == '' or (not querystring.startswith('action:')) or len(querystring) &gt; 100:		    querystring =...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/04/29</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">
-            
-                <span>2019DDCTF 部分我解决的题目writeup</span>
-        </a>
-        <div class="abstract-content">
-            我得说DDCTF真的是脑洞太大，一言难尽。。。 
-滴~文件包含，需要一些转换。转成hex值之后两次base64。 
-12345678910# -*- coding: utf-8 -*- import base64 import binascii text = raw_input('text: ') text = binascii.b2a_hex(text) print text print base64.b64encode(base64.b64encode(text))
-拿到index.php源码 
-123456789101112131415161718192021222324&lt;?...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/04/19</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/03/31/2019TCTF-web-writeup/">
-            
-                <span>2019TCTF web writeup</span>
-        </a>
-        <div class="abstract-content">
-            wallbreaker easy这道题在比赛的时候专注在imagick上面，但是由于是最新版本，以前的bypass漏洞已经修补。。。之后由于复试的原因没有仔细研究，现在开始复现。
-这道题给了一个webshell，密码是backdoor，可以直接用菜刀连接，然而用phpinfo查看禁用函数，发现已经把所有执行命令的函数都ban了，并且知道操作系统是ubuntu18.04.
-
-所以这是一个受限制的webshell绕过disable_function的问题
-bypass disable_function的方法绕过disable_function也是一个老生常谈的问题了。总结一下大概有一下四种：...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/31</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="JAVA">JAVA</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/03/02/serial-ports-translation-cn/">
-            
-                <span>快速寻找串行接口</span>
-        </a>
-        <div class="abstract-content">
-            这是一篇来自devttys0的一篇文章，在寻找串口的方法上给出了很多有用的方法，是一篇不错的总结文，在国内没有看到翻译，所以就想翻译成中文供大家学习，第一次做翻译，如有错误之处，请大家体谅，可以给我留言，我会快速修改。
-原文链接
-鉴于这个博客的名声和我拥有的点击量，我认为现在是大家一起讨论串口的时候了，尤其是嵌入式系统的串口。
-我的目标是通过使用确定的测试和有根据的猜测来讲解我发现的有效识别和逆向嵌入式串口的技术，而不需要特别昂贵的设备。
-简介串口对于嵌入式开发人员特别有用，通常会使用串口来：
-
-进入boot loader
-得到启动和调试信息
-通过shell和系统交互
-
-不用说这个功能同...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/02</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="IOT">IOT</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="翻译">翻译</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/02/18/yingshi-camera-firmware-extract/">
-            
-                <span>萤石某摄像头的安全分析--固件提取</span>
-        </a>
-        <div class="abstract-content">
-            由于之前考研一直没有时间搞，现在终于有空来做一些小实验。
-固件提取方式比较主流的提取方式有以下几种：
-
-官网或者找客服索要固件
-在线升级的时候抓包得到下载地址
-拆flash芯片，用编程器读取芯片内容（也可以使用烧录夹直接获取flash，但是有些时候有保护引脚就只能拆芯片）
-用硬件电路的调试接口和固件的bootloader获取固件
-从串口进入系统之后，打包固件
-
-首先，这个摄像头现在没有升级操作，官网也没有固件。烧录夹现在还用的不熟练，在分析之后决定用硬件调试接口来获取固件。
-TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.pediy.com/thread-246...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/02/18</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="IOT">IOT</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="闲聊">闲聊</a>
     
 </div>
             
@@ -703,11 +398,107 @@ TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.p
     <!-- paginator  -->
     
     <nav class="page-nav">
-        <span class="page-number current">1</span><a class="page-number" href="/archives/2019/page/2/">2</a><a class="extend next" rel="next" href="/archives/2019/page/2/">NEXT &#62;</a>
+        <a class="extend prev" rel="prev" href="/page/2/">&#60; PREV</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
     </nav>
     
 </main>
             <!-- profile -->
+            
+            <div class="profile">
+    <img class="profile-avatar" alt="avatar" src="/avatar/441520_1.jpg">
+    <div class="profile-name">hurricane618</div>
+    
+    <div class="profile-signature">
+        May the wind guide you
+    </div>
+    
+    
+    <div class="profile-social">
+        
+    
+        
+            
+                <a href="mailto:hurricane618@hotmail.com" class="iconfont-archer email" title="email"></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/hurricane618" class="iconfont-archer github" target="_blank" title="github"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//twitter.com/hurricane_618" class="iconfont-archer twitter" target="_blank" title="twitter"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title="rss"></a>
+            
+        
+    
+
+    </div>
+    
+    
+        <div class="friends">
+            <div>FRIENDS</div>
+            
+                
+                    <span>
+                        <a href="https://blog.donot.me/" target="_black">donot</a>
+                    </span>
+                
+            
+                
+                    <span>
+                        <a href="https://www.zuozuovera.com/" target="_black">左左薇拉</a>
+                    </span>
+                
+            
+        </div>
+    
+    
+        <div class="about-me">
+            <a href="/about">ABOUT ME</a>
+        </div>
+    
+</div>
             
         </div>
         <footer class="footer footer-unloaded">

@@ -357,6 +357,42 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2019/11/11/cnss-recruit-pwn-1/">
+            
+                <span>CNSS招新题中的一道ROP题</span>
+        </a>
+        <div class="abstract-content">
+            CNSS招新题目中有两道不错的Pwn题，拿来学习一波知识。然而其中有一道是内核ROP，复现了好几天。。还是有点问题，再加上研究生大作业集群来了（完全不能摸鱼，哭唧唧），所以那道内核题能做出来就放博客。
+Sleepy Server这道题checksec发现防御全开，同时给了libseccomp，看来是对libc的调用有一定限制。
+
+可以看到禁用了execve，不能通过直接拿shell获得flag。开始分析整个程序，看看有什么利用点。
+
+比较容易的就能看到buf有一个溢出，但是溢出的数量有限只有0x10字节，随后看到我们输入的用户名和密码被传入一个函数判断，判断的结果正确才会进入漏洞点，我们...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/11/11</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2019/09/14/fancy-rop-practice/">
             
                 <span>花式栈溢出学习</span>
@@ -741,9 +777,76 @@ r0pbaby一道强化版...
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 20
+        Total : 21
         </div>
         <!-- search  -->
         
@@ -756,6 +859,11 @@ r0pbaby一道强化版...
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/27</span><a class="archive-post-title" href="/2019/11/27/docker-mysql-problem-check/">Docker中的Mysql配置问题处理与思考</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -877,15 +985,19 @@ r0pbaby一道强化版...
     
         <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
     
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
+        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
+    
         <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
     
-        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+        <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
     
         <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
     
         <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
-    
-        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
     
         <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
     
