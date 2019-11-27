@@ -426,7 +426,7 @@ height:50vh;
 <p>注：要是有师傅能有更好的解决方案，欢迎交流。</p>
 <p>##Mysql的安装交互问题</p>
 <p>那么采用了服务装进一个容器里面之后，发现了另外一个问题，<code>apt-get install mysql-server</code>这个安装是需要交互的，途中要求你设置root的密码。这个没有办法用<code>-y</code>选项回避掉。一顿搜索之后，在stackoverflow中看到可以使用一个环境变量<code>DEBIAN_FRONTEND=noninteractive</code>来跳过交互。</p>
-<p>这样我们在Dockerfile中</p>
+<p>这样我们在<code>Dockerfile</code>中</p>
 <figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ENV</span> DEBIAN_FRONTEND=noninteractive</span><br><span class="line"><span class="keyword">RUN</span> apt-get update &amp;&amp; apt-get install -y mysql-server &amp;&amp; apt-get clean</span><br></pre></td></tr></table></figure>
 <p>就可以完美解决交互问题。</p>
 <h2 id="php中的mysql扩展安装顺序问题"><a href="#php中的mysql扩展安装顺序问题" class="headerlink" title="php中的mysql扩展安装顺序问题"></a>php中的mysql扩展安装顺序问题</h2><p>题目使用的是mysql扩展，自带的php没有，这个时候需要<code>docker-php-ext-install mysql</code>。但是事故发生了，我在手动操作的时候是可以成功的，但是自动化的时候连接报错<code>No such file or directory</code>，当时我立即使用Mysql的客户端尝试连接，结果是成功的，排除了用户名和密码问题。那么问题来了，为什么Mysql客户端可以连接成功，php的连接函数就不行。</p>
@@ -459,7 +459,7 @@ height:50vh;
             <p>原文作者：<a href="http://hurricane618.me">hurricane618</a>
             </p><p>原文链接：<a href="http://hurricane618.me/2019/11/27/docker-mysql-problem-check/">http://hurricane618.me/2019/11/27/docker-mysql-problem-check/</a>
             </p><p>发表日期：<a href="http://hurricane618.me/2019/11/27/docker-mysql-problem-check/">November 27th 2019, 11:07:33 pm</a>
-            </p><p>更新日期：<a href="http://hurricane618.me/2019/11/27/docker-mysql-problem-check/">November 27th 2019, 11:08:47 pm</a>
+            </p><p>更新日期：<a href="http://hurricane618.me/2019/11/27/docker-mysql-problem-check/">November 27th 2019, 11:16:39 pm</a>
             </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
