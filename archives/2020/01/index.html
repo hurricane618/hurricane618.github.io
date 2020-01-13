@@ -357,57 +357,26 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">
+        <a class="abstract-title" href="/2020/01/13/algorithm-course-summary/">
             
-                <span>2019DDCTF 未解决的web题 writeup</span>
+                <span>算法课程总结</span>
         </a>
         <div class="abstract-content">
-            homebrew event loop一道python的代码审计题目，题目的入口点会检测url中携带的参数并且初始化session的值。
-123456789101112def entry_point():	  querystring = urllib.unquote(request.query_string)	  request.event_queue = []	  if querystring == '' or (not querystring.startswith('action:')) or len(querystring) &gt; 100:		    querystring =...
+            一开始只是抱着开阔视野的心态来的，想着算法是IT行业哪里都会用到的东西，学完之后觉得卜老师不愧是教了13年的老师，很多地方都很受益，虽然不是专门做算法的，其中的很多思想都对以后的工作有一定启发。
+观察问题的角度问题的可分解性想要解决一个复杂的问题，我们首先从这个问题最简单的实例入手，这个最简单的实例能用什么方法解决？复杂的问题能不能分解成简单的问题？
+可行性解的形式以及解之间的变换关系问题的可行解的形式是什么？可行解的总数有多少？可行解能否一步一步的逐步构建出来？我们能否对一个可行解施加小幅度的扰动，将它变成另外一个可行解？
+类似的问题和给定的问题类似的问题有哪些？解决类似问题的算法能够...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/04/29</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/01/13</span>
             </div>
             <!-- tags  -->
             
             <div class="abstract-tags">
     
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">
-            
-                <span>2019DDCTF 部分我解决的题目writeup</span>
-        </a>
-        <div class="abstract-content">
-            我得说DDCTF真的是脑洞太大，一言难尽。。。 
-滴~文件包含，需要一些转换。转成hex值之后两次base64。 
-12345678910# -*- coding: utf-8 -*- import base64 import binascii text = raw_input('text: ') text = binascii.b2a_hex(text) print text print base64.b64encode(base64.b64encode(text))
-拿到index.php源码 
-123456789101112131415161718192021222324&lt;?...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/04/19</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="算法">算法</a>
     
 </div>
             

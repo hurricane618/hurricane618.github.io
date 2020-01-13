@@ -357,57 +357,29 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">
+        <a class="abstract-title" href="/2018/06/30/csp-bypass-summary/">
             
-                <span>2019DDCTF 未解决的web题 writeup</span>
+                <span>CSP绕过总结</span>
         </a>
         <div class="abstract-content">
-            homebrew event loop一道python的代码审计题目，题目的入口点会检测url中携带的参数并且初始化session的值。
-123456789101112def entry_point():	  querystring = urllib.unquote(request.query_string)	  request.event_queue = []	  if querystring == '' or (not querystring.startswith('action:')) or len(querystring) &gt; 100:		    querystring =...
+            首发在信安之路上 https://mp.weixin.qq.com/s/z_XmhrTUg_yUfkyAFFfaKQ ，之后文章略有修改。
+CSP绕过总结今年的0CTF预选赛6道web题，其中三道都涉及CSP的知识点，简直可怕。。。这次趁着空闲时间就稍稍总结一下CSP绕过方面的知识，无论是对以后CTF比赛还是工作都很有帮助。
+CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术。它是一种由开发者定义的安全性政策性申明，通过CSP指定可信的内容来源，让WEB处于一个安全的运行环境中。
+一个CSP头由多组CSP策略组成，中间由分号分隔,如下所示：
+...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/04/29</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/30</span>
             </div>
             <!-- tags  -->
             
             <div class="abstract-tags">
     
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="CSP">CSP</a>
     
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">
-            
-                <span>2019DDCTF 部分我解决的题目writeup</span>
-        </a>
-        <div class="abstract-content">
-            我得说DDCTF真的是脑洞太大，一言难尽。。。 
-滴~文件包含，需要一些转换。转成hex值之后两次base64。 
-12345678910# -*- coding: utf-8 -*- import base64 import binascii text = raw_input('text: ') text = binascii.b2a_hex(text) print text print base64.b64encode(base64.b64encode(text))
-拿到index.php源码 
-123456789101112131415161718192021222324&lt;?...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/04/19</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="XSS">XSS</a>
     
 </div>
             
@@ -415,6 +387,10 @@
     </article>
     
     <!-- paginator  -->
+    
+    <nav class="page-nav">
+        <a class="extend prev" rel="prev" href="/categories/技术/page/2/">&#60; PREV</a><a class="page-number" href="/categories/技术/">1</a><a class="page-number" href="/categories/技术/page/2/">2</a><span class="page-number current">3</span>
+    </nav>
     
 </main>
             <!-- profile -->

@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://hurricane618.me/"/>
-  <updated>2019-11-27T16:01:02.987Z</updated>
+  <updated>2020-01-13T11:03:07.533Z</updated>
   <id>http://hurricane618.me/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>算法课程总结</title>
+    <link href="http://hurricane618.me/2020/01/13/algorithm-course-summary/"/>
+    <id>http://hurricane618.me/2020/01/13/algorithm-course-summary/</id>
+    <published>2020-01-13T11:00:36.000Z</published>
+    <updated>2020-01-13T11:03:07.533Z</updated>
+    
+    <content type="html"><![CDATA[<p>一开始只是抱着开阔视野的心态来的，想着算法是IT行业哪里都会用到的东西，学完之后觉得卜老师不愧是教了13年的老师，很多地方都很受益，虽然不是专门做算法的，其中的很多思想都对以后的工作有一定启发。</p><h2 id="观察问题的角度"><a href="#观察问题的角度" class="headerlink" title="观察问题的角度"></a>观察问题的角度</h2><h3 id="问题的可分解性"><a href="#问题的可分解性" class="headerlink" title="问题的可分解性"></a>问题的可分解性</h3><p>想要解决一个复杂的问题，我们首先从这个问题最简单的实例入手，这个最简单的实例能用什么方法解决？复杂的问题能不能分解成简单的问题？</p><h3 id="可行性解的形式以及解之间的变换关系"><a href="#可行性解的形式以及解之间的变换关系" class="headerlink" title="可行性解的形式以及解之间的变换关系"></a>可行性解的形式以及解之间的变换关系</h3><p>问题的可行解的形式是什么？可行解的总数有多少？可行解能否一步一步的逐步构建出来？我们能否对一个可行解施加小幅度的扰动，将它变成另外一个可行解？</p><h3 id="类似的问题"><a href="#类似的问题" class="headerlink" title="类似的问题"></a>类似的问题</h3><p>和给定的问题类似的问题有哪些？解决类似问题的算法能够直接运用于解决当前的问题？如果不能，那么是什么因素造成了妨碍？能否想到方法消除这些妨碍的因素？</p><h3 id="现有算法的不足"><a href="#现有算法的不足" class="headerlink" title="现有算法的不足"></a>现有算法的不足</h3><p>现有的算法有哪些不足？比如：是否存在冗余计算？如果存在的话，能否想到办法消除冗余？</p><h2 id="解决问题的思路"><a href="#解决问题的思路" class="headerlink" title="解决问题的思路"></a>解决问题的思路</h2><h3 id="基于对问题结构观察的算法设计"><a href="#基于对问题结构观察的算法设计" class="headerlink" title="基于对问题结构观察的算法设计"></a>基于对问题结构观察的算法设计</h3><p>在解决一个问题的时候，需要分析这个问题是怎么组成的，能够怎么抽象。而不是直接一个一个算法去套，这种硬套的方法就是碰运气，如果运气好就能用，运气不好就不行了。</p><h3 id="从最简单的例子做起"><a href="#从最简单的例子做起" class="headerlink" title="从最简单的例子做起"></a>从最简单的例子做起</h3><p>做复杂的问题很多时候会很懵逼，这个时候就需要从最简单的情况考虑问题比如n=2，n=3的时候，这样会更加容易上手。</p><h3 id="试图把大问题分解成小问题"><a href="#试图把大问题分解成小问题" class="headerlink" title="试图把大问题分解成小问题"></a>试图把大问题分解成小问题</h3><p>如果从简单问题的观察中，发现问题是可以分解的，那么我们可以尝试把大问题分解成小问题。</p><h3 id="试图从粗糙开始逐步改善"><a href="#试图从粗糙开始逐步改善" class="headerlink" title="试图从粗糙开始逐步改善"></a>试图从粗糙开始逐步改善</h3><p>如果从简单问题的观察中，发现问题是不能分解的，那么就从最笨最简陋的方法开始逐步优化。</p><h3 id="试图枚举所有的解，但是要用聪明的方法"><a href="#试图枚举所有的解，但是要用聪明的方法" class="headerlink" title="试图枚举所有的解，但是要用聪明的方法"></a>试图枚举所有的解，但是要用聪明的方法</h3><p>如果问题的解是一种集合，那么可以尝试枚举所有的解。在遍历的过程中要学会剪枝，不要暴力检索。</p><h3 id="难以优化的函数使用下界或者上界函数代替"><a href="#难以优化的函数使用下界或者上界函数代替" class="headerlink" title="难以优化的函数使用下界或者上界函数代替"></a>难以优化的函数使用下界或者上界函数代替</h3><p>例如：EM，Lagrangian，log barrier<br>$$<br>\large \begin{matrix}<br>min &amp; f(x)\<br>s.t. &amp; h(x) \geq 0<br>\end{matrix}<br>$$<br>$f(x)$难以计算的时候，使用拉格朗日乘子，$L(x,\lambda)=f(x)-\lambda h(x)$，如果$\lambda \geq 0$那么必有$f(x) \geq L(x,\lambda)$。</p><h3 id="复杂操作的潜力一定要挖掘干净"><a href="#复杂操作的潜力一定要挖掘干净" class="headerlink" title="复杂操作的潜力一定要挖掘干净"></a>复杂操作的潜力一定要挖掘干净</h3><p>例如：Dinic’s algorithm</p><p>一次BFS需要O(m)的时间，只用于增广一条<code>s-&gt;t</code>路。而把一条路改成所有路就能最大程度的增加效率。（这个算法其实我没听懂23333）</p><h3 id="求同时满足多个条件的解，分步满足，并利用对称性"><a href="#求同时满足多个条件的解，分步满足，并利用对称性" class="headerlink" title="求同时满足多个条件的解，分步满足，并利用对称性"></a>求同时满足多个条件的解，分步满足，并利用对称性</h3><p>在我们解决LP问题的时候，通常需要满足多个条件，那么我们可以这样来解决问题，先满足其中的大部分条件，然后再循环逼近另外的条件，或者降低不满足其他条件的程度。</p><h3 id="想想对偶"><a href="#想想对偶" class="headerlink" title="想想对偶"></a>想想对偶</h3><p>依旧是在解决LP问题时候的一种策略，如果单纯的替换变量不好做，那么可以试试对偶来解决问题。</p><h3 id="Random-sampling"><a href="#Random-sampling" class="headerlink" title="Random sampling"></a>Random sampling</h3><p>分治思想中的快排，在选取切分点的时候不会去选择最优的pivot而是随机选择一个。</p><h3 id="Scaling-number"><a href="#Scaling-number" class="headerlink" title="Scaling number"></a>Scaling number</h3><p>在有很多数字计算的问题中，可以采用放缩的方法降低计算量。比如所有的数字都除一个数，如果数字小于1就变成0。</p><h3 id="从最好-gt-足够好"><a href="#从最好-gt-足够好" class="headerlink" title="从最好 =&gt; 足够好"></a>从最好 =&gt; 足够好</h3><p>这个思想和random sampling有点类似，不一定要最好的分支点（命中概率$\frac{1}{n}$），只要足够好就行（命中概率$\frac{1}{2}$），如果要对快排再次改进，就可以让选择pivot的时候限制在一个较好的区间中，避免pivot在最边上的情况。</p><h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>推荐了两本书Polya的《怎样解题》和费曼的《物理学讲义》。一本书是对解题思维过程的理解，另外一本书是著名的物理学家费曼的物理讲义，想要了解什么书才是好书，把科学的概念和生活联系在一起，而不是枯燥的阐述和推理。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;一开始只是抱着开阔视野的心态来的，想着算法是IT行业哪里都会用到的东西，学完之后觉得卜老师不愧是教了13年的老师，很多地方都很受益，虽然不是专门做算法的，其中的很多思想都对以后的工作有一定启发。&lt;/p&gt;
+&lt;h2 id=&quot;观察问题的角度&quot;&gt;&lt;a href=&quot;#观察问题的角度&quot;
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="http://hurricane618.me/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+      <category term="算法" scheme="http://hurricane618.me/tags/%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
   
   <entry>
     <title>Docker中的Mysql配置问题处理与思考</title>
