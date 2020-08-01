@@ -357,6 +357,41 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2020/08/01/2020rctf-some-pwn/">
+            
+                <span>2020RCTF 几道pwn题的复现</span>
+        </a>
+        <div class="abstract-content">
+            博客长草严重，上半年摸鱼太久。最近趁着有空开始复现之前的一些题目，这次做了2020RCTF的几道pwn题，本来还想着把MIPS那道题做出来再发，结果发现MIPS的调试还有很多问题，所以就先发常规一点的题。
+note最经典的菜单堆题，还是note管理系统。64位程序，保护全开。主要功能有new，sell，show，edit，经典的增删查改，除了基本功能之外，还有两个额外的功能，一个是super note，一个是越界写数据但是只能操作一次。
+这个题的super note是个幌子，最后完全没有用到。它的数据结构是三个部分组成，开头是一个指针指向我们申请的message区域，第二块是size，表...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/08/01</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2020/01/13/algorithm-course-summary/">
             
                 <span>算法课程总结</span>
@@ -775,26 +810,9 @@
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 22
+        Total : 23
         </div>
         <!-- search  -->
         
@@ -807,6 +825,11 @@
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2020/08/01/2020rctf-some-pwn/">2020RCTF 几道pwn题的复现</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -949,11 +972,11 @@
     
         <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
     
-        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
-    
         <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
     
         <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
     
         <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
     
@@ -968,6 +991,8 @@
         <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
     
         <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+        <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>

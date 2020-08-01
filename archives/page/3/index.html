@@ -357,6 +357,45 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2018/07/01/phpmyadmin4-8-1-background-LFI/">
+            
+                <span>phpmyadmin4.8.1 后台LFI</span>
+        </a>
+        <div class="abstract-content">
+            之前ChaMd5团队报出来的phpmyadmin的文件包含漏洞，今天就来分析复现一下。
+分析
+漏洞的输入点是 include $_REQUEST[&#39;target&#39;];出现了文件包含这种危险操作，那么有很大概率出现问题。
+我们只要绕过57、58、59行的检测就可以成功控制包含文件。
+第57行用正则匹配开头为index的路径，只要路径开头没有index即可。
+第58行检索输入中是否有黑名单的字符，黑名单在第50行，可以看到 import.php和export.php，只要参数中没这两个php就行。
+第59行要看Core类的方法checkPageValidity。
+
+第452行...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/01</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2018/06/30/csp-bypass-summary/">
             
                 <span>CSP绕过总结</span>
@@ -813,26 +852,9 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 22
+        Total : 23
         </div>
         <!-- search  -->
         
@@ -845,6 +867,11 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2020/08/01/2020rctf-some-pwn/">2020RCTF 几道pwn题的复现</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -987,11 +1014,11 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
     
         <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
     
-        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
-    
         <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
     
         <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
     
         <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
     
@@ -1006,6 +1033,8 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
         <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
     
         <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+        <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>

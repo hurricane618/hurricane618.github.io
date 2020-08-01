@@ -370,6 +370,47 @@ height:50vh;
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2019/03/02/serial-ports-translation-cn/">
+            
+                <span>快速寻找串行接口</span>
+        </a>
+        <div class="abstract-content">
+            这是一篇来自devttys0的一篇文章，在寻找串口的方法上给出了很多有用的方法，是一篇不错的总结文，在国内没有看到翻译，所以就想翻译成中文供大家学习，第一次做翻译，如有错误之处，请大家体谅，可以给我留言，我会快速修改。
+原文链接
+鉴于这个博客的名声和我拥有的点击量，我认为现在是大家一起讨论串口的时候了，尤其是嵌入式系统的串口。
+我的目标是通过使用确定的测试和有根据的猜测来讲解我发现的有效识别和逆向嵌入式串口的技术，而不需要特别昂贵的设备。
+简介串口对于嵌入式开发人员特别有用，通常会使用串口来：
+
+进入boot loader
+得到启动和调试信息
+通过shell和系统交互
+
+不用说这个功能同...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/02</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="IOT">IOT</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="翻译">翻译</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2019/02/18/yingshi-camera-firmware-extract/">
             
                 <span>萤石某摄像头的安全分析--固件提取</span>
@@ -680,45 +721,6 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
             <div class="abstract-tags">
     
         <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2018/07/01/phpmyadmin4-8-1-background-LFI/">
-            
-                <span>phpmyadmin4.8.1 后台LFI</span>
-        </a>
-        <div class="abstract-content">
-            之前ChaMd5团队报出来的phpmyadmin的文件包含漏洞，今天就来分析复现一下。
-分析
-漏洞的输入点是 include $_REQUEST[&#39;target&#39;];出现了文件包含这种危险操作，那么有很大概率出现问题。
-我们只要绕过57、58、59行的检测就可以成功控制包含文件。
-第57行用正则匹配开头为index的路径，只要路径开头没有index即可。
-第58行检索输入中是否有黑名单的字符，黑名单在第50行，可以看到 import.php和export.php，只要参数中没这两个php就行。
-第59行要看Core类的方法checkPageValidity。
-
-第452行...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/01</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
     
 </div>
             
@@ -1223,26 +1225,9 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 22
+        Total : 23
         </div>
         <!-- search  -->
         
@@ -1255,6 +1240,11 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2020/08/01/2020rctf-some-pwn/">2020RCTF 几道pwn题的复现</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1397,11 +1387,11 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     
         <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
     
-        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
-    
         <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
     
         <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
     
         <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
     
@@ -1416,6 +1406,8 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
         <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
     
         <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+        <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>

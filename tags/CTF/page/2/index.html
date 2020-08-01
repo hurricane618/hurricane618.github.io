@@ -357,61 +357,30 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href="/2019/01/27/haozi-xss-challenges/">
+        <a class="abstract-title" href="/2018/07/08/google-ctf-beginner-js-safe-1/">
             
-                <span>haozi xss 挑战赛 writeup</span>
+                <span>Google CTF Beginner JS Safe 1 复现</span>
         </a>
         <div class="abstract-content">
-            0x00123function render (input) &#123;  return '&lt;div&gt;' + input + '&lt;/div&gt;'&#125;
-没什么说的，div标签+没过滤直接插 &lt;img src=1 onerror=alert(1)&gt;
-0x01123function render (input) &#123;  return '&lt;textarea&gt;' + input + '&lt;/textarea&gt;'&#125;
-输入点在&lt;textarea&gt;这种标签中，需要闭合标签，在插入payload。&lt;/te...
+            周末看了看GoogleCTF的beginner题目，感觉有些题目还不错，这里就先分析其中一道题JS Safe。
+题目
+分析与操作这道题有点high，作为一个JS调试新手，着实爽了一把。题目给了一个Html网页，里面有两段JS代码，看来是JS代码分析的题目。
+
+我们先看其中的一段，前两个是解密用的参数，看到open_safe这个函数，password必须是CTF{xxxx}的格式，读取其中的数据代入判断。if中把我们的输入代入了x函数。
+
+我们的password会在env的g参数中被编码，a是读数组数据，b是创建函数，c是加操作，d是ascii码转换。
+之后，根据code中的字母在env中...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/27</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/08</span>
             </div>
             <!-- tags  -->
             
             <div class="abstract-tags">
     
-        <a class="post-tag" href="javascript:void(0);" data-tags="XSS">XSS</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2018/06/30/csp-bypass-summary/">
-            
-                <span>CSP绕过总结</span>
-        </a>
-        <div class="abstract-content">
-            首发在信安之路上 https://mp.weixin.qq.com/s/z_XmhrTUg_yUfkyAFFfaKQ ，之后文章略有修改。
-CSP绕过总结今年的0CTF预选赛6道web题，其中三道都涉及CSP的知识点，简直可怕。。。这次趁着空闲时间就稍稍总结一下CSP绕过方面的知识，无论是对以后CTF比赛还是工作都很有帮助。
-CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术。它是一种由开发者定义的安全性政策性申明，通过CSP指定可信的内容来源，让WEB处于一个安全的运行环境中。
-一个CSP头由多组CSP策略组成，中间由分号分隔,如下所示：
-...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/30</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CSP">CSP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="XSS">XSS</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
     
 </div>
             
@@ -419,6 +388,10 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
     </article>
     
     <!-- paginator  -->
+    
+    <nav class="page-nav">
+        <a class="extend prev" rel="prev" href="/tags/CTF/">&#60; PREV</a><a class="page-number" href="/tags/CTF/">1</a><span class="page-number current">2</span>
+    </nav>
     
 </main>
             <!-- profile -->
