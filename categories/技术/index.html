@@ -357,6 +357,37 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2020/08/07/glibc-pwn-off-by-one-1/">
+            
+                <span>glibc堆利用之off by one的两道CTF题目</span>
+        </a>
+        <div class="abstract-content">
+            b00ks这是一道asis ctf 2016的题目，主要功能是书本记录，除了基本的书本的增删改查功能，还有一个作者名称的改变。程序是一个基本保护除了canary其他全开的64位程序。
+调试写exp的过程参考了ctf-wiki，先知社区一篇文章，和另外一个博客。很多细节上面的文章已经写的很详细了，我补充一些其他细节点。
+这里漏洞的问题是出现在程序自定义的读取函数中，在读完规定长度的数据之后又会在末尾填一个0，这样就会溢出一个空字节。这种漏洞被称为OBO（off by one），这里一共使用了两次，第一次是先把作者name全部填满，这样溢出的0字节就在下一个区域中，随后这个程序有一个管理全局...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/08/07</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2020/08/01/2020rctf-some-pwn/">
             
                 <span>2020RCTF 几道pwn题的复现</span>
@@ -644,43 +675,6 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
             <div class="abstract-tags">
     
         <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/03/31/2019TCTF-web-writeup/">
-            
-                <span>2019TCTF web writeup</span>
-        </a>
-        <div class="abstract-content">
-            wallbreaker easy这道题在比赛的时候专注在imagick上面，但是由于是最新版本，以前的bypass漏洞已经修补。。。之后由于复试的原因没有仔细研究，现在开始复现。
-这道题给了一个webshell，密码是backdoor，可以直接用菜刀连接，然而用phpinfo查看禁用函数，发现已经把所有执行命令的函数都ban了，并且知道操作系统是ubuntu18.04.
-
-所以这是一个受限制的webshell绕过disable_function的问题
-bypass disable_function的方法绕过disable_function也是一个老生常谈的问题了。总结一下大概有一下四种：...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/31</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="JAVA">JAVA</a>
     
 </div>
             
@@ -1083,9 +1077,14 @@ bypass disable_function的方法绕过disable_function也是一个老生常谈�
     
     
     
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 23
+        Total : 24
         </div>
         <!-- search  -->
         
@@ -1098,6 +1097,11 @@ bypass disable_function的方法绕过disable_function也是一个老生常谈�
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href="/2020/08/07/glibc-pwn-off-by-one-1/">glibc堆利用之off by one的两道CTF题目</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1263,9 +1267,9 @@ bypass disable_function的方法绕过disable_function也是一个老生常谈�
     
         <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
     
-        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
-    
         <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
+    
+        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>

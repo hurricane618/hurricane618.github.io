@@ -357,6 +357,37 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2020/08/07/glibc-pwn-off-by-one-1/">
+            
+                <span>glibc堆利用之off by one的两道CTF题目</span>
+        </a>
+        <div class="abstract-content">
+            b00ks这是一道asis ctf 2016的题目，主要功能是书本记录，除了基本的书本的增删改查功能，还有一个作者名称的改变。程序是一个基本保护除了canary其他全开的64位程序。
+调试写exp的过程参考了ctf-wiki，先知社区一篇文章，和另外一个博客。很多细节上面的文章已经写的很详细了，我补充一些其他细节点。
+这里漏洞的问题是出现在程序自定义的读取函数中，在读完规定长度的数据之后又会在末尾填一个0，这样就会溢出一个空字节。这种漏洞被称为OBO（off by one），这里一共使用了两次，第一次是先把作者name全部填满，这样溢出的0字节就在下一个区域中，随后这个程序有一个管理全局...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/08/07</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2020/08/01/2020rctf-some-pwn/">
             
                 <span>2020RCTF 几道pwn题的复现</span>
@@ -810,9 +841,14 @@ note最经典的菜单堆题，还是note管理系统。64位程序，保护全�
     
     
     
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 23
+        Total : 24
         </div>
         <!-- search  -->
         
@@ -825,6 +861,11 @@ note最经典的菜单堆题，还是note管理系统。64位程序，保护全�
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href="/2020/08/07/glibc-pwn-off-by-one-1/">glibc堆利用之off by one的两道CTF题目</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -990,9 +1031,9 @@ note最经典的菜单堆题，还是note管理系统。64位程序，保护全�
     
         <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
     
-        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
-    
         <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
+    
+        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
