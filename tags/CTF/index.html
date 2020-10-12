@@ -357,6 +357,74 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2020/10/12/2020-tctf-final-jit/">
+            
+                <span>2020 TCTF final SecureJIT writeup</span>
+        </a>
+        <div class="abstract-content">
+            第一次打final 被打的头都炸了，555555。过去三周了，还是水一下这道签到题。
+题目情况作者搞到了一个ruby的jit——rubi，其中打了patch，让执行代码的区域变成不可写的情况。
+12345678910111213141516diff --git a/engine.c b/engine.cindex 79e83d2..2350d59 100644--- a/engine.c+++ b/engine.c@@ -137,6 +137,11 @@ static int execute(char *source)init();lex(source);parser();+ long ...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/10/12</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="fmt">fmt</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href="/2020/09/15/2020qwb-qwxf-pwn/">
+            
+                <span>2020强网杯 强网先锋のpwn</span>
+        </a>
+        <div class="abstract-content">
+            受到摸鱼和各种项目压力之后，终于发出来了，这次是强网杯中强网先锋的4道pwn题，剩下的pwn题还在陆续复现ing，在做了在做了ing
+babymessage一道神奇的栈溢出题目，有三个功能，写name，写message，输出buf，其中message的数据会被strcopy到buf上。这里的溢出点是在写message的功能上，一开始只能够溢出16字节，覆盖掉栈变量+rbp的值。这里如果只是看反编译的代码是看不出问题的，一定要观察汇编代码，这也是我经常失误的地方不太爱看汇编，555555。
+这里的写message的函数里带着一个局部变量size，而这个变量因为是局部变量，它是受到rbp的值...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/09/15</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2020/08/01/2020rctf-some-pwn/">
             
                 <span>2020RCTF 几道pwn题的复现</span>
@@ -605,80 +673,6 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
             <!-- date  -->
             <div class="abstract-date">
                 <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/15</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2018/08/01/dianfengjikeCTF-web/">
-            
-                <span>巅峰极客CTF 部分Web复现</span>
-        </a>
-        <div class="abstract-content">
-            复现了三道题，其他的都关环境了，记录一下复现的这三道吧。
-A Simple CMS在网上找到的onethink的漏洞分析文章
-https://bbs.ichunqiu.com/thread-4918-1-1.html
-这个是原理相同的，只不过是thinkphp
-https://xz.aliyun.com/t/99
-通过这些我们知道，问题是出在缓存的存储上，我们的用户名被简单的反序列化存储进了缓存文件中。所以要getshell的话我们只需要通过用户名传入webshell。但是这里有个条件，我们必须能猜到缓存文件的名字。
-在题目的根目录下扫到 www.zip 得到题目的源码，在这里我们看到f...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/01</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2018/07/18/google-ctf-beginner-part1/">
-            
-                <span>Google CTF Beginner Part1</span>
-        </a>
-        <div class="abstract-content">
-            会陆陆续续的把GoogleCTF题目的相关复现整理出来，这里先放一部分。通过这次Beginner训练还是了解到了许多之前没接触过的，比如PWN题中的libc地址问题。
-LETTER(MISC)原理说出来都很简单，考察的是PDF中表层的覆盖其实还是可读的，所以我们选中需要的内容复制粘贴出来就可以了
-
-复制粘贴大法
-
-OCR is cool!(MISC)一道题考察图片转文字之后，运用古典加密解决问题。学到新的知识OCR，PDF或者图片转文本的技术。
-在线转换链接
-
-之后在凯撒加密中破解，因为题目中包含着凯撒，提示也是很明显了。
-
-MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/18</span>
             </div>
             <!-- tags  -->
             
@@ -1109,9 +1103,32 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 25
+        Total : 26
         </div>
         <!-- search  -->
         
@@ -1124,6 +1141,11 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/12</span><a class="archive-post-title" href="/2020/10/12/2020-tctf-final-jit/">2020 TCTF final SecureJIT writeup</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1278,6 +1300,8 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
         <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
     
         <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
+    
+        <span class="sidebar-tag-name" data-tags="fmt"><span class="iconfont-archer">&#xe606;</span>fmt</span>
     
         <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
     

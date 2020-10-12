@@ -357,6 +357,39 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2020/10/12/2020-tctf-final-jit/">
+            
+                <span>2020 TCTF final SecureJIT writeup</span>
+        </a>
+        <div class="abstract-content">
+            第一次打final 被打的头都炸了，555555。过去三周了，还是水一下这道签到题。
+题目情况作者搞到了一个ruby的jit——rubi，其中打了patch，让执行代码的区域变成不可写的情况。
+12345678910111213141516diff --git a/engine.c b/engine.cindex 79e83d2..2350d59 100644--- a/engine.c+++ b/engine.c@@ -137,6 +137,11 @@ static int execute(char *source)init();lex(source);parser();+ long ...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/10/12</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="fmt">fmt</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2020/09/15/2020qwb-qwxf-pwn/">
             
                 <span>2020强网杯 强网先锋のpwn</span>
@@ -374,6 +407,8 @@ babymessage一道神奇的栈溢出题目，有三个功能，写name，写messa
             <!-- tags  -->
             
             <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
     
         <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
     
@@ -896,9 +931,32 @@ note最经典的菜单堆题，还是note管理系统。64位程序，保护全�
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 25
+        Total : 26
         </div>
         <!-- search  -->
         
@@ -911,6 +969,11 @@ note最经典的菜单堆题，还是note管理系统。64位程序，保护全�
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/12</span><a class="archive-post-title" href="/2020/10/12/2020-tctf-final-jit/">2020 TCTF final SecureJIT writeup</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1065,6 +1128,8 @@ note最经典的菜单堆题，还是note管理系统。64位程序，保护全�
         <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
     
         <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
+    
+        <span class="sidebar-tag-name" data-tags="fmt"><span class="iconfont-archer">&#xe606;</span>fmt</span>
     
         <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
     

