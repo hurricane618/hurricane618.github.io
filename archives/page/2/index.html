@@ -357,6 +357,37 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2019/05/24/2019rctf-some-writeup/">
+            
+                <span>2019RCTF 部分Web的WriteUp</span>
+        </a>
+        <div class="abstract-content">
+            一年一度的RCTF开始了，又能学一波骚操作，RCTF的web题目去年就非常好，今年也特别出色。由于研究所月赛的原因没有参与其中，所以赛后来复现一下。
+nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &#125; else &#123; show_source(__FILE__); &#125;
+一个代码执行，但是肯定没有这么简单，执行phpinfo查看到disable_function之后，发现禁用了已知范围内的所有危险函数，并且还把之前考差过的putenv也禁用了。这样就没有办...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/24</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">
             
                 <span>2019DDCTF 未解决的web题 writeup</span>
@@ -666,38 +697,6 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
         <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
     
         <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2018/08/15/google-ctf-beginner-part2/">
-            
-                <span>Google CTF Beginner Part2</span>
-        </a>
-        <div class="abstract-content">
-            Holey Beep(PWN)Holey Beep是CVE-2018-0492，详细的漏洞细节 https://sigint.sh/#/holeybeep 。一开始以为要用这个的exp，结果一看给的二进制文件，似乎不太对……我们需要得到/secret_cake_recipe的内容，然而权限不够，所以这里应该是拿来越权的。
-
-我们看到第一个if是一个通过信号触发的条件，第二个if知道了程序需要参数，然后会open一个写死的路径，之后将输入的参数代入ioctl(device,0x4B2F,参数)，出现问题就会打印报错信息，然后关闭打开的文件。循环上面的操作把所有的参数都跑一遍。
-信号触发的i...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/15</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
     
 </div>
             
@@ -1136,18 +1135,9 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 26
+        Total : 27
         </div>
         <!-- search  -->
         
@@ -1160,6 +1150,11 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href="/2020/10/26/2020-bytectf-gun/">2020 bytectf gun writeup</a>
+        </li>
     
     
         <li class="archive-post-item">

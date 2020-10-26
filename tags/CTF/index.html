@@ -357,6 +357,39 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2020/10/26/2020-bytectf-gun/">
+            
+                <span>2020 bytectf gun writeup</span>
+        </a>
+        <div class="abstract-content">
+            这周打了一下ByteCTF，发现差距还是很大的，现在的很多堆菜单题都上2.31，新版本的题目需要多熟悉熟悉。
+分析checksec保护全开，逆向的时候发现其中有prctl函数，用seccomp-tools查看沙箱逻辑。
+
+看这个逻辑只能使用orw的方法获得flag。整个程序主要由三个功能，射击子弹，上膛子弹，购买子弹，购买子弹会malloc，同时有一次向chunk写数据的机会，购买的子弹会通过一个18字节大小的数据结构管理。chunk指向分配的堆块，next指向其他堆块形成一个链表，flag是标志位分别有0，1，2，表示不同的状态。
+12345struct &#123;    char*...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/10/26</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2020/10/12/2020-tctf-final-jit/">
             
                 <span>2020 TCTF final SecureJIT writeup</span>
@@ -647,38 +680,6 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
         <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
     
         <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2018/08/15/google-ctf-beginner-part2/">
-            
-                <span>Google CTF Beginner Part2</span>
-        </a>
-        <div class="abstract-content">
-            Holey Beep(PWN)Holey Beep是CVE-2018-0492，详细的漏洞细节 https://sigint.sh/#/holeybeep 。一开始以为要用这个的exp，结果一看给的二进制文件，似乎不太对……我们需要得到/secret_cake_recipe的内容，然而权限不够，所以这里应该是拿来越权的。
-
-我们看到第一个if是一个通过信号触发的条件，第二个if知道了程序需要参数，然后会open一个写死的路径，之后将输入的参数代入ioctl(device,0x4B2F,参数)，出现问题就会打印报错信息，然后关闭打开的文件。循环上面的操作把所有的参数都跑一遍。
-信号触发的i...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/08/15</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
     
 </div>
             
@@ -1117,18 +1118,9 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 26
+        Total : 27
         </div>
         <!-- search  -->
         
@@ -1141,6 +1133,11 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href="/2020/10/26/2020-bytectf-gun/">2020 bytectf gun writeup</a>
+        </li>
     
     
         <li class="archive-post-item">

@@ -357,6 +357,39 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2020/10/26/2020-bytectf-gun/">
+            
+                <span>2020 bytectf gun writeup</span>
+        </a>
+        <div class="abstract-content">
+            这周打了一下ByteCTF，发现差距还是很大的，现在的很多堆菜单题都上2.31，新版本的题目需要多熟悉熟悉。
+分析checksec保护全开，逆向的时候发现其中有prctl函数，用seccomp-tools查看沙箱逻辑。
+
+看这个逻辑只能使用orw的方法获得flag。整个程序主要由三个功能，射击子弹，上膛子弹，购买子弹，购买子弹会malloc，同时有一次向chunk写数据的机会，购买的子弹会通过一个18字节大小的数据结构管理。chunk指向分配的堆块，next指向其他堆块形成一个链表，flag是标志位分别有0，1，2，表示不同的状态。
+12345struct &#123;    char*...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/10/26</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2020/10/12/2020-tctf-final-jit/">
             
                 <span>2020 TCTF final SecureJIT writeup</span>
@@ -812,18 +845,9 @@
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 26
+        Total : 27
         </div>
         <!-- search  -->
         
@@ -836,6 +860,11 @@
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href="/2020/10/26/2020-bytectf-gun/">2020 bytectf gun writeup</a>
+        </li>
     
     
         <li class="archive-post-item">

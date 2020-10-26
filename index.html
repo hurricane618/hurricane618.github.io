@@ -370,6 +370,39 @@ height:50vh;
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2020/10/26/2020-bytectf-gun/">
+            
+                <span>2020 bytectf gun writeup</span>
+        </a>
+        <div class="abstract-content">
+            这周打了一下ByteCTF，发现差距还是很大的，现在的很多堆菜单题都上2.31，新版本的题目需要多熟悉熟悉。
+分析checksec保护全开，逆向的时候发现其中有prctl函数，用seccomp-tools查看沙箱逻辑。
+
+看这个逻辑只能使用orw的方法获得flag。整个程序主要由三个功能，射击子弹，上膛子弹，购买子弹，购买子弹会malloc，同时有一次向chunk写数据的机会，购买的子弹会通过一个18字节大小的数据结构管理。chunk指向分配的堆块，next指向其他堆块形成一个链表，flag是标志位分别有0，1，2，表示不同的状态。
+12345struct &#123;    char*...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/10/26</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2020/10/12/2020-tctf-final-jit/">
             
                 <span>2020 TCTF final SecureJIT writeup</span>
@@ -662,37 +695,6 @@ r0pbaby一道强化版...
         <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
     
         <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/05/24/2019rctf-some-writeup/">
-            
-                <span>2019RCTF 部分Web的WriteUp</span>
-        </a>
-        <div class="abstract-content">
-            一年一度的RCTF开始了，又能学一波骚操作，RCTF的web题目去年就非常好，今年也特别出色。由于研究所月赛的原因没有参与其中，所以赛后来复现一下。
-nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &#125; else &#123; show_source(__FILE__); &#125;
-一个代码执行，但是肯定没有这么简单，执行phpinfo查看到disable_function之后，发现禁用了已知范围内的所有危险函数，并且还把之前考差过的putenv也禁用了。这样就没有办...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/24</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
     
 </div>
             
@@ -1233,18 +1235,9 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 26
+        Total : 27
         </div>
         <!-- search  -->
         
@@ -1257,6 +1250,11 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href="/2020/10/26/2020-bytectf-gun/">2020 bytectf gun writeup</a>
+        </li>
     
     
         <li class="archive-post-item">
