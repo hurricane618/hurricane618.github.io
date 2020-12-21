@@ -357,6 +357,43 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2020/12/17/2020xhlj-iot-pwn/">
+            
+                <span>西湖论剑 IoT闯关赛 2020 pwn3 ezarmpwn</span>
+        </a>
+        <div class="abstract-content">
+            文章首发于安全客 https://www.anquanke.com/post/id/224972
+前言打了安恒举办的西湖论剑比赛，题目都是跑在一个开发板上的，通过数据线连接开发板的otg接口能访问题目环境。pwn题目一共有三道，其中有一道题目因为逻辑上的问题导致能比较简单的获得flag，另外一道题目是boa服务器在处理http认证过程中，发生栈溢出。我们这里分析的是这次比赛的第三道pwn题ezarmpwn。
+题目分析通过file和checksec能够知道程序为32位的arm小端程序，开启NX保护，没有PIE和canary保护。
+
+主办方给出的libc为2.30，把libc解压的文件夹和题...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/12/17</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="IOT">IOT</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="ARM">ARM</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2020/10/26/2020-bytectf-gun/">
             
                 <span>2020 bytectf gun writeup</span>
@@ -639,39 +676,6 @@ bypass disable_function的方法绕过disable_function也是一个老生常谈�
             <!-- date  -->
             <div class="abstract-date">
                 <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/24</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/01/10/code-breaking-esay-wp/">
-            
-                <span>code-breaking easy部分题目writeup</span>
-        </a>
-        <div class="abstract-content">
-            ph师傅的代码审计CTF题目 https://code-breaking.com
-easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET['arg'] ?? '';if(preg_match('/^[a-z0-9_]*$/isD', $action)) &#123;    show_source(__FILE__);&#125; else &#123;    $action('', $arg);&#125;
-观察正则表达式可以发现正常的函数名都不行，所以很容易联想到要在函数名中加入其它字符，这道...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/10</span>
             </div>
             <!-- tags  -->
             
@@ -1118,9 +1122,34 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 27
+        Total : 28
         </div>
         <!-- search  -->
         
@@ -1133,6 +1162,11 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/17</span><a class="archive-post-title" href="/2020/12/17/2020xhlj-iot-pwn/">西湖论剑 IoT闯关赛 2020 pwn3 ezarmpwn</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1302,11 +1336,11 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
     
         <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
     
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
         <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
     
         <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
-    
-        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
     
         <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
     
@@ -1317,6 +1351,8 @@ easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET
         <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
     
         <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
+    
+        <span class="sidebar-tag-name" data-tags="ARM"><span class="iconfont-archer">&#xe606;</span>ARM</span>
     
         <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
     

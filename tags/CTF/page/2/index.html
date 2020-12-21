@@ -357,6 +357,39 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2019/01/10/code-breaking-esay-wp/">
+            
+                <span>code-breaking easy部分题目writeup</span>
+        </a>
+        <div class="abstract-content">
+            ph师傅的代码审计CTF题目 https://code-breaking.com
+easy - function1234567&lt;?php$action = $_GET['action'] ?? '';$arg = $_GET['arg'] ?? '';if(preg_match('/^[a-z0-9_]*$/isD', $action)) &#123;    show_source(__FILE__);&#125; else &#123;    $action('', $arg);&#125;
+观察正则表达式可以发现正常的函数名都不行，所以很容易联想到要在函数名中加入其它字符，这道...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/10</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2018/08/15/google-ctf-beginner-part2/">
             
                 <span>Google CTF Beginner Part2</span>
@@ -925,9 +958,34 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 27
+        Total : 28
         </div>
         <!-- search  -->
         
@@ -940,6 +998,11 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/17</span><a class="archive-post-title" href="/2020/12/17/2020xhlj-iot-pwn/">西湖论剑 IoT闯关赛 2020 pwn3 ezarmpwn</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1109,11 +1172,11 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     
         <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
     
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
         <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
     
         <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
-    
-        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
     
         <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
     
@@ -1124,6 +1187,8 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
         <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
     
         <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
+    
+        <span class="sidebar-tag-name" data-tags="ARM"><span class="iconfont-archer">&#xe606;</span>ARM</span>
     
         <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
     
