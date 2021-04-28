@@ -370,6 +370,40 @@ height:50vh;
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2019/09/14/fancy-rop-practice/">
+            
+                <span>花式栈溢出学习</span>
+        </a>
+        <div class="abstract-content">
+            继续进行着栈溢出的练习，这次是参考了ctf-wiki上面的演示题目，在复现过程中的一些记录。
+over安恒月赛的题目，首先看程序保护，开启了NX，不能写shellcode，同时分析了程序结果发现buffer有0x50，但是输入有0x60也就是说只能覆盖rbp和ret地址，所以必须要改变栈的位置。
+首先是一个trick，里面读入的函数是read，所以读入的数据是不会自动加上\0的，其他的两个函数gets和scanf都会对读入的字符串加上\0截断。利用这个差异性，我们只要填入0x50个非0数据，这样puts就会打印出rbp的值。泄露出栈基址之后，我们就能利用相对偏移来确定题目随意的栈地址。
+...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/09/14</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2019/07/26/basic-rop-practice/">
             
                 <span>基础ROP学习</span>
@@ -677,41 +711,6 @@ TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.p
             <div class="abstract-tags">
     
         <a class="post-tag" href="javascript:void(0);" data-tags="XSS">XSS</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/01/24/code-breaking-lumenserial/">
-            
-                <span>code-breaking lumenserial 复现</span>
-        </a>
-        <div class="abstract-content">
-            题目分析php的laravel框架的审计题目。这里记录一下复现过程。整体思路是venenof7师傅的。
-先来看入口，不知道他们怎么就找到了这个请求……
-/server/editor?action=Catchimage&amp;source[]=phar:///var/www/html/upload/image/
-我在黑盒测试的时候只找到了action，完全没有source的影子，个人感觉是结合白盒测试出来的。这里对应的源代码如下：
-12345678910111213141516171819202122232425protected function doCatchimage(Reques...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/24</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
     
 </div>
             
@@ -1277,9 +1276,38 @@ TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.p
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 28
+        Total : 29
         </div>
         <!-- search  -->
         
@@ -1289,6 +1317,20 @@ TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.p
     
     
     
+    
+    <div class="archive-year"> 2021 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/28</span><a class="archive-post-title" href="/2021/04/28/linux-kernel-security-summary/">Linux 内核安全机制总结</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
     
     <div class="archive-year"> 2020 </div>
     <ul class="year-list">
@@ -1466,11 +1508,11 @@ TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.p
     
         <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
     
-        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
-    
         <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
     
         <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
     
         <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
     
@@ -1489,6 +1531,10 @@ TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.p
         <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
     
         <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+        <span class="sidebar-tag-name" data-tags="Linux"><span class="iconfont-archer">&#xe606;</span>Linux</span>
+    
+        <span class="sidebar-tag-name" data-tags="Kernel"><span class="iconfont-archer">&#xe606;</span>Kernel</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>

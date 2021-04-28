@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="hurricane618">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="hurricane618">
+    
+    <meta name="keywords" content="hexo,web security,ctf,hurricane618,代码审计,iot">
+    
+    <meta name="description" content="hurricane618's blog">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Linux 内核安全机制总结 · 风之栖息地|hurricane618&#39;s blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/hurricane_favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-121933059-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/">风之栖息地</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">Linux 内核安全机制总结</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href="/">风之栖息地</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            Linux 内核安全机制总结
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class="post-intro-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="Linux">Linux</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="Kernel">Kernel</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">10.6k</span>阅读时长: <span class="post-count reading-time">40 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2021/04/28</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>文章首发于安全客  <a href="https://www.anquanke.com/post/id/238363" target="_blank" rel="noopener">https://www.anquanke.com/post/id/238363</a></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前面试被问到了内核安全机制的相关问题，但是没有很好的回答出来，所以在此以学习的目的总结这方面的知识。欢迎各位师傅一起交流讨论。</p>
+<h2 id="防御框架"><a href="#防御框架" class="headerlink" title="防御框架"></a>防御框架</h2><p>说到Linux内核防御就不得不提起那张广泛流传的<code>Linux Kernel Defence Map</code>。这里放出两个不同版本的对比图，可以看到新版本中又对老版本的地图做了一些修改和添加。新图在老图的基础上修改了一些语言描述，并且调整了排列顺序，增加了ARM，Intel的硬件防护，clang的CFI，PAX_RAP。所以这里我会按照新图的顺序来讲解。</p>
+<img src="/2021/04/28/linux-kernel-security-summary/1.jpg">
+<p>这个地图把Linux内核的防御相关内容划分成了八种不同的类别，这里简单介绍一下：</p>
+<ul>
+<li>绿色标记：Linux内核的主线防御</li>
+<li>白色标记：通用防御技术</li>
+<li>深蓝色标记：主线不支持的防御</li>
+<li>紫色标记：bug检测</li>
+<li>灰色标记：商用防御</li>
+<li>粉色标记：漏洞</li>
+<li>浅蓝色标记：硬件防御</li>
+<li>黄色标记：利用技术</li>
+</ul>
+<p>防御方面会总结Linux的主线防御，商用防御和硬件防御，主线不支持的防御将不会出现。</p>
+<h2 id="防御技术"><a href="#防御技术" class="headerlink" title="防御技术"></a>防御技术</h2><h3 id="RANDSTRUCT"><a href="#RANDSTRUCT" class="headerlink" title="RANDSTRUCT"></a>RANDSTRUCT</h3><p>它是作为一个GCC的插件，能够随机化C写的结构体布局，这个选项开启的时候会把内核中的结构体字段重新排列。这个重新排列的过程发生在编译期间，插件会获得一个随机种子，根据这个来重新排列结构体字段，使得攻击者无法精确知道结构体对应位置的字段。因此，提高了漏洞利用的难度。</p>
+<p>参考：<a href="https://lwn.net/Articles/722293/" target="_blank" rel="noopener">https://lwn.net/Articles/722293/</a></p>
+<h3 id="LATENT-ENTROPY"><a href="#LATENT-ENTROPY" class="headerlink" title="LATENT_ENTROPY"></a>LATENT_ENTROPY</h3><p>GCC的插件之一，这个插件为了缓解内核在启动和启动之后生成加密密钥的熵太少的问题。这个插件会把随机值混入到有<code>__latent_entropy</code>属性标记的函数中的<code>latent_entropy</code>全局变量中。这个全局变量的值会被加入到内核熵池中用来增加熵。</p>
+<p>参考：<a href="https://lwn.net/Articles/688492/" target="_blank" rel="noopener">https://lwn.net/Articles/688492/</a></p>
+<h3 id="PAX-RANDKSTACK"><a href="#PAX-RANDKSTACK" class="headerlink" title="PAX_RANDKSTACK"></a>PAX_RANDKSTACK</h3><p>由PaX Team实现的<code>PAX_RANDKSTACK</code>是针对进程内核栈的随机化。由于内核栈本身的实现，内核中是可以任意访问没有任何防护的。随机化对栈布局的打乱，配合内核栈信息的擦除，能够有效防止内核信息泄漏，不容易猜透内存的布局。</p>
+<p>实现总结：</p>
+<ol>
+<li>pax_randomize_kstack的实现。这个函数读取时钟（随机数）对进程内核栈基址进行掩码异或，获取有随机化偏移的栈基址，赋值给相应的内核结构，栈增长时就会基于这个随机化地址。</li>
+<li>在相应的系统调用入口处插入随机化的函数。因为进程內核栈的使用是通过进程触发系统调用（当然还有异常和中断），陷进内核，来切换到进程内核栈，随机化应该在这些地方插入执行。而它放置的位置是在系统调用返回之前。</li>
+<li>配合性地，PaX 实现了 pax_erase_kstack 函数，在内核/用户空间切换的时候进行内核信息抹除，填充。</li>
+</ol>
+<p>参考：<a href="https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/PAX_RANDKSTACK.md" target="_blank" rel="noopener">https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/PAX_RANDKSTACK.md</a></p>
+<h3 id="ro-after-init"><a href="#ro-after-init" class="headerlink" title="__ro_after_init"></a>__ro_after_init</h3><p>为了减少内核中的攻击面，会标记内核的一部分为只读内容。内核在初始化过程中会写入一些内容，但在初始化之后这部分内容确定为只读作用，这种情况下我们不能使用const，因为实际上它是有写入修改的，所以就诞生了<code>__ro_after_init</code>。它会在内核初始化完成之后把这些内存区域标记为只读。</p>
+<p>参考：<a href="https://lwn.net/Articles/676145/" target="_blank" rel="noopener">https://lwn.net/Articles/676145/</a></p>
+<h3 id="PAX-CONSTIFY-PLUGIN"><a href="#PAX-CONSTIFY-PLUGIN" class="headerlink" title="PAX_CONSTIFY_PLUGIN"></a>PAX_CONSTIFY_PLUGIN</h3><p>为了缓解修改函数指针劫持控制流的攻击方式而推出的GCC插件。它会使得所有的函数指针的结构体都变为只读。</p>
+<p>参考：<a href="https://isopenbsdsecu.re/mitigations/missing_features/" target="_blank" rel="noopener">https://isopenbsdsecu.re/mitigations/missing_features/</a></p>
+<h3 id="PAX-SIZE-OVERFLOW"><a href="#PAX-SIZE-OVERFLOW" class="headerlink" title="PAX_SIZE_OVERFLOW"></a>PAX_SIZE_OVERFLOW</h3><p>用于检测溢出用的GCC插件，它会用double类型大小的数据结构来保存size表达式的计算结果，然后拿这个结果和实际的输出大小作比较，以此来检查溢出的情况。但是，这个检测不会针对整个源码，只会对一些特定的地方做检查，比如内存分配的时候错误的大小导致的缓冲区溢出。也可以对一些地方做标记，跳过对它们的溢出检查。</p>
+<p>参考：<a href="https://ir.library.oregonstate.edu/downloads/zp38wj554" target="_blank" rel="noopener">https://ir.library.oregonstate.edu/downloads/zp38wj554</a></p>
+<h3 id="REFCOUNT-FULL"><a href="#REFCOUNT-FULL" class="headerlink" title="REFCOUNT_FULL"></a>REFCOUNT_FULL</h3><p>这个是一个针对引用计数的溢出保护，在对引用计数操作的函数中添加指令检测refcount是否为负。如果没有这个保护，内核对象引用计数不断增加，当发生溢出时，引用计数为负数，内存即可被释放，而此时程序还有对该指针所值内存的引用，就有可能发生<code>use after free</code>，可以用做攻击利用。</p>
+<p>参考：<a href="https://lwn.net/Articles/728626/" target="_blank" rel="noopener">https://lwn.net/Articles/728626/</a></p>
+<p>类似的保护<code>PAX_REFCOUNT</code></p>
+<p>参考：<a href="https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/PAX_REFCOUNT.md" target="_blank" rel="noopener">https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/PAX_REFCOUNT.md</a></p>
+<h3 id="TIF-FSCHECK-flag"><a href="#TIF-FSCHECK-flag" class="headerlink" title="TIF_FSCHECK flag"></a>TIF_FSCHECK flag</h3><p>一些执行路径会临时升高<code>addr_limit</code>，为了内核代码能够像读写用户内存一样读写内核内存，但如果就这样返回到用户态，那么在用户态就可以读写到内核内存，所以这个标志位会在返回用户态时检查<code>addr_limit</code>的值。对任何调用了<code>set_fs()</code>都会设置线程标记<code>TIF_FSCHECK</code>。</p>
+<p>参考：<a href="https://patchwork.kernel.org/project/kernel-hardening/patch/20180514130316.23855-2-mpe@ellerman.id.au/" target="_blank" rel="noopener">https://patchwork.kernel.org/project/kernel-hardening/patch/20180514130316.23855-2-mpe@ellerman.id.au/</a></p>
+<h3 id="SCHED-STACK-END-CHECK"><a href="#SCHED-STACK-END-CHECK" class="headerlink" title="SCHED_STACK_END_CHECK"></a>SCHED_STACK_END_CHECK</h3><p>这个选项是为了检查在调用<code>schedule()</code>时的栈溢出情况。如果栈结束的位置发现被覆盖，那么这些被覆盖区域的内容是不可信的。这是为了确保不会发生错误行为，被覆盖区域如果执行可能会在后续阶段出现数据损坏或崩溃。这个检查的运行时开销很小。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/SCHED_STACK_END_CHECK.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/SCHED_STACK_END_CHECK.html</a></p>
+<h3 id="GRKERNSEC-KSTACKOVERFLOW"><a href="#GRKERNSEC-KSTACKOVERFLOW" class="headerlink" title="GRKERNSEC_KSTACKOVERFLOW"></a>GRKERNSEC_KSTACKOVERFLOW</h3><p>Grsecurity 的 KSTACKOVERFLOW 特性是针对进程内核栈溢出的一些加固措施，主要包括：</p>
+<ul>
+<li>进程内核栈初始化时的<code>vmap</code>与 <code>thread_info</code>的分离</li>
+<li><code>double_fault</code> 中 <code>Guard page</code> 的检测</li>
+<li>一些指针的检查</li>
+<li>一些配合性的初始化</li>
+</ul>
+<p>参考：<a href="https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/KSTACKOVERFLOW.md" target="_blank" rel="noopener">https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/KSTACKOVERFLOW.md</a></p>
+<p>以下是另外两个相关的防御机制</p>
+<h4 id="VMAP-STACK"><a href="#VMAP-STACK" class="headerlink" title="VMAP_STACK"></a>VMAP_STACK</h4><p>这个机制是采用vmalloc申请的内存作为内核栈，这样可以利用vmalloc自带的<code>guard page</code>增强栈溢出检测能力，同时这些申请的内存空间在物理上可能是不连续的，能够减少内存的碎片化。</p>
+<p>参考：<a href="https://blog.csdn.net/rikeyone/article/details/105971720" target="_blank" rel="noopener">https://blog.csdn.net/rikeyone/article/details/105971720</a></p>
+<h4 id="THREAD-INFO-IN-TASK"><a href="#THREAD-INFO-IN-TASK" class="headerlink" title="THREAD_INFO_IN_TASK"></a>THREAD_INFO_IN_TASK</h4><p>这个选项开启的时候会把<code>thread_info</code>放入到<code>task_struct</code>中，在原来的结构中<code>task_struct</code>和<code>thread_info</code>是分开的，这个<code>thread_info</code>位于线程栈的最低地址处，但又比<code>task_struct</code>地址高，所以如果发生溢出会使得<code>thread_info</code>的数据结构被破坏，不会被判断为栈溢出。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">union</span> thread_union &#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> CONFIG_ARCH_TASK_STRUCT_ON_STACK</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> <span class="title">task</span>;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> CONFIG_THREAD_INFO_IN_TASK</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">thread_info</span> <span class="title">thread_info</span>;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="built_in">stack</span>[THREAD_SIZE/<span class="keyword">sizeof</span>(<span class="keyword">long</span>)];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>参考：<a href="https://zhuanlan.zhihu.com/p/84591715" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/84591715</a></p>
+<h3 id="HARDENED-USERCOPY"><a href="#HARDENED-USERCOPY" class="headerlink" title="HARDENED_USERCOPY"></a>HARDENED_USERCOPY</h3><p>这个安全机制是从<code>PAX_USERCOPY</code>中借鉴学习的。Linux内核的设计中，内核地址空间和用户地址空间是隔离的，不能直接透过地址去访问内存。因此，当需要发生用户空间和内核空间进行数据交换时，需要将数据拷贝一份到另一个的内存空间中。在内核中 copy_from_user 和 copy_to_user 这组函数承担了数据在内核空间和用户空间之间拷贝的任务。这就带来一个问题，如果从用户空间拷贝到内核空间的数据长度超过内核的缓冲区长度，就会产生溢出破坏内核的空间数据导致有漏洞利用的可能。<code>HARDENED_USERCOPY</code>在这组函数中实现了对缓冲区长度的检查，当长度检查发现有溢出的可能时，就不会执行数据的复制，防止非法拷贝覆盖内存，破坏栈帧或堆。</p>
+<p>参考：<a href="https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/PAX_USERCOPY.md" target="_blank" rel="noopener">https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/PAX_USERCOPY.md</a></p>
+<h3 id="STACKLEAK"><a href="#STACKLEAK" class="headerlink" title="STACKLEAK"></a>STACKLEAK</h3><p>这个机制的出现时为了缓解内核栈的溢出和泄露类型的漏洞。主要作用：</p>
+<ul>
+<li>减少内核栈信息泄露漏洞能泄露的信息</li>
+<li>阻止一些未初始化栈变量攻击</li>
+<li>检测进程内核栈的溢出</li>
+</ul>
+<p>整体的实现方法借鉴了<code>PAX_MEMORY_STACKLEAK</code>，一个是实现了再进出内核空间时对进程内核栈的数据进行擦除，这样就算有泄露信息的漏洞也只能得到无效数据；另外一个用于检测栈溢出的功能可以与<code>VMAP_STACK</code>和<code>THREAD_INFO_IN_TASK</code>搭配。</p>
+<p>参考：<a href="https://a13xp0p0v.github.io/2018/11/04/stackleak.html、https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/MEMORY_LEAK.md" target="_blank" rel="noopener">https://a13xp0p0v.github.io/2018/11/04/stackleak.html、https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/MEMORY_LEAK.md</a></p>
+<h3 id="slub-debug"><a href="#slub-debug" class="headerlink" title="slub_debug"></a>slub_debug</h3><img src="/2021/04/28/linux-kernel-security-summary/2.png">
+<h4 id="Z（Red-Zone）"><a href="#Z（Red-Zone）" class="headerlink" title="Z（Red Zone）"></a>Z（Red Zone）</h4><p>Red zone出现在内存分配对象的后面，以及后一个对象的前面，用于检测越界访问的问题，在这里面会填充<code>magic num</code>，之后检测Red zone区域数据就能够判断是否发生溢出。</p>
+<h4 id="F（free）"><a href="#F（free）" class="headerlink" title="F（free）"></a>F（free）</h4><p>激活完整性检查功能，在特定的环节比如free的时候增加各种条件判断，验证数据是否完好。可以用来检测多次free的情况。</p>
+<h4 id="P（Posion）"><a href="#P（Posion）" class="headerlink" title="P（Posion）"></a>P（Posion）</h4><p>当对象被新分配的时候回被填充特殊的<code>magic num 0x5a</code>，这时出现对象使用就会触发未初始化使用的错误，而在对象释放之后会被填充<code>0x6b</code>，这时如果对象被使用就会触发<code>use after free</code>的漏洞检测。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> POISON_INUSE         0x5a    <span class="comment">/* for use-uninitialised poisoning */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> POISON_FREE          0x6b    <span class="comment">/* for use-after-free poisoning */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> POISON_END           0xa5    <span class="comment">/* end-byte of poisoning */</span></span></span><br></pre></td></tr></table></figure>
+<p>参考：<a href="http://www.wowotech.net/memory_management/427.html" target="_blank" rel="noopener">http://www.wowotech.net/memory_management/427.html</a></p>
+<h3 id="FORTIFY-SOURCE"><a href="#FORTIFY-SOURCE" class="headerlink" title="FORTIFY_SOURCE"></a>FORTIFY_SOURCE</h3><p>检查内存拷贝类函数的目的缓冲区是否存在溢出。检测的函数包括：<code>memcpy</code>, <code>mempcpy</code>, <code>memmove</code>, <code>memset</code>, <code>strcpy</code>,<code>stpcpy</code>, <code>strncpy</code>, <code>strcat</code>, <code>strncat</code>,<code>sprintf</code>,<code>vsprintf</code>,<code>snprintf</code>,<code>vsnprintf</code>,<code>gets</code>。</p>
+<p>参考：<a href="https://access.redhat.com/blogs/766093/posts/1976213" target="_blank" rel="noopener">https://access.redhat.com/blogs/766093/posts/1976213</a></p>
+<h3 id="UBSAN-BOUNDS"><a href="#UBSAN-BOUNDS" class="headerlink" title="UBSAN_BOUNDS"></a>UBSAN_BOUNDS</h3><p>这是一个ubsan的配置选项，用于执行数组指针越界的检查。选项开启之后能够检测出在编译期间已知数组长度的越界访问漏洞，但这个选项也有较大的局限性，它不能保护因为内存拷贝类函数造成的数组溢出。这个缺点可以用<code>FORTIFY_SOURCE</code>来解决。</p>
+<p>参考：<a href="https://github.com/torvalds/linux/blob/master/lib/Kconfig.ubsan" target="_blank" rel="noopener">https://github.com/torvalds/linux/blob/master/lib/Kconfig.ubsan</a></p>
+<h3 id="SLAB-FREELIST-HARDENED"><a href="#SLAB-FREELIST-HARDENED" class="headerlink" title="SLAB_FREELIST_HARDENED"></a>SLAB_FREELIST_HARDENED</h3><p>加固slab freelist的元数据的防御，许多内核堆的攻击都尝试针对slab的缓存元数据和其他基础结构，这个选项能以较小的代价加固内核slab分配器，使得通用的freelist利用方法更加难以使用。具体的做法是修改了保存在每个释放的空间的数据, 也就是freelist那个链表不再是直接取数据就能用的, 需要进行逆运算才能得到下一个空间的地址，运算过程在freelist_ptr函数中。</p>
+<p>参考：<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2482ddec，https://hardenedlinux.github.io/system-security/2017/12/02/linux_kernel_4.14%E7%9A%84SLAB_FREELIST_HARDENED%E7%9A%84%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90.html" target="_blank" rel="noopener">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2482ddec，https://hardenedlinux.github.io/system-security/2017/12/02/linux_kernel_4.14%E7%9A%84SLAB_FREELIST_HARDENED%E7%9A%84%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90.html</a></p>
+<h3 id="PAGE-POISONING"><a href="#PAGE-POISONING" class="headerlink" title="PAGE_POISONING"></a>PAGE_POISONING</h3><p>和<code>PAX_MEMORY_SANITIZE</code>类似的功能，在释放的页上做内存数据擦除工作。在<code>free_pages()</code>之后填入特殊的数据，在分配页之前会验证这个数据，以达到防御<code>use after free</code>的效果，而填充的数据能减少信息泄露。这个选项对内核的执行效率会有一定的影响。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/PAGE_POISONING.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/PAGE_POISONING.html</a></p>
+<h3 id="PAX-MEMORY-SANITIZE"><a href="#PAX-MEMORY-SANITIZE" class="headerlink" title="PAX_MEMORY_SANITIZE"></a>PAX_MEMORY_SANITIZE</h3><p>这个是一个用于将已被释放的内存，进行全面的擦除的特性。实现思路很简单但效果很好，能够有效防御<code>use after free</code>的攻击和减少部分信息泄露问题。整个擦除的过程是放在<code>slab</code>对象释放时进行，通过检测一开始设置好的<code>SLAB_</code>的标志位来确定是否对内存执行擦除。</p>
+<p>参考：<a href="https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/MEMORY_LEAK.md#pax_memory_sanitize" target="_blank" rel="noopener">https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/MEMORY_LEAK.md#pax_memory_sanitize</a></p>
+<h3 id="init-on-free-init-on-alloc"><a href="#init-on-free-init-on-alloc" class="headerlink" title="init_on_free/init_on_alloc"></a>init_on_free/init_on_alloc</h3><p>这两个选项的目标是阻止信息泄露和依赖于未初始化值的控制流漏洞。开启两个选项之一能保证页分配器返回的内存和SL[A|U]B是会被初始化为0。SLOB分配器现在不支持这两个选项，因为它的kmem仿真缓存让<code>SLAB_TYPESAFE_BY_RCU</code>缓存的处理变得复杂。开启<code>init_on_free</code>也能保证页和堆对象在它们释放之后能立即初始化，因此无法使用悬挂指针访问原始数据。</p>
+<p>参考：<a href="https://lwn.net/Articles/791380/" target="_blank" rel="noopener">https://lwn.net/Articles/791380/</a></p>
+<h3 id="X86-X86-INTEL-UMIP"><a href="#X86-X86-INTEL-UMIP" class="headerlink" title="X86: X86_INTEL_UMIP"></a>X86: X86_INTEL_UMIP</h3><p>用于intel的用户模式指令防护（User Mode Instruction Prevention，UMIP），UMIP是一个intel新CPU推出的安全特性。如果开启，在用户模式下执行了<code>SGDT</code>，<code>SLDT</code>，<code>SIDT</code>，<code>SMSW</code>，<code>STR</code>指令就会出现报错，这些指令会泄露硬件状态信息。这些指令很少会有程序使用，大多只会出现在软件仿真上。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/X86_INTEL_UMIP.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/X86_INTEL_UMIP.html</a></p>
+<h3 id="kptr-restrict"><a href="#kptr-restrict" class="headerlink" title="kptr_restrict"></a>kptr_restrict</h3><p>内核提供的控制变量<code>/proc/sys/kernel/kptr_restrict</code>可以用来控制内核的一些信息输出。默认情况值为0，root和普通用户都能读取内核地址，值为1时只有root用户有权限获取，值为2时所有用户都没有权限获得。</p>
+<p>参考：<a href="https://blog.csdn.net/gatieme/article/details/78311841" target="_blank" rel="noopener">https://blog.csdn.net/gatieme/article/details/78311841</a></p>
+<h3 id="GRKERNSEC-HIDESYM"><a href="#GRKERNSEC-HIDESYM" class="headerlink" title="GRKERNSEC_HIDESYM"></a>GRKERNSEC_HIDESYM</h3><p>隐藏内核符号的配置选项，如果开启选项，获取加载模块的信息和通过系统调用显示所有内核符号的操作都会被<code>CAP_SYS_MODULE</code>限制。而为了兼容性，<code>/proc/kallsyms</code>能限制root用户。</p>
+<p>参考：<a href="https://xorl.wordpress.com/2010/11/20/grkernsec_hidesym-hide-kernel-symbols/" target="_blank" rel="noopener">https://xorl.wordpress.com/2010/11/20/grkernsec_hidesym-hide-kernel-symbols/</a></p>
+<h3 id="SECURITY-DMESG-RESTRICT"><a href="#SECURITY-DMESG-RESTRICT" class="headerlink" title="SECURITY_DMESG_RESTRICT"></a>SECURITY_DMESG_RESTRICT</h3><p>用来限制未授权访问内核syslog，内核syslog包含着对漏洞利用非常有效的调试信息，例如：内核堆地址。这个方案比清除数百上千的调试信息更好，而且不会破坏这些重要的调试信息。开启选项之后只有<code>CAP_SYS_ADMIN</code>能够读取内核syslog。类似的还有<code>GRKERNSEC_DMESG</code>。</p>
+<p>参考：<a href="https://lwn.net/Articles/414813/" target="_blank" rel="noopener">https://lwn.net/Articles/414813/</a></p>
+<h3 id="INIT-STACK-ALL-ZERO"><a href="#INIT-STACK-ALL-ZERO" class="headerlink" title="INIT_STACK_ALL_ZERO"></a>INIT_STACK_ALL_ZERO</h3><p>这个选项开启之后会把新分配的栈上的所有数据都初始化为0，这样就消除了所有的未初始化栈变量的漏洞利用以及信息泄露。初始化为0能让字符串，指针，索引等更安全。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/INIT_STACK_ALL_ZERO.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/INIT_STACK_ALL_ZERO.html</a></p>
+<h3 id="STRUCTLEAK-BYREF-ALL"><a href="#STRUCTLEAK-BYREF-ALL" class="headerlink" title="STRUCTLEAK_BYREF_ALL"></a>STRUCTLEAK_BYREF_ALL</h3><p>和<code>PAX_MEMORY_STRUCTLEAK</code>类似，只初始化那些在栈上被传输引用的变量，而剩下的没被传输出去的变量不做初始化操作。</p>
+<p>参考：<a href="https://www.openwall.com/lists/kernel-hardening/2019/03/11/2" target="_blank" rel="noopener">https://www.openwall.com/lists/kernel-hardening/2019/03/11/2</a></p>
+<h3 id="PAX-MEMORY-STRUCTLEAK"><a href="#PAX-MEMORY-STRUCTLEAK" class="headerlink" title="PAX_MEMORY_STRUCTLEAK"></a>PAX_MEMORY_STRUCTLEAK</h3><p>开启选项后，内核会对之后要复制到用户态的局部变量初始化为0，这样做同样是防止未初始化的变量泄露信息。它的代价相比<code>PAX_MEMORY_STACKLEAK</code>更小，而覆盖的范围也相对更小。</p>
+<p>参考：<a href="https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options" target="_blank" rel="noopener">https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options</a></p>
+<h3 id="bpf-jit-harden"><a href="#bpf-jit-harden" class="headerlink" title="bpf_jit_harden"></a>bpf_jit_harden</h3><p>开启选项之后能加固BPF JIT编译器，能够支持eBPF JIT后端。启用后会牺牲部分性能，但能减少JIT喷射攻击。一共有三个选项，0表示关闭，1表示针对非特权用户会做加固，2表示针对所有用户都会做加固。这个加固的实现方法是把JIT生成的立即数全部做拆分，生成一个随机数与原来的立即数做异或得到一个值，随后在使用之前再通过异或来还原原始立即数。这样攻击者想利用的立即数就会拆解，导致JIT喷射失败。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov    $0xa8909090,%eax</span><br><span class="line">=&gt;</span><br><span class="line">mov    $0xe1192563,%r10d</span><br><span class="line">xor    $0x4989b5f3,%r10d</span><br><span class="line">mov    %r10d,%eax</span><br></pre></td></tr></table></figure>
+<p>参考：<a href="https://www.kernel.org/doc/Documentation/sysctl/net.txt，https://arthurchiao.art/blog/cilium-bpf-xdp-reference-guide-zh/" target="_blank" rel="noopener">https://www.kernel.org/doc/Documentation/sysctl/net.txt，https://arthurchiao.art/blog/cilium-bpf-xdp-reference-guide-zh/</a></p>
+<h3 id="GRKERNSEC-JIT-HARDEN"><a href="#GRKERNSEC-JIT-HARDEN" class="headerlink" title="GRKERNSEC_JIT_HARDEN"></a>GRKERNSEC_JIT_HARDEN</h3><p>如果开启选项，则将对内核的BPF JIT引擎生成的代码做加固，用来防止JIT喷射攻击。JIT喷射会将对攻击者有用的指令放入JIT生成的32位立即数字段中，通过跳转进生成指令的中间部分来执行攻击者构造的指令序列。而这个选项可以把JIT产生的32位立即数做拆分以此来防御攻击。</p>
+<p>参考：<a href="https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options" target="_blank" rel="noopener">https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options</a></p>
+<h3 id="MODULE-SIG"><a href="#MODULE-SIG" class="headerlink" title="MODULE_SIG*"></a>MODULE_SIG*</h3><p>一个检查模块签名的选项，内核提供了<code>SHA1</code>，<code>SHA224</code>，<code>SHA256</code>，<code>SHA384</code>，<code>SHA512</code>五种hash算法。需要注意的是在签名完成之后不要做去除符号表等修改操作。</p>
+<p>参考：<a href="https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/module-signing.rst" target="_blank" rel="noopener">https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/module-signing.rst</a></p>
+<h3 id="SECURITY-LOADPIN"><a href="#SECURITY-LOADPIN" class="headerlink" title="SECURITY_LOADPIN"></a>SECURITY_LOADPIN</h3><p>LoadPin是一个用来确保所有内核加载的文件都是没有被篡改的Linux安全模块，整体的实现方法是利用新的内核文件加载机制去中断所有尝试加载进内核的文件，包括加载内核模块，读取固件，加载镜像等等，然后会把需要加载的文件与启动之后第一次加载使用的文件作比较，如果没有匹配，那么这次的加载操作会被阻止。</p>
+<p>参考：<a href="https://lwn.net/Articles/682302/" target="_blank" rel="noopener">https://lwn.net/Articles/682302/</a></p>
+<h3 id="LDISC-AUTOLOAD-is-not-set"><a href="#LDISC-AUTOLOAD-is-not-set" class="headerlink" title="LDISC_AUTOLOAD is not set"></a>LDISC_AUTOLOAD is not set</h3><p>这个是一个控制自动加载TTY行规程的选项，在历史上当有用户要使用<code>TIOCSETD ioctl</code>或者其他方法加载内核模块时，内核总是会自动加载内核模块中的任何行规程。如果你之后不会使用一些古老的行规程，最好是把自动加载选项关闭或者设置<code>CAP_SYS_MODULE</code>权限来限制一般用户。在系统运行时还可以设置<code>dev.tty.ldisc_autoload</code>的值来改变选项。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/LDISC_AUTOLOAD.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/LDISC_AUTOLOAD.html</a></p>
+<h3 id="GRKERNSEC-MODHARDEN"><a href="#GRKERNSEC-MODHARDEN" class="headerlink" title="GRKERNSEC_MODHARDEN"></a>GRKERNSEC_MODHARDEN</h3><p>这是一个加固模块自动加载的选项，开启之后会限制非特权用户使用模块自动加载功能，主要目的是保护内核不要自动加载一些容易受攻击的模块。</p>
+<p>参考：<a href="https://xorl.wordpress.com/2010/11/08/grsecuritys-grkernsec_modharden-protection-and-the-rds-local-root-exploit/" target="_blank" rel="noopener">https://xorl.wordpress.com/2010/11/08/grsecuritys-grkernsec_modharden-protection-and-the-rds-local-root-exploit/</a></p>
+<h3 id="DEBUG-WX"><a href="#DEBUG-WX" class="headerlink" title="DEBUG_WX"></a>DEBUG_WX</h3><p>在启动的时候对<code>W+X</code>执行权限的映射区域产生警告，这个选项的开启能够有效的发现内核在应用<code>NX</code>之后遗留的<code>W+X</code>映射区域，而这些映射都是高风险的利用区域。需要注意的是这个选项只会在内核启动时检查一次，不会在启动之后再次检查。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/DEBUG_WX.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/DEBUG_WX.html</a></p>
+<h3 id="ARM-RODATA-FULL-DEFAULT-ENABLED"><a href="#ARM-RODATA-FULL-DEFAULT-ENABLED" class="headerlink" title="ARM: RODATA_FULL_DEFAULT_ENABLED"></a>ARM: RODATA_FULL_DEFAULT_ENABLED</h3><p>这是ARM版Linux内核中的一个选项，开启之后会把只读的属性应用到虚拟内存的其他线性别名上，这样可以防止代码段或一些只读数据通过其他的内存映射页被修改。这个额外的加固能够在运行时传输<code>rodata=off</code>关闭选项。如果想要在选项开启时对只读区域做修改，可以临时设置一个新的可写内存映射，做出修改之后再取消映射完成更新。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/RODATA_FULL_DEFAULT_ENABLED.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/RODATA_FULL_DEFAULT_ENABLED.html</a></p>
+<h3 id="STRICT-KERNEL-MODULE-RWX"><a href="#STRICT-KERNEL-MODULE-RWX" class="headerlink" title="STRICT_{KERNEL,MODULE}_RWX"></a>STRICT_{KERNEL,MODULE}_RWX</h3><p>一共两个选项，一个是<code>STRICT_KERNEL_RWX</code>，开启选项之后，内核的<code>text</code>段和<code>rodata</code>段内存将会变成只读，并且非代码段的内存将会变成不可执行。这个保护防御了堆栈执行和代码段被修改的攻击。另外一个<code>STRICT_MODULE_RWX</code>，主要目的是设置加载的内核模块数据段不可执行和代码段只读，基本情况和<code>STRICT_KERNEL_RWX</code>一样。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/STRICT_KERNEL_RWX.html，https://cateee.net/lkddb/web-lkddb/STRICT_MODULE_RWX.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/STRICT_KERNEL_RWX.html，https://cateee.net/lkddb/web-lkddb/STRICT_MODULE_RWX.html</a></p>
+<h3 id="PAX-KERNEXEC"><a href="#PAX-KERNEXEC" class="headerlink" title="PAX_KERNEXEC"></a>PAX_KERNEXEC</h3><p><code>PAX_KERNEXEC</code> 是 PaX 针对内核的 No-execute 实现，可以说是内核空间版的 pageexec/mprotect。由于 PAGEEXEC 的实现已经完成了一部分工作（实际上内核的内存访问同样也是透过 page-fault 去处理），<code>KERNEXEC</code>选项的代码实现主要包括这几方面：</p>
+<ul>
+<li>对内核空间的内存属性进行设置（RO &amp; NX）</li>
+<li>内核态的内存访问的控制</li>
+<li>可加载内核模块（W^X）和 bios/efi 内存属性的控制</li>
+<li>透过 gcc-plugin 的配合实现</li>
+</ul>
+<p>参考：<a href="https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/PAX_KERNEXEC.md" target="_blank" rel="noopener">https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/PAX_KERNEXEC.md</a></p>
+<h3 id="STACKPROTECTOR"><a href="#STACKPROTECTOR" class="headerlink" title="STACKPROTECTOR"></a>STACKPROTECTOR</h3><p>检查栈缓冲区溢出的保护，这个选项开启之后会产生大家都很熟悉的<code>canary</code>，在函数开头部分一个值会被放进栈的返回地址之前。当发成栈溢出覆盖到<code>canary</code>，在函数返回时会检查先前放入的值，如果与前面生成的值不匹配则会终止程序。<code>canary</code>产生的条件是栈空间大于等于8字节，需要gcc 4.2版本以上。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/STACKPROTECTOR.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/STACKPROTECTOR.html</a></p>
+<h3 id="ARM-SHADOW-CALL-STACK"><a href="#ARM-SHADOW-CALL-STACK" class="headerlink" title="ARM: SHADOW_CALL_STACK"></a>ARM: SHADOW_CALL_STACK</h3><p>这个选项会开启Clang的影子调用栈，它会用一个影子栈来保存函数的返回地址，这样即使攻击者修改了返回地址也无法劫持控制流，但它只能用在Clang作为编译语言的情况下。然而当攻击者知道影子栈的位置，并拥有写入的权限，那么这个防护将会失效。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/SHADOW_CALL_STACK.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/SHADOW_CALL_STACK.html</a></p>
+<h3 id="Control-Flow-Integrity"><a href="#Control-Flow-Integrity" class="headerlink" title="Control Flow Integrity"></a>Control Flow Integrity</h3><p>为了缓解各种控制流劫持攻击而提出的一种防御手段，在最原始的设计中是通过分析程序的控制流图，获取间接转移指令（包括间接跳转、间接调用、和函数返回指令）目标的白名单，并在运行过程中，核对间接转移指令的目标是否在白名单中。但这种检查针对系统中的每一个跳转和调用就会造成极大的系统开销，而粗粒度的检查又会导致安全性的下降。所以现在的安全研究员在探索新的CFI技术，使其在可接受的开销下能获得高安全性。</p>
+<h4 id="ARM-ARM64-PTR-AUTH-ARM64-BTI-KERNEL"><a href="#ARM-ARM64-PTR-AUTH-ARM64-BTI-KERNEL" class="headerlink" title="ARM: ARM64_PTR_AUTH + ARM64_BTI_KERNEL"></a>ARM: ARM64_PTR_AUTH + ARM64_BTI_KERNEL</h4><p><code>ARM64_PTR_AUTH</code>是开启指针认证支持的选项，开启之后会提供签名和认证指针的指令并产生相关的密钥，这些保护能阻止ROP类修改地址的攻击。需要ARMv8.3才能支持的新特性。</p>
+<p><code>ARM64_BTI_KERNEL</code>开启选项会把分支目标识别（BTI）应用到内核中，能够对间接跳转的目标进行限制，能阻止JOP类的跳转攻击。与指针认证结合使用能很大程度上减少控制流劫持攻击。需要ARMv8.5才能支持的新特性。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/ARM64_PTR_AUTH.html，https://cateee.net/lkddb/web-lkddb/ARM64_BTI_KERNEL.html，https://www.secrss.com/articles/9812" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/ARM64_PTR_AUTH.html，https://cateee.net/lkddb/web-lkddb/ARM64_BTI_KERNEL.html，https://www.secrss.com/articles/9812</a></p>
+<h4 id="X86-Intel-CET"><a href="#X86-Intel-CET" class="headerlink" title="X86: Intel CET"></a>X86: Intel CET</h4><p>Intel开发的新安全机制控制流执行技术CET（Control-flow Enforcement Technology），主要提供了两个功能，间接分支跟踪和影子栈。间接分支跟踪能提供对间接分支的保护，用来防御<code>JOP/COP</code>类的攻击方法。影子栈可以提供对返回地址的保护，用来防御<code>ROP</code>类的攻击方法，影子栈的实现方式大多类似，这里同样是保存返回地址然后在函数返回时对地址做检查。</p>
+<p>参考：<a href="https://newsroom.intel.com/editorials/intel-cet-answers-call-protect-common-malware-threats/#gs.yeecux" target="_blank" rel="noopener">https://newsroom.intel.com/editorials/intel-cet-answers-call-protect-common-malware-threats/#gs.yeecux</a></p>
+<h4 id="PAX-RAP"><a href="#PAX-RAP" class="headerlink" title="PAX_RAP"></a>PAX_RAP</h4><p>PaX/Grsecurity团队在2015年提出的针对Linux内核的新安全机制。其中的防御思路也分成两个部分，其一，针对返回地址的保护，它将返回地址保存在<code>rbx</code>中并与<code>r12</code>异或，在函数返回之前再异或回来并与返回地址作比较。例子如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">push %rbx</span><br><span class="line">mov 8(%rsp),%rbx</span><br><span class="line">xor %r12,%rbx</span><br><span class="line">...</span><br><span class="line">xor %r12,%rbx</span><br><span class="line">cmp %rbx,8(%rsp)</span><br><span class="line">jnz .error</span><br><span class="line">pop %rbx</span><br><span class="line">retn</span><br><span class="line">.error:</span><br><span class="line">ud2</span><br></pre></td></tr></table></figure>
+<p>其二，针对非直接控制跳转的保护，它这里会在调用之前检查调用地址是否在白名单中，在调用返回之前也会进行检查。</p>
+<p>调用执行之前：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cmpq $0x11223344,-8(%rax)</span><br><span class="line">jne .error</span><br><span class="line">call *%rax</span><br><span class="line">...</span><br><span class="line">cmpq $0x55667788,-16(%rax)</span><br><span class="line">jne .error</span><br><span class="line">call *%rax</span><br><span class="line">...</span><br><span class="line">dq 0x55667788,0x11223344</span><br><span class="line">func:</span><br></pre></td></tr></table></figure>
+<p>调用返回之前：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">call ...</span><br><span class="line">jmp 1f</span><br><span class="line">dq 0xffffffffaabbccdd</span><br><span class="line">1:</span><br><span class="line">...</span><br><span class="line">mov %(rsp),%rcx</span><br><span class="line">cmpq $0xaabbccdd,2(%rcx)</span><br><span class="line">jne .error</span><br><span class="line">retn</span><br></pre></td></tr></table></figure>
+<p>参考：<a href="https://pax.grsecurity.net/docs/PaXTeam-H2HC15-RAP-RIP-ROP.pdf" target="_blank" rel="noopener">https://pax.grsecurity.net/docs/PaXTeam-H2HC15-RAP-RIP-ROP.pdf</a></p>
+<h3 id="SMEP-PXN"><a href="#SMEP-PXN" class="headerlink" title="SMEP/PXN"></a>SMEP/PXN</h3><p>在x86架构下为SMEP（Supervisor Mode Execution Prevention，管理模式执行保护），在ARM架构下为PXN（Privileged eXecute Never，永不执行权限）。</p>
+<p>SMEP是禁止内核执行用户空间的代码，如果在内核中执行了用户空间的代码就会触发页错误。开启条件是<code>CR4</code>寄存器的第21位为1，如果被设置为0则保护关闭。（这也给突破保护留下了机会，如果能通过漏洞把<code>CR4</code>寄存器的第20位设置为0即可绕过）</p>
+<p>PXN 是一个防止用户空间代码被内核空间执行的安全特性（和SMEP一样）。在 ARMv7 的硬件支持下，通过 PXN 比特位的设定，决定该页的内存是否可被内核执行，可有效防止 ret2usr 攻击。需要ARMv7的硬件支持。</p>
+<p>参考：<a href="https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/PXN.md，https://blog.csdn.net/qq_40827990/article/details/98937960" target="_blank" rel="noopener">https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/PXN.md，https://blog.csdn.net/qq_40827990/article/details/98937960</a></p>
+<h3 id="SMAP-PAN"><a href="#SMAP-PAN" class="headerlink" title="SMAP/PAN"></a>SMAP/PAN</h3><p>在x86架构下为SMAP（Supervisor Mode Access Prevention，管理模式访问保护），在ARM架构下为PAN（Privileged Access Never，永不访问权限）。</p>
+<p>SMAP是禁止内核访问用户空间的数据，如果在内核中访问了用户空间的代码就会出现错误。开启条件是<code>CR4</code>寄存器的第22位为1，如果被设置为0则保护关闭。绕过的方式同样可以是利用漏洞修改<code>RC4</code>寄存器的值。</p>
+<p>PAN是一个防止用户空间数据被内核空间访问的安全特性（和SMAP一样）。需要ARMv8.1的硬件支持，下面有两个PAN相关的内核配置选项。</p>
+<p>参考：<a href="https://mp.weixin.qq.com/s/ErugGvrJxhrf0qoxzWgQAQ" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/ErugGvrJxhrf0qoxzWgQAQ</a></p>
+<h4 id="ARM-CPU-SW-DOMAIN-PAN"><a href="#ARM-CPU-SW-DOMAIN-PAN" class="headerlink" title="ARM: CPU_SW_DOMAIN_PAN"></a>ARM: CPU_SW_DOMAIN_PAN</h4><p>选项开启之后，启用CPU的PAN保护，确保内核无法访问用户空间数据来提高安全性。实现思路是用不同的内存映射来做约束，但遇到内核确实需要访问用户空间数据的情况时，会临时关闭保护。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/CPU_SW_DOMAIN_PAN.html，https://patchwork.kernel.org/project/linux-arm-kernel/patch/E1ZSmQG-0002za-E3@rmk-PC.arm.linux.org.uk/" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/CPU_SW_DOMAIN_PAN.html，https://patchwork.kernel.org/project/linux-arm-kernel/patch/E1ZSmQG-0002za-E3@rmk-PC.arm.linux.org.uk/</a></p>
+<h4 id="ARM-ARM64-SW-TTBR0-PAN"><a href="#ARM-ARM64-SW-TTBR0-PAN" class="headerlink" title="ARM: ARM64_SW_TTBR0_PAN"></a>ARM: ARM64_SW_TTBR0_PAN</h4><p>这个选项是用<code>TTBR0_EL1</code>交换来仿真实现PAN保护。开启选项之后通过把<code>TTBR0_EL1</code>指向保留归零区域和保留的ASID来阻止内核直接访问用户空间数据。当需要访问的时候会临时恢复合法的<code>TTBR0_EL1</code>。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/ARM64_SW_TTBR0_PAN.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/ARM64_SW_TTBR0_PAN.html</a></p>
+<h3 id="PAX-MEMORY-UDEREF"><a href="#PAX-MEMORY-UDEREF" class="headerlink" title="PAX_MEMORY_UDEREF"></a>PAX_MEMORY_UDEREF</h3><p>这个防御机制是针对 Linux 的内核/用户空间做地址分离，再结合<code>KERNEXEC</code>能够防御大量针对内核的漏洞利用，比如<code>ret2usr/ret2dir</code>这类将特权级执行流引向用户空间的攻击方式。在 32-bit 的 x86 下，分离的特性很大部分是透过分段机制的寄存器去实现的，而 amd64 以后由于段寄存器功能的削弱，PaX 针对 64-bit 精心设计了<code>KERNEXEC/UDEREF</code>，包括使用 PCID 特性和<code>per-cpu-pgd</code>的实现等。后续UDEREF的改进(2017版)主要是利用硬件特性SMAP提升了性能的同时保证安全性。</p>
+<p>UDEREF的实现主要包括几个方面：</p>
+<ul>
+<li><code>per-cpu-pgd</code> 的实现，将内核/用户空间的页目录彻底分离，彼此无法跨界访问</li>
+<li>PCID 特性的使用，跨界访问的时候产生硬件检查</li>
+<li>内核/用户空间切换时，将用户空间映射为不可执行以及一些刷新 TLB 配合实现</li>
+</ul>
+<p>由于 UDEREF 经过漫长的演变，而且不同的硬件设施会产生不同的防御效果和安全性能，因此 PaX 实现了如下几种模式的 UDEREF：</p>
+<ul>
+<li>无硬件 PCID 支持的，维护的页目录数量只有一个，进出内核的时候屏蔽页目录项的相关访问权限</li>
+<li>有硬件 PCID 支持的 WEAKUDEREF，维护两个页目录，并且将用户空间也备份进内核页目录，屏蔽相关访问位，进出内核时切换 CR3</li>
+<li>有硬件 PCID 支持的 STRONGUDEREF，维护两个页目录，不备份用户空间，内核空间的 TLB 常驻不刷新，减少性能损耗</li>
+</ul>
+<p>参考：<a href="https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/PAX_MEMORY_UDEREF.md" target="_blank" rel="noopener">https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/grsec-code-analysis/PAX_MEMORY_UDEREF.md</a></p>
+<h3 id="DEFAULT-MMAP-MIN-ADDR-65536"><a href="#DEFAULT-MMAP-MIN-ADDR-65536" class="headerlink" title="DEFAULT_MMAP_MIN_ADDR=65536"></a>DEFAULT_MMAP_MIN_ADDR=65536</h3><p><code>MMAP_MIN_ADDR</code>是内核中的一个配置选项，它能指定mmap产生的最小虚拟地址。如果这个值设置过于小会增加内核空指针问题导致的安全风险，小地址空间也可能配合其他漏洞做进一步的利用。阻止程序映射较低虚拟内存地址也有不方便的地方，有少部分应用会依赖映射低地址，比如<code>dosemu</code>，<code>qemu</code>，<code>wine</code>。</p>
+<p>参考：<a href="https://wiki.debian.org/mmap_min_addr" target="_blank" rel="noopener">https://wiki.debian.org/mmap_min_addr</a></p>
+<h3 id="X86-pti-on-PAGE-TABLE-ISOLATION"><a href="#X86-pti-on-PAGE-TABLE-ISOLATION" class="headerlink" title="X86: pti=on (PAGE_TABLE_ISOLATION)"></a>X86: pti=on (PAGE_TABLE_ISOLATION)</h3><p>内核页表隔离（KPTI）的前身为KAISER，它是在其基础上增加实现了完全分离用户空间与内核空间的页表来解决页表泄露的问题。实现细节上，在创建全局页目录（PGD）的时候会创建两份，一份在内核运行时使用，另外一份在用户空间运行时使用，这样在切换内核空间和用户空间时PGD也会切换，这两个PGD有着相同的结构，但属于用户空间的PGD中的内核空间大部分会缺失。</p>
+<p>参考：<a href="https://lwn.net/Articles/741878/" target="_blank" rel="noopener">https://lwn.net/Articles/741878/</a></p>
+<h3 id="ARM-kpti-on-UNMAP-KERNEL-AT-EL0"><a href="#ARM-kpti-on-UNMAP-KERNEL-AT-EL0" class="headerlink" title="ARM: kpti=on (UNMAP_KERNEL_AT_EL0)"></a>ARM: kpti=on (UNMAP_KERNEL_AT_EL0)</h3><p>选项开启后当在用户空间运行时会取消内核的映射，这个保护是针对之前爆出的熔断漏洞，它利用CPU的推测行为绕过MMU权限检查，泄露内核数据到用户空间中。在因为系统调用触发中断等等情况时又会把内核暂时映射回来。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/UNMAP_KERNEL_AT_EL0.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/UNMAP_KERNEL_AT_EL0.html</a></p>
+<h3 id="mitigations-auto-nosmt"><a href="#mitigations-auto-nosmt" class="headerlink" title="mitigations=auto,nosmt"></a>mitigations=auto,nosmt</h3><p>选项控制针对CPU的保护措施，<code>auto</code>会开启所有的保护，<code>nosmt</code>会关闭CPU的同步多线程功能。这样每个CPU核的辅助CPU将不会被激活，并且只使用每个CPU核上的主线程。</p>
+<p>参考：<a href="https://unix.stackexchange.com/questions/554908/disable-spectre-and-meltdown-mitigations" target="_blank" rel="noopener">https://unix.stackexchange.com/questions/554908/disable-spectre-and-meltdown-mitigations</a></p>
+<h3 id="X86-MICROCODE"><a href="#X86-MICROCODE" class="headerlink" title="X86: MICROCODE"></a>X86: MICROCODE</h3><p>Intel为了应对幽灵，针对MICROCODE的生成问题打上补丁。在原来的微码ROM下面又增加了一小块SRAM存储，利用它来在ROM上打补丁。补丁的过程需要微码解码器的硬件支持，基本是向量替换的方式。</p>
+<p>参考：<a href="https://zhuanlan.zhihu.com/p/86432216" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/86432216</a></p>
+<h3 id="RESPECTRE"><a href="#RESPECTRE" class="headerlink" title="RESPECTRE"></a>RESPECTRE</h3><p><code>Pax/Grsecurity</code>开发出的防御幽灵的安全机制。它是一个gcc编译器插件，它会理解代码的原始含义并自动的重构，用来消除能基于推测的侧信道信息。实际的效果测试表明只占用内核性能的0.3%。</p>
+<p>参考：<a href="https://grsecurity.net/respectre_announce" target="_blank" rel="noopener">https://grsecurity.net/respectre_announce</a></p>
+<h3 id="Manual-usage-of-nospec-barriers"><a href="#Manual-usage-of-nospec-barriers" class="headerlink" title="Manual usage of nospec barriers"></a>Manual usage of nospec barriers</h3><p>内核提供的通用API确保在分支预测的情况下边界检查是符合预期的。这里主要设计了两个API <code>nospec_ptr(ptr, lo, hi)</code>和<code>nospec_array_ptr(arr, idx, sz)</code>，第一个API会限制ptr在lo和hi的范围内，防止指针越界；第二个API会限制idx只有在<code>[0,sz)</code>的范围中才能获得<code>arr[idx]</code>的数据。</p>
+<p>参考：<a href="https://lwn.net/Articles/743278/" target="_blank" rel="noopener">https://lwn.net/Articles/743278/</a></p>
+<h3 id="X86-spectre-v2-on-RETPOLINE"><a href="#X86-spectre-v2-on-RETPOLINE" class="headerlink" title="X86: spectre_v2=on (RETPOLINE)"></a>X86: spectre_v2=on (RETPOLINE)</h3><p>这是针对幽灵和熔断安全漏洞的v2补丁，引入了<code>retpoline</code>技术通过<code>spectre_v2</code>参数控制。参数有多个配置选项，总结如下：</p>
+<ul>
+<li>on，表示无论硬件如何，都开启</li>
+<li>off，表示物理硬件如何，都关闭</li>
+<li>auto，表示内核根据当前CPU model自动选择mitigation方法。参考的因素包括：<ul>
+<li>cpu model</li>
+<li>是否有可用微码(也就是针对IBRS和IBPB提供的固件)</li>
+<li>内核配置选项CONFIG_RETPOLINE是否配置</li>
+<li>编译内核用的编译器是否提供了新的编译选项：-mindirect-branch=thunk-extern</li>
+</ul>
+</li>
+<li>retpoline/retpoline,generic/retpoline,amd 一共三种<code>RETPOLINE</code>选项，最后对应五种配置</li>
+</ul>
+<p>参考：<a href="http://happyseeker.github.io/kernel/2018/05/31/about-spectre_v2-boot-parameters.html" target="_blank" rel="noopener">http://happyseeker.github.io/kernel/2018/05/31/about-spectre_v2-boot-parameters.html</a></p>
+<h3 id="ARM-HARDEN-BRANCH-PREDICTOR"><a href="#ARM-HARDEN-BRANCH-PREDICTOR" class="headerlink" title="ARM: HARDEN_BRANCH_PREDICTOR"></a>ARM: HARDEN_BRANCH_PREDICTOR</h3><p>这个配置选项是为了阻止分支预测攻击加固分支预测，针对CPU的分支预测攻击是控制分支预测执行攻击者精心构造的分支路径。通过清除内部分支预测的状态并限制某些情况下的预测逻，可以部分缓解这种攻击。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/HARDEN_BRANCH_PREDICTOR.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/HARDEN_BRANCH_PREDICTOR.html</a></p>
+<h3 id="X86-spec-store-bypass-disable-on"><a href="#X86-spec-store-bypass-disable-on" class="headerlink" title="X86: spec_store_bypass_disable=on"></a>X86: spec_store_bypass_disable=on</h3><p>这个配置选项控制是否开启对<code>Speculative Store Bypass</code>的加固以及采用什么方式加固。配置选项如下：</p>
+<ul>
+<li>off，表示不开启任何加固</li>
+<li>on，表示全局关闭CPU的<code>Speculative Store Bypass</code>优化</li>
+<li>prctl，表示使用prctl进行加固</li>
+<li>seccomp，表示使用seccomp进行加固</li>
+<li>auto，表示自动选择加固方式，若系统支持seccomp框架，则默认采用 seccomp 加固方式，否则采用 prctl 加固方式</li>
+</ul>
+<p>幽灵的v4版本开始利用<code>store buffer bypass</code>泄露信息，现代的CPU为了提升性能都会假设<code>store buffer</code>中不存在当前内存地址的更新值，直接开始执行之后的指令，如果之后发现<code>store buffer</code>中确实存在更新的值，就会丢弃之前执行的结果，然而这导致之前执行时已经泄露相关的信息。所以这里推荐的是直接关闭CPU的<code>Speculative Store Bypass</code>优化。</p>
+<p>参考：<a href="https://www.sohu.com/a/357494787_467784" target="_blank" rel="noopener">https://www.sohu.com/a/357494787_467784</a></p>
+<h3 id="ARM-ssbd-force-on"><a href="#ARM-ssbd-force-on" class="headerlink" title="ARM: ssbd=force-on"></a>ARM: ssbd=force-on</h3><p>一个ARM架构针对<code>Speculative Store Bypass</code>的加固配置，控制<code>Speculative Store Bypass Disable</code>的开关，和x86的配置比较相似。配置选项如下：</p>
+<ul>
+<li>force-on，无条件对内核和用户空间开启加固</li>
+<li>force-off，无条件对内核和用户空间关闭加固</li>
+<li>kernel，开启对内核的加固，并且为用户空间提供用来加固的prctl接口，可以选择性的加固需要的地方。</li>
+</ul>
+<p>参考：<a href="https://lkml.org/lkml/2018/5/24/812" target="_blank" rel="noopener">https://lkml.org/lkml/2018/5/24/812</a></p>
+<h3 id="X86-mds-full-nosmt"><a href="#X86-mds-full-nosmt" class="headerlink" title="X86: mds=full,nosmt"></a>X86: mds=full,nosmt</h3><p>MDS（Microarchitectural Data Sampling，微架构的数据采样）攻击是利用处理器的预测执行，通过测信道获取<code>store buffer</code>，<code>fill buffer</code>，<code>load buffer</code>中的数据。通过这个攻击能从用户空间获得内核数据，但是由于攻击无法构造特定的内存地址以获取特定地址处的内存数据，因而只能通过采样的方式获取某一内存地址处对应的数据，攻击者需要收集大量数据才有可能推测出敏感数据。</p>
+<p>这个配置的选项如下：</p>
+<ul>
+<li>off，表示不开启MDS的加固</li>
+<li>full，表示开启CPU buffer clear，但是不关闭SMT</li>
+<li>full+nosmt，表示开启CPU buffer clear，同时会关闭SMT</li>
+</ul>
+<p>而针对MDS攻击的加固主要是从内核态切换到用户态时对<code>store buffer</code>，<code>fill buffer</code>，<code>load buffer</code>等缓存进行清空，另外还需要配合关闭SMT，以防止同一个核心上的辅助CPU重新填充这些缓存。</p>
+<p>参考：<a href="https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/mds.html，http://www.360doc.com/content/21/0207/15/15915859_961159696.shtml" target="_blank" rel="noopener">https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/mds.html，http://www.360doc.com/content/21/0207/15/15915859_961159696.shtml</a></p>
+<h3 id="X86-l1tf-full-force"><a href="#X86-l1tf-full-force" class="headerlink" title="X86: l1tf=full,force"></a>X86: l1tf=full,force</h3><p>L1TF（L1 Terminal Fault，L1终端错误）同样是利用CPU的预测执行来获取物理页的内容。Linux中使用PTE（page table entry）来实现虚拟地址到物理地址之间的转换，PTE其中的PFN（page frame number）字段描述对应<code>page frame</code>的物理地址，P（present）表示当前虚拟地址是否存在对应的物理地址，即是否为该虚拟地址分配了对应的 physical page frame。进程在使用虚拟地址访问内存时，会首先找到该虚拟地址对应的 PTE，若 P 字段为 0，则会发生 page fault；若 P 字段为 1，根据 PFN 字段的值在 L1 data cache 中寻找是否存在缓存。</p>
+<p>Intel 处理器在判断 P 标志位是否为 1 的时候，在判断尚未结束之前会预测执行之后的代码，即根据 PFN 字段的值在 L1 data cache 中寻找是否存在缓存。若缓存命中，那么通过 cache 侧信道攻击，攻击者就可以获取某一物理地址处的内存数据。</p>
+<p>这个配置的选项如下：</p>
+<ul>
+<li>off，表示不开启任何L1TF加固</li>
+<li>flush，表示开启条件性的L1D flush加固，关闭SMT Disabling</li>
+<li>flush+nowarn，同样开启L1D flush加固，关闭SMT Disabling，不会产生waring警告</li>
+<li>flush+nosmt，表示开启条件性的L1D flush加固，开启SMT Disabling加固</li>
+<li>full，表示开启无条件的L1D flush加固，开启SMT Disabling加固</li>
+<li>full+force，与full效果相同，但无法通过sysfs接口在运行时动态开启或关闭L1D flush或者SMT Disabling</li>
+</ul>
+<p>考虑到攻击的条件是对应物理地址在L1数据缓存中命中，那么每次在切换时把缓存清除即可。L1D flush是指在host kernel每次进入guest之前，都清空L1的数据缓存，由于清除缓存会带来性能下降的问题，所以又分成条件性清除和无条件清除，无条件就是应用到每次的<code>VMENTER</code>都会进行清除，条件执行是当<code>VMEXIT</code>和<code>VMENTER</code>之间执行的代码都是不重要的路径时，不会执行清除操作。</p>
+<p>参考：<a href="https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/l1tf.html，http://www.360doc.com/content/21/0207/15/15915859_961159696.shtml" target="_blank" rel="noopener">https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/l1tf.html，http://www.360doc.com/content/21/0207/15/15915859_961159696.shtml</a></p>
+<h3 id="SLAB-FREELIST-RANDOM"><a href="#SLAB-FREELIST-RANDOM" class="headerlink" title="SLAB_FREELIST_RANDOM"></a>SLAB_FREELIST_RANDOM</h3><p>开启配置选项会随机化slab的freelist，随机化用于创建新页的freelist为了减少对内核slab分配器的可预测性。这样能增加堆溢出攻击的难度。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/SLAB_FREELIST_RANDOM.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/SLAB_FREELIST_RANDOM.html</a></p>
+<h3 id="SHUFFLE-PAGE-ALLOCATOR"><a href="#SHUFFLE-PAGE-ALLOCATOR" class="headerlink" title="SHUFFLE_PAGE_ALLOCATOR"></a>SHUFFLE_PAGE_ALLOCATOR</h3><p>开启配置选项会使得页分配器随机分配内存，页分配器的随机化分配过程会提高内存端缓存映射的平均利用率，并且随机化的过程也能让页面分配不可预测，能够搭配<code>SLAB_FREELIST_RANDOM</code>让整个分配过程更加难以预测。尽管随机化能提高缓存利用率，但会对没有缓存的情况产生影响，因此，默认情况下，只会在运行时检测到有内存缓存之后才会启用随机化，也可以使用内核命令行参数<code>page_alloc.shuffle</code>强制开启。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/SHUFFLE_PAGE_ALLOCATOR.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/SHUFFLE_PAGE_ALLOCATOR.html</a></p>
+<h3 id="slab-nomerge"><a href="#slab-nomerge" class="headerlink" title="slab_nomerge"></a>slab_nomerge</h3><p>选项开启之后会禁止相近大小的slab合并，这个能有效防御一部分堆溢出的攻击，如果slab开启合并，被堆溢出篡改的slab块合并之后通常可以扩大攻击范围，让整个攻击危害更大。</p>
+<p>参考：<a href="https://tails.boum.org/contribute/design/kernel_hardening/，https://patchwork.kernel.org/project/kernel-hardening/patch/1497915397-93805-24-git-send-email-keescook@chromium.org/" target="_blank" rel="noopener">https://tails.boum.org/contribute/design/kernel_hardening/，https://patchwork.kernel.org/project/kernel-hardening/patch/1497915397-93805-24-git-send-email-keescook@chromium.org/</a></p>
+<h3 id="unprivileged-userfaultfd-0"><a href="#unprivileged-userfaultfd-0" class="headerlink" title="unprivileged_userfaultfd=0"></a>unprivileged_userfaultfd=0</h3><p>这个标志位是控制低权限用户是否能使用<code>userfaultfd</code>系统调用，标志设置为1时，允许低权限用户使用，设置为0时禁止低权限用户使用，只有高权限用户能够调用。<code>userfaultfd</code>是Linux中处理内存页错误的机制，用户可以自定义函数处理这种事件，在处理函数没有结束之前，缺页发生的位置将会处于暂停状态，这会导致一些条件竞争漏洞的利用。所以最好的办法是只让高权限用户有使用的权限。</p>
+<p>参考：<a href="https://patchwork.kernel.org/project/linux-fsdevel/patch/20190319030722.12441-2-peterx@redhat.com/" target="_blank" rel="noopener">https://patchwork.kernel.org/project/linux-fsdevel/patch/20190319030722.12441-2-peterx@redhat.com/</a></p>
+<h3 id="DEBUG-LIST-SG-CREDENTIALS-NOTIFIERS-VIRTUAL"><a href="#DEBUG-LIST-SG-CREDENTIALS-NOTIFIERS-VIRTUAL" class="headerlink" title="DEBUG_{LIST,SG,CREDENTIALS,NOTIFIERS,VIRTUAL}"></a>DEBUG_{LIST,SG,CREDENTIALS,NOTIFIERS,VIRTUAL}</h3><p>这一组配置选项用于调试内核。</p>
+<ul>
+<li><code>DEBUG_LIST</code>：用于调试链表操作，开启之后会在链表操作中执行额外检查</li>
+<li><code>DEBUG_SG</code>：用于调试SG表的操作，开启之后会检查scatter-gather表，这个能帮助发现那些不能正确初始化SG表的驱动</li>
+<li><code>DEBUG_CREDENTIALS</code>：用于调试凭证管理，开启之后对凭证管理做调试检查，追踪<code>task_struct</code>到给定凭证结构的指针数量没有超过凭证结构的使用上限</li>
+<li><code>DEBUG_NOTIFIERS</code>：用于调试通知调用链，开启之后会检测通知调用链的合法性，这个选项对于内核开发人员非常有用，能确保模块正确的从通知链中注销</li>
+<li><code>DEBUG_VIRTUAL</code>：用于调试虚拟内存转换，开启之后在内存转换时会合法性检查（待确认）</li>
+</ul>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/DEBUG_LIST.html，https://github.com/torvalds/linux/blob/master/lib/Kconfig.debug#L1540" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/DEBUG_LIST.html，https://github.com/torvalds/linux/blob/master/lib/Kconfig.debug#L1540</a></p>
+<h3 id="BUG-ON-DATA-CORRUPTION"><a href="#BUG-ON-DATA-CORRUPTION" class="headerlink" title="BUG_ON_DATA_CORRUPTION"></a>BUG_ON_DATA_CORRUPTION</h3><p>开启配置选项会在检查到数据污染时触发一个bug，如果想要检查内核内存结构中的数据污染可以开启这个选项。能有效防御缓冲区溢出类漏洞。</p>
+<p>参考：<a href="https://cateee.net/lkddb/web-lkddb/BUG_ON_DATA_CORRUPTION.html" target="_blank" rel="noopener">https://cateee.net/lkddb/web-lkddb/BUG_ON_DATA_CORRUPTION.html</a></p>
+<h3 id="STATIC-USERMODEHELPER"><a href="#STATIC-USERMODEHELPER" class="headerlink" title="STATIC_USERMODEHELPER"></a>STATIC_USERMODEHELPER</h3><p>这个选项会强制所有的<code>usermodehelper</code>通过单一的二进制程序调用。在默认情况下，内核会通过<code>usermodehelper</code>的内核接口调用不同的用户空间程序，其中的一些会在内核代码中静态定义或者作为内核配置选项。然而，其中的另外一些是在运行时动态创建的或者在内核启动之后能修改。为了增强安全性，会重定向所有的调用到一个特定的不能改变的二进制程序上，这个程序的第一个参数是需要被执行的用户空间程序。</p>
+<p>参考：<a href="https://patchwork.kernel.org/project/kernel-hardening/patch/20170116165044.GC29693@kroah.com/" target="_blank" rel="noopener">https://patchwork.kernel.org/project/kernel-hardening/patch/20170116165044.GC29693@kroah.com/</a></p>
+<h3 id="LOCKDOWN-LSM"><a href="#LOCKDOWN-LSM" class="headerlink" title="LOCKDOWN_LSM"></a>LOCKDOWN_LSM</h3><p>这个相关的<code>locked_down</code>能让LSM（Linux Security Module）通过hook的方法锁定内核，阻止一些高危操作。比如加载未签名的模块，访问特殊文件<code>/dev/port</code>等等。</p>
+<p>参考：<a href="https://lwn.net/Articles/791863/" target="_blank" rel="noopener">https://lwn.net/Articles/791863/</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>内核防御机制多种多样，大体上较为通用的思路有限制权限的以SMEP，SMAP为代表，有做地址空间分离的，有通过随机化增加预测难度的，有插入特殊数据块或者检查返回地址防御缓冲区溢出的，有擦除混淆数据防止泄露的。最后可以看到Linux内核的很多优秀的防御机制都来自于<code>PaX/Grsecurity</code>，该组织提供的防御思路比各大厂商领先好几年，在学习之余不由得敬佩这20年来他们为内核防御做出的杰出贡献。</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://ayesawyer.github.io/2019/08/16/%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E2%80%94%E2%80%94Android-Linux/" target="_blank" rel="noopener">https://ayesawyer.github.io/2019/08/16/%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E2%80%94%E2%80%94Android-Linux/</a></p>
+<p><a href="https://www.jianshu.com/p/4bc65d4477d3" target="_blank" rel="noopener">https://www.jianshu.com/p/4bc65d4477d3</a></p>
+<p><a href="https://github.com/bsauce/kernel-security-learning" target="_blank" rel="noopener">https://github.com/bsauce/kernel-security-learning</a></p>
+<p><a href="https://github.com/hardenedlinux/grsecurity-101-tutorials" target="_blank" rel="noopener">https://github.com/hardenedlinux/grsecurity-101-tutorials</a></p>
+<p><a href="https://kernsec.org/wiki/index.php/Main_Page" target="_blank" rel="noopener">https://kernsec.org/wiki/index.php/Main_Page</a></p>
+<p><a href="https://hardenedlinux.github.io/announcement/2017/04/29/hardenedlinux-statement2.html" target="_blank" rel="noopener">https://hardenedlinux.github.io/announcement/2017/04/29/hardenedlinux-statement2.html</a></p>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
+            </p><p>原文链接：<a href="https://hurricane618.me/2021/04/28/linux-kernel-security-summary/">https://hurricane618.me/2021/04/28/linux-kernel-security-summary/</a>
+            </p><p>发表日期：<a href="https://hurricane618.me/2021/04/28/linux-kernel-security-summary/">April 28th 2021, 10:32:46 am</a>
+            </p><p>更新日期：<a href="https://hurricane618.me/2021/04/28/linux-kernel-security-summary/">April 28th 2021, 10:32:46 am</a>
+            </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2020/12/17/2020xhlj-iot-pwn/" title="西湖论剑 IoT闯关赛 2020 pwn3 ezarmpwn">
+                    <div class="prevTitle">西湖论剑 IoT闯关赛 2020 pwn3 ezarmpwn</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "https://hurricane618.me/2021/04/28/linux-kernel-security-summary/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "Linux 内核安全机制总结"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://hurricane618.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:hurricane618@hotmail.com" class="iconfont-archer email" title="email"></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/hurricane618" class="iconfont-archer github" target="_blank" title="github"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//twitter.com/hurricane_618" class="iconfont-archer twitter" target="_blank" title="twitter"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title="rss"></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a> record <a href="http://www.beian.miit.gov.cn">蜀ICP备17007526号</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+    
+    <span id="busuanzi_container_site_uv">已经有 <span id="busuanzi_value_site_uv"></span> 个不明生物光临此地</span>
+    
+    </div>
+    
+</footer>
+
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#防御框架"><span class="toc-number">2.</span> <span class="toc-text">防御框架</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#防御技术"><span class="toc-number">3.</span> <span class="toc-text">防御技术</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#RANDSTRUCT"><span class="toc-number">3.1.</span> <span class="toc-text">RANDSTRUCT</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LATENT-ENTROPY"><span class="toc-number">3.2.</span> <span class="toc-text">LATENT_ENTROPY</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PAX-RANDKSTACK"><span class="toc-number">3.3.</span> <span class="toc-text">PAX_RANDKSTACK</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ro-after-init"><span class="toc-number">3.4.</span> <span class="toc-text">__ro_after_init</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PAX-CONSTIFY-PLUGIN"><span class="toc-number">3.5.</span> <span class="toc-text">PAX_CONSTIFY_PLUGIN</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PAX-SIZE-OVERFLOW"><span class="toc-number">3.6.</span> <span class="toc-text">PAX_SIZE_OVERFLOW</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#REFCOUNT-FULL"><span class="toc-number">3.7.</span> <span class="toc-text">REFCOUNT_FULL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TIF-FSCHECK-flag"><span class="toc-number">3.8.</span> <span class="toc-text">TIF_FSCHECK flag</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SCHED-STACK-END-CHECK"><span class="toc-number">3.9.</span> <span class="toc-text">SCHED_STACK_END_CHECK</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GRKERNSEC-KSTACKOVERFLOW"><span class="toc-number">3.10.</span> <span class="toc-text">GRKERNSEC_KSTACKOVERFLOW</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#VMAP-STACK"><span class="toc-number">3.10.1.</span> <span class="toc-text">VMAP_STACK</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#THREAD-INFO-IN-TASK"><span class="toc-number">3.10.2.</span> <span class="toc-text">THREAD_INFO_IN_TASK</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HARDENED-USERCOPY"><span class="toc-number">3.11.</span> <span class="toc-text">HARDENED_USERCOPY</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#STACKLEAK"><span class="toc-number">3.12.</span> <span class="toc-text">STACKLEAK</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#slub-debug"><span class="toc-number">3.13.</span> <span class="toc-text">slub_debug</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Z（Red-Zone）"><span class="toc-number">3.13.1.</span> <span class="toc-text">Z（Red Zone）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#F（free）"><span class="toc-number">3.13.2.</span> <span class="toc-text">F（free）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#P（Posion）"><span class="toc-number">3.13.3.</span> <span class="toc-text">P（Posion）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FORTIFY-SOURCE"><span class="toc-number">3.14.</span> <span class="toc-text">FORTIFY_SOURCE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UBSAN-BOUNDS"><span class="toc-number">3.15.</span> <span class="toc-text">UBSAN_BOUNDS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SLAB-FREELIST-HARDENED"><span class="toc-number">3.16.</span> <span class="toc-text">SLAB_FREELIST_HARDENED</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PAGE-POISONING"><span class="toc-number">3.17.</span> <span class="toc-text">PAGE_POISONING</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PAX-MEMORY-SANITIZE"><span class="toc-number">3.18.</span> <span class="toc-text">PAX_MEMORY_SANITIZE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#init-on-free-init-on-alloc"><span class="toc-number">3.19.</span> <span class="toc-text">init_on_free/init_on_alloc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#X86-X86-INTEL-UMIP"><span class="toc-number">3.20.</span> <span class="toc-text">X86: X86_INTEL_UMIP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#kptr-restrict"><span class="toc-number">3.21.</span> <span class="toc-text">kptr_restrict</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GRKERNSEC-HIDESYM"><span class="toc-number">3.22.</span> <span class="toc-text">GRKERNSEC_HIDESYM</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SECURITY-DMESG-RESTRICT"><span class="toc-number">3.23.</span> <span class="toc-text">SECURITY_DMESG_RESTRICT</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#INIT-STACK-ALL-ZERO"><span class="toc-number">3.24.</span> <span class="toc-text">INIT_STACK_ALL_ZERO</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#STRUCTLEAK-BYREF-ALL"><span class="toc-number">3.25.</span> <span class="toc-text">STRUCTLEAK_BYREF_ALL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PAX-MEMORY-STRUCTLEAK"><span class="toc-number">3.26.</span> <span class="toc-text">PAX_MEMORY_STRUCTLEAK</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#bpf-jit-harden"><span class="toc-number">3.27.</span> <span class="toc-text">bpf_jit_harden</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GRKERNSEC-JIT-HARDEN"><span class="toc-number">3.28.</span> <span class="toc-text">GRKERNSEC_JIT_HARDEN</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MODULE-SIG"><span class="toc-number">3.29.</span> <span class="toc-text">MODULE_SIG*</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SECURITY-LOADPIN"><span class="toc-number">3.30.</span> <span class="toc-text">SECURITY_LOADPIN</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LDISC-AUTOLOAD-is-not-set"><span class="toc-number">3.31.</span> <span class="toc-text">LDISC_AUTOLOAD is not set</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GRKERNSEC-MODHARDEN"><span class="toc-number">3.32.</span> <span class="toc-text">GRKERNSEC_MODHARDEN</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DEBUG-WX"><span class="toc-number">3.33.</span> <span class="toc-text">DEBUG_WX</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ARM-RODATA-FULL-DEFAULT-ENABLED"><span class="toc-number">3.34.</span> <span class="toc-text">ARM: RODATA_FULL_DEFAULT_ENABLED</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#STRICT-KERNEL-MODULE-RWX"><span class="toc-number">3.35.</span> <span class="toc-text">STRICT_{KERNEL,MODULE}_RWX</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PAX-KERNEXEC"><span class="toc-number">3.36.</span> <span class="toc-text">PAX_KERNEXEC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#STACKPROTECTOR"><span class="toc-number">3.37.</span> <span class="toc-text">STACKPROTECTOR</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ARM-SHADOW-CALL-STACK"><span class="toc-number">3.38.</span> <span class="toc-text">ARM: SHADOW_CALL_STACK</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Control-Flow-Integrity"><span class="toc-number">3.39.</span> <span class="toc-text">Control Flow Integrity</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ARM-ARM64-PTR-AUTH-ARM64-BTI-KERNEL"><span class="toc-number">3.39.1.</span> <span class="toc-text">ARM: ARM64_PTR_AUTH + ARM64_BTI_KERNEL</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#X86-Intel-CET"><span class="toc-number">3.39.2.</span> <span class="toc-text">X86: Intel CET</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#PAX-RAP"><span class="toc-number">3.39.3.</span> <span class="toc-text">PAX_RAP</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SMEP-PXN"><span class="toc-number">3.40.</span> <span class="toc-text">SMEP/PXN</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SMAP-PAN"><span class="toc-number">3.41.</span> <span class="toc-text">SMAP/PAN</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ARM-CPU-SW-DOMAIN-PAN"><span class="toc-number">3.41.1.</span> <span class="toc-text">ARM: CPU_SW_DOMAIN_PAN</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ARM-ARM64-SW-TTBR0-PAN"><span class="toc-number">3.41.2.</span> <span class="toc-text">ARM: ARM64_SW_TTBR0_PAN</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PAX-MEMORY-UDEREF"><span class="toc-number">3.42.</span> <span class="toc-text">PAX_MEMORY_UDEREF</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DEFAULT-MMAP-MIN-ADDR-65536"><span class="toc-number">3.43.</span> <span class="toc-text">DEFAULT_MMAP_MIN_ADDR=65536</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#X86-pti-on-PAGE-TABLE-ISOLATION"><span class="toc-number">3.44.</span> <span class="toc-text">X86: pti=on (PAGE_TABLE_ISOLATION)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ARM-kpti-on-UNMAP-KERNEL-AT-EL0"><span class="toc-number">3.45.</span> <span class="toc-text">ARM: kpti=on (UNMAP_KERNEL_AT_EL0)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mitigations-auto-nosmt"><span class="toc-number">3.46.</span> <span class="toc-text">mitigations=auto,nosmt</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#X86-MICROCODE"><span class="toc-number">3.47.</span> <span class="toc-text">X86: MICROCODE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RESPECTRE"><span class="toc-number">3.48.</span> <span class="toc-text">RESPECTRE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Manual-usage-of-nospec-barriers"><span class="toc-number">3.49.</span> <span class="toc-text">Manual usage of nospec barriers</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#X86-spectre-v2-on-RETPOLINE"><span class="toc-number">3.50.</span> <span class="toc-text">X86: spectre_v2=on (RETPOLINE)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ARM-HARDEN-BRANCH-PREDICTOR"><span class="toc-number">3.51.</span> <span class="toc-text">ARM: HARDEN_BRANCH_PREDICTOR</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#X86-spec-store-bypass-disable-on"><span class="toc-number">3.52.</span> <span class="toc-text">X86: spec_store_bypass_disable=on</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ARM-ssbd-force-on"><span class="toc-number">3.53.</span> <span class="toc-text">ARM: ssbd=force-on</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#X86-mds-full-nosmt"><span class="toc-number">3.54.</span> <span class="toc-text">X86: mds=full,nosmt</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#X86-l1tf-full-force"><span class="toc-number">3.55.</span> <span class="toc-text">X86: l1tf=full,force</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SLAB-FREELIST-RANDOM"><span class="toc-number">3.56.</span> <span class="toc-text">SLAB_FREELIST_RANDOM</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SHUFFLE-PAGE-ALLOCATOR"><span class="toc-number">3.57.</span> <span class="toc-text">SHUFFLE_PAGE_ALLOCATOR</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#slab-nomerge"><span class="toc-number">3.58.</span> <span class="toc-text">slab_nomerge</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#unprivileged-userfaultfd-0"><span class="toc-number">3.59.</span> <span class="toc-text">unprivileged_userfaultfd=0</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DEBUG-LIST-SG-CREDENTIALS-NOTIFIERS-VIRTUAL"><span class="toc-number">3.60.</span> <span class="toc-text">DEBUG_{LIST,SG,CREDENTIALS,NOTIFIERS,VIRTUAL}</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#BUG-ON-DATA-CORRUPTION"><span class="toc-number">3.61.</span> <span class="toc-text">BUG_ON_DATA_CORRUPTION</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#STATIC-USERMODEHELPER"><span class="toc-number">3.62.</span> <span class="toc-text">STATIC_USERMODEHELPER</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LOCKDOWN-LSM"><span class="toc-number">3.63.</span> <span class="toc-text">LOCKDOWN_LSM</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-number">5.</span> <span class="toc-text">Reference</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 29
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2021 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/28</span><a class="archive-post-title" href="/2021/04/28/linux-kernel-security-summary/">Linux 内核安全机制总结</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/17</span><a class="archive-post-title" href="/2020/12/17/2020xhlj-iot-pwn/">西湖论剑 IoT闯关赛 2020 pwn3 ezarmpwn</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href="/2020/10/26/2020-bytectf-gun/">2020 bytectf gun writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/12</span><a class="archive-post-title" href="/2020/10/12/2020-tctf-final-jit/">2020 TCTF final SecureJIT writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href="/2020/09/15/2020qwb-qwxf-pwn/">2020强网杯 强网先锋のpwn</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href="/2020/08/07/glibc-pwn-off-by-one-1/">glibc堆利用之off by one的两道CTF题目</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2020/08/01/2020rctf-some-pwn/">2020RCTF 几道pwn题的复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/13</span><a class="archive-post-title" href="/2020/01/13/algorithm-course-summary/">算法课程总结</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/27</span><a class="archive-post-title" href="/2019/11/27/docker-mysql-problem-check/">Docker中的Mysql配置问题处理与思考</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/11</span><a class="archive-post-title" href="/2019/11/11/cnss-recruit-pwn-1/">CNSS招新题中的一道ROP题</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/14</span><a class="archive-post-title" href="/2019/09/14/fancy-rop-practice/">花式栈溢出学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/26</span><a class="archive-post-title" href="/2019/07/26/basic-rop-practice/">基础ROP学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/24</span><a class="archive-post-title" href="/2019/05/24/2019rctf-some-writeup/">2019RCTF 部分Web的WriteUp</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span><a class="archive-post-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">2019DDCTF 未解决的web题 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">2019DDCTF 部分我解决的题目writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/31</span><a class="archive-post-title" href="/2019/03/31/2019TCTF-web-writeup/">2019TCTF web writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href="/2019/03/02/serial-ports-translation-cn/">快速寻找串行接口</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/18</span><a class="archive-post-title" href="/2019/02/18/yingshi-camera-firmware-extract/">萤石某摄像头的安全分析--固件提取</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/03</span><a class="archive-post-title" href="/2019/02/03/thinkphp-5-0-23-rce/">thinkphp 5.0.23 rce分析和复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/27</span><a class="archive-post-title" href="/2019/01/27/haozi-xss-challenges/">haozi xss 挑战赛 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href="/2019/01/24/code-breaking-lumenserial/">code-breaking lumenserial 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/10</span><a class="archive-post-title" href="/2019/01/10/code-breaking-esay-wp/">code-breaking easy部分题目writeup</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/15</span><a class="archive-post-title" href="/2018/08/15/google-ctf-beginner-part2/">Google CTF Beginner Part2</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2018/08/01/dianfengjikeCTF-web/">巅峰极客CTF 部分Web复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/18</span><a class="archive-post-title" href="/2018/07/18/google-ctf-beginner-part1/">Google CTF Beginner Part1</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href="/2018/07/08/google-ctf-beginner-js-safe-1/">Google CTF Beginner JS Safe 1 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/01</span><a class="archive-post-title" href="/2018/07/01/phpmyadmin4-8-1-background-LFI/">phpmyadmin4.8.1 后台LFI</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/30</span><a class="archive-post-title" href="/2018/06/30/csp-bypass-summary/">CSP绕过总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span><a class="archive-post-title" href="/2018/06/26/new-start/">新的开始</a>
+        </li>
+    
+    </ul></div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
+    
+        <span class="sidebar-tag-name" data-tags="fmt"><span class="iconfont-archer">&#xe606;</span>fmt</span>
+    
+        <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
+    
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
+        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
+    
+        <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
+    
+        <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
+    
+        <span class="sidebar-tag-name" data-tags="ARM"><span class="iconfont-archer">&#xe606;</span>ARM</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
+    
+        <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+        <span class="sidebar-tag-name" data-tags="Linux"><span class="iconfont-archer">&#xe606;</span>Linux</span>
+    
+        <span class="sidebar-tag-name" data-tags="Kernel"><span class="iconfont-archer">&#xe606;</span>Kernel</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br>
+    1、请确保node版本大于6.2<br>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
+    
+        <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "hurricane618"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
