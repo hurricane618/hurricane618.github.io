@@ -22,7 +22,7 @@
     <meta name="description" content="hurricane618's blog">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>风之栖息地|hurricane618&#39;s blog</title>
+    <title>hw2021 蓝队总结 · 风之栖息地|hurricane618&#39;s blog</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -214,12 +214,23 @@
 </head>
 
     
+        <body class="post-body">
+    
     
 <header class="header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
     <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/">风之栖息地</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">hw2021 蓝队总结</a>
+            </div>
+    </div>
     
     <a class="home-link" href="/">风之栖息地</a>
 </header>
@@ -231,24 +242,76 @@
 
 
 
+
+height:50vh;
 ">
     
     <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/)"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
+            
+            hw2021 蓝队总结
+            <!-- 404 -->
             
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
             
+            
+            <!-- 404 -->
+            
         </p>
         <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class="post-intro-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="hw">hw</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="总结">总结</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">1.8k</span>阅读时长: <span class="post-count reading-time">6 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2021/05/15</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
         
     </div>
 </div>
@@ -349,88 +412,81 @@
 </script>        
         <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
         <div class="container container-unloaded">
-            <main class="main index-page">
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/03/31/2019TCTF-web-writeup/">
-            
-                <span>2019TCTF web writeup</span>
-        </a>
-        <div class="abstract-content">
-            wallbreaker easy这道题在比赛的时候专注在imagick上面，但是由于是最新版本，以前的bypass漏洞已经修补。。。之后由于复试的原因没有仔细研究，现在开始复现。
-这道题给了一个webshell，密码是backdoor，可以直接用菜刀连接，然而用phpinfo查看禁用函数，发现已经把所有执行命令的函数都ban了，并且知道操作系统是ubuntu18.04.
-
-所以这是一个受限制的webshell绕过disable_function的问题
-bypass disable_function的方法绕过disable_function也是一个老生常谈的问题了。总结一下大概有一下四种：...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/31</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="JAVA">JAVA</a>
-    
-</div>
-            
-        </div>
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>拖了好久，终于趁着休息的时候简单总结一下第一次hw学习到的东西。（应该也是最后一次）</p>
+<h2 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h2><h3 id="资产梳理与排查"><a href="#资产梳理与排查" class="headerlink" title="资产梳理与排查"></a>资产梳理与排查</h3><p>在hw前期，需要梳理防护单位的资产，比如哪些服务器是用来做什么的，网络拓扑结构，有哪些防护设备，防护设备都开启了哪些设置。对于不重要的服务和业务应该尽可能的关闭，减少攻击者能利用的攻击面。同时排查现有服务器中是否存在漏洞和过去遗留下的后门木马。</p>
+<h3 id="防护设备配置"><a href="#防护设备配置" class="headerlink" title="防护设备配置"></a>防护设备配置</h3><p>在完成资产的梳理和排查之后，需要对相关的业务做防御加强，配置相关的WAF和防火墙过滤攻击流量。然后配置探针获取外网到内网以及内网之间的流量数据，这些流量数据搭配一些日志分析平台，监控网络攻击的实时情况，同时流量数据也能为之后的溯源提供帮助。在相关业务的重要服务器上部署主机防御系统，记录服务器上的执行程序日志，也能配置策略禁止一些高危操作和权限控制。部署与主要业务类似的蜜罐系统，最好是采用一比一完全相似的业务服务，这样能有效消耗攻击者的时间，还能观察到攻击者的攻击痕迹和攻击IP，为后续的反制提供信息，这里的蜜罐还能采用一些恶意服务程序反向攻击获取攻击者的相关信息，比如jsonp获得社交账号，mysql数据库读漏洞。</p>
+<h3 id="防护人员分组"><a href="#防护人员分组" class="headerlink" title="防护人员分组"></a>防护人员分组</h3><p>对接下来hw中的防护人员进行分组，大家相互协作配合，我在的地方是：</p>
+<p>蜜罐（1）+ 流量探针（1）+ 流量分析（1）+ 处置封锁IP和增加规则（1）+ 主机防护和waf（2）+ 研判分析（3）+ 业务方（3）+ 总指挥（2）</p>
+<p>其中蜜罐，流量探针，流量分析，主机防护，waf基本上都是在各自审查系统上的日志和数据，如果有异常会上报给研判组，研判组分析研判之后确定为真实攻击会写一份相关的简报，如果是重大事件研判组则会协同各个小组人员进行溯源分析。业务方是每个业务排的一个人确保系统正常运行，以及配合修补系统漏洞。总指挥会协调各个小组的配合，整理汇总分析报告，对hw整体局势做把控。</p>
+<h2 id="演戏进行中"><a href="#演戏进行中" class="headerlink" title="演戏进行中"></a>演戏进行中</h2><h3 id="威胁监控"><a href="#威胁监控" class="headerlink" title="威胁监控"></a>威胁监控</h3><p>在hw开始之后，处在各个审查系统上的人员专注查看这些日志记录，对其中高危的操作和异常日志进行上报，比如会有一些恶意通信，需要判断是否是误报，如果不是误报则需要追踪这个攻击是否成功，是否造成影响，最后确定能造成影响，但服务器不在我们这里，是某个成员单位拥有的，则书写一份简报上交给总指挥，如果是我们这里的主要业务系统受到影响，则需要进一步溯源排查攻击情况。审查系统上的人员在看到大量扫描攻击行为时会上报攻击者的IP给负责处置的同事，添加封锁的IP地址，消耗攻击队的IP池。收集到有新漏洞的威胁情报之后会进行验证，该打补丁的打补丁，没补丁的进行临时过滤修补。</p>
+<h3 id="应急响应"><a href="#应急响应" class="headerlink" title="应急响应"></a>应急响应</h3><p>在判断到我们的主要业务收到影响之后，开始应急响应的流程，在被攻击的主机上收集信息，包括history信息，web日志信息，结合攻击流量，主机防护系统的记录，对攻击者的入侵路径和遗留下的木马后门做判断。针对遗留的木马后门，保存副本并删除服务器上的恶意代码，这一次hw中出现了大量的内存木马，使得难以被发现，虽然最后通过流量分析和web日志找到了入侵痕迹，我们还是只能用重启服务的代价消灭它。在排除了威胁之后，我们开始进一步对攻击者的入侵路径做调查，最后确定是利用了最早的OA漏洞，在没有及时打上补丁的时候偷偷摸进来的，不仅如此，根据内存马中的ID信息可以确定到攻击者的个人信息，完成了溯源到本人的工作。在主机防护系统上也看到了攻击者在凌晨执行的命令，更加清晰的看到攻击者的动作，比较有趣的一点是我们是发现主机防御系统的服务被卸载才意识到问题的严重性，23333。</p>
+<p>另外一次应急响应，已经不能叫做应急响应了。。。只能叫做事后溯源排查，接到某个成员单位被日穿的消息，匆匆忙忙赶去排查。到那边之后发现是windows server 2008，只能说牛逼，现在还有人用windows的服务器。收集到了一波系统日志信息，web日志信息之后，灰溜溜的走了，没有什么太好的发现，而且很多攻击者留下的痕迹都被很蠢的运维给删了，只能说这种事业单位的防护措施真的很垃圾。最后根据各种日志信息发现在最早的一天攻击者就进来了，但是攻击的路径完全无法确定。。。。信息太少然后就不了了之。</p>
+<h3 id="每日总结"><a href="#每日总结" class="headerlink" title="每日总结"></a>每日总结</h3><p>每天从早上8点半开始到晚上9点结束，早上刚到的时候会检查晚上的日志情况，在晚上结束的时候会开一个简短的小会，大家汇报今天各个岗位的情况，最后总指挥会对今天的情况做总结，这会儿有可能甲方爸爸也会来两句。</p>
+<h2 id="会后总结"><a href="#会后总结" class="headerlink" title="会后总结"></a>会后总结</h2><h3 id="汇报演习情况"><a href="#汇报演习情况" class="headerlink" title="汇报演习情况"></a>汇报演习情况</h3><p>在hw结束后的一天下午开了总结大会，主要是交代了hw期间做的工作，封锁的IP，溯源的结果，提交的报告，各家提供服务的单位做的贡献如何。指出这次hw中做的不足，还需要改进的地方，以及系统中哪些是脆弱点，哪些还需要加强。不得不说OA真的是重灾区，每年都是被打的很惨。</p>
+<h3 id="后续工作交接"><a href="#后续工作交接" class="headerlink" title="后续工作交接"></a>后续工作交接</h3><p>每个人需要提交一份hw的总结报告，描述自己的工作情况（也是给甲方爸爸交差，不然显得自己很摸鱼，23333），对工作中遗留的问题交接给其他人来完成剩下的工作。比如：为了临时防御一些攻击做了哪些策略调整，需不需要替换回来等等。</p>
+<h2 id="最后用一张图描述hw的真实感受"><a href="#最后用一张图描述hw的真实感受" class="headerlink" title="最后用一张图描述hw的真实感受"></a>最后用一张图描述hw的真实感受</h2><img src="/2021/05/15/hw2021-summary/1.png">
     </article>
+    <!-- license  -->
     
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/03/02/serial-ports-translation-cn/">
-            
-                <span>快速寻找串行接口</span>
-        </a>
-        <div class="abstract-content">
-            这是一篇来自devttys0的一篇文章，在寻找串口的方法上给出了很多有用的方法，是一篇不错的总结文，在国内没有看到翻译，所以就想翻译成中文供大家学习，第一次做翻译，如有错误之处，请大家体谅，可以给我留言，我会快速修改。
-原文链接
-鉴于这个博客的名声和我拥有的点击量，我认为现在是大家一起讨论串口的时候了，尤其是嵌入式系统的串口。
-我的目标是通过使用确定的测试和有根据的猜测来讲解我发现的有效识别和逆向嵌入式串口的技术，而不需要特别昂贵的设备。
-简介串口对于嵌入式开发人员特别有用，通常会使用串口来：
-
-进入boot loader
-得到启动和调试信息
-通过shell和系统交互
-
-不用说这个功能同...
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
+            </p><p>原文链接：<a href="https://hurricane618.me/2021/05/15/hw2021-summary/">https://hurricane618.me/2021/05/15/hw2021-summary/</a>
+            </p><p>发表日期：<a href="https://hurricane618.me/2021/05/15/hw2021-summary/">May 15th 2021, 3:12:55 pm</a>
+            </p><p>更新日期：<a href="https://hurricane618.me/2021/05/15/hw2021-summary/">May 15th 2021, 3:12:55 pm</a>
+            </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/02</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="IOT">IOT</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="翻译">翻译</a>
-    
-</div>
-            
-        </div>
-    </article>
     
     <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2021/04/28/linux-kernel-security-summary/" title="Linux 内核安全机制总结">
+                    <div class="prevTitle">Linux 内核安全机制总结</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
     
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "https://hurricane618.me/2021/05/15/hw2021-summary/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "hw2021 蓝队总结"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://hurricane618.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
 </main>
             <!-- profile -->
             
@@ -517,6 +573,24 @@ bypass disable_function的方法绕过disable_function也是一个老生常谈�
 
     </div>
     <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前期准备"><span class="toc-number">1.</span> <span class="toc-text">前期准备</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#资产梳理与排查"><span class="toc-number">1.1.</span> <span class="toc-text">资产梳理与排查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#防护设备配置"><span class="toc-number">1.2.</span> <span class="toc-text">防护设备配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#防护人员分组"><span class="toc-number">1.3.</span> <span class="toc-text">防护人员分组</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#演戏进行中"><span class="toc-number">2.</span> <span class="toc-text">演戏进行中</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#威胁监控"><span class="toc-number">2.1.</span> <span class="toc-text">威胁监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#应急响应"><span class="toc-number">2.2.</span> <span class="toc-text">应急响应</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#每日总结"><span class="toc-number">2.3.</span> <span class="toc-text">每日总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#会后总结"><span class="toc-number">3.</span> <span class="toc-text">会后总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#汇报演习情况"><span class="toc-number">3.1.</span> <span class="toc-text">汇报演习情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#后续工作交接"><span class="toc-number">3.2.</span> <span class="toc-text">后续工作交接</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最后用一张图描述hw的真实感受"><span class="toc-number">4.</span> <span class="toc-text">最后用一张图描述hw的真实感受</span></a></li></ol>
+    </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
     <div class="sidebar sidebar-hide">
@@ -1237,6 +1311,8 @@ jsonContent:
     
     </div>
     <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
      
     </body>
 </html>
