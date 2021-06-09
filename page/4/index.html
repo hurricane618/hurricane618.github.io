@@ -78,8 +78,6 @@
     <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
     
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    
     <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
 /* This file is meant as a standalone workflow for
 - testing support for link[rel=preload]
@@ -214,8 +212,10 @@
 </head>
 
     
+        <body class="home-body">
     
-<header class="header">
+    
+<header class="header index-header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
@@ -231,21 +231,34 @@
 
 
 
+
+height:50vh;
 ">
     
     <!-- 主页  -->
+    
+    
+    <!-- 文章页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/)"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/index-bg1.jpg)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
             
+            风之栖息地
+            <!-- 文章页  -->
+            
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
+            
+            
+                habitat of wind
+            
+            <!-- 文章页  -->
             
         </p>
         <!-- 文章页meta -->
@@ -357,95 +370,25 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href="/2020/09/15/2020qwb-qwxf-pwn/">
+        <a class="abstract-title" href="/2018/06/26/new-start/">
             
-                <span>2020强网杯 强网先锋のpwn</span>
+                <span>新的开始</span>
         </a>
         <div class="abstract-content">
-            受到摸鱼和各种项目压力之后，终于发出来了，这次是强网杯中强网先锋的4道pwn题，剩下的pwn题还在陆续复现ing，在做了在做了ing
-babymessage一道神奇的栈溢出题目，有三个功能，写name，写message，输出buf，其中message的数据会被strcopy到buf上。这里的溢出点是在写message的功能上，一开始只能够溢出16字节，覆盖掉栈变量+rbp的值。这里如果只是看反编译的代码是看不出问题的，一定要观察汇编代码，这也是我经常失误的地方不太爱看汇编，555555。
-这里的写message的函数里带着一个局部变量size，而这个变量因为是局部变量，它是受到rbp的值...
+            之前的博客荒废掉了，所以在github上开一个新的博客希望能够坚持下去吧。也不讲太多矫情的话了，撸起袖子就是肝。
+一开始会更新的比较慢，hexo的博客还需要一段时间适应，之后会逐渐加快。
+
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/09/15</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/26</span>
             </div>
             <!-- tags  -->
             
             <div class="abstract-tags">
     
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2020/08/07/glibc-pwn-off-by-one-1/">
-            
-                <span>glibc堆利用之off by one的两道CTF题目</span>
-        </a>
-        <div class="abstract-content">
-            b00ks这是一道asis ctf 2016的题目，主要功能是书本记录，除了基本的书本的增删改查功能，还有一个作者名称的改变。程序是一个基本保护除了canary其他全开的64位程序。
-调试写exp的过程参考了ctf-wiki，先知社区一篇文章，和另外一个博客。很多细节上面的文章已经写的很详细了，我补充一些其他细节点。
-这里漏洞的问题是出现在程序自定义的读取函数中，在读完规定长度的数据之后又会在末尾填一个0，这样就会溢出一个空字节。这种漏洞被称为OBO（off by one），这里一共使用了两次，第一次是先把作者name全部填满，这样溢出的0字节就在下一个区域中，随后这个程序有一个管理全局...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/08/07</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2020/08/01/2020rctf-some-pwn/">
-            
-                <span>2020RCTF 几道pwn题的复现</span>
-        </a>
-        <div class="abstract-content">
-            博客长草严重，上半年摸鱼太久。最近趁着有空开始复现之前的一些题目，这次做了2020RCTF的几道pwn题，本来还想着把MIPS那道题做出来再发，结果发现MIPS的调试还有很多问题，所以就先发常规一点的题。
-note最经典的菜单堆题，还是note管理系统。64位程序，保护全开。主要功能有new，sell，show，edit，经典的增删查改，除了基本功能之外，还有两个额外的功能，一个是super note，一个是越界写数据但是只能操作一次。
-这个题的super note是个幌子，最后完全没有用到。它的数据结构是三个部分组成，开头是一个指针指向我们申请的message区域，第二块是size，表...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/08/01</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="闲聊">闲聊</a>
     
 </div>
             
@@ -454,8 +397,120 @@ note最经典的菜单堆题，还是note管理系统。64位程序，保护全�
     
     <!-- paginator  -->
     
+    <nav class="page-nav">
+        <a class="extend prev" rel="prev" href="/page/3/">&#60; PREV</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span>
+    </nav>
+    
 </main>
             <!-- profile -->
+            
+            <div class="profile">
+    <img class="profile-avatar" alt="avatar" src="/avatar/441520_1.jpg">
+    <div class="profile-name">hurricane618</div>
+    
+    <div class="profile-signature">
+        May the wind guide you
+    </div>
+    
+    
+    <div class="profile-social">
+        
+    
+        
+            
+                <a href="mailto:hurricane618@hotmail.com" class="iconfont-archer email" title="email"></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/hurricane618" class="iconfont-archer github" target="_blank" title="github"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//twitter.com/hurricane_618" class="iconfont-archer twitter" target="_blank" title="twitter"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title="rss"></a>
+            
+        
+    
+
+    </div>
+    
+    
+        <div class="friends">
+            <div>FRIENDS</div>
+            
+                
+                    <span>
+                        <a href="https://blog.donot.me/" target="_black">donot</a>
+                    </span>
+                
+            
+                
+                    <span>
+                        <a href="https://www.zuozuovera.com/" target="_black">左左薇拉</a>
+                    </span>
+                
+            
+                
+                    <span>
+                        <a href="https://les1ie.com/" target="_black">les1ie</a>
+                    </span>
+                
+            
+                
+                    <span>
+                        <a href="https://jdkhnjggf.github.io/" target="_black">lbb</a>
+                    </span>
+                
+            
+        </div>
+    
+    
+        <div class="about-me">
+            <a href="/about">ABOUT ME</a>
+        </div>
+    
+</div>
             
         </div>
         <footer class="footer footer-unloaded">
