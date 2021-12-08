@@ -357,6 +357,45 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2019/02/18/yingshi-camera-firmware-extract/">
+            
+                <span>萤石某摄像头的安全分析--固件提取</span>
+        </a>
+        <div class="abstract-content">
+            由于之前考研一直没有时间搞，现在终于有空来做一些小实验。
+固件提取方式比较主流的提取方式有以下几种：
+
+官网或者找客服索要固件
+在线升级的时候抓包得到下载地址
+拆flash芯片，用编程器读取芯片内容（也可以使用烧录夹直接获取flash，但是有些时候有保护引脚就只能拆芯片）
+用硬件电路的调试接口和固件的bootloader获取固件
+从串口进入系统之后，打包固件
+
+首先，这个摄像头现在没有升级操作，官网也没有固件。烧录夹现在还用的不熟练，在分析之后决定用硬件调试接口来获取固件。
+TTL接口线序这里推荐一篇仙果大佬写的省钱版测序 https://bbs.pediy.com/thread-246...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/02/18</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="IOT">IOT</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2019/02/03/thinkphp-5-0-23-rce/">
             
                 <span>thinkphp 5.0.23 rce分析和复现</span>
@@ -667,41 +706,6 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
         <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
     
         <a class="post-tag" href="javascript:void(0);" data-tags="代码审计">代码审计</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2018/06/30/csp-bypass-summary/">
-            
-                <span>CSP绕过总结</span>
-        </a>
-        <div class="abstract-content">
-            首发在信安之路上 https://mp.weixin.qq.com/s/z_XmhrTUg_yUfkyAFFfaKQ ，之后文章略有修改。
-CSP绕过总结今年的0CTF预选赛6道web题，其中三道都涉及CSP的知识点，简直可怕。。。这次趁着空闲时间就稍稍总结一下CSP绕过方面的知识，无论是对以后CTF比赛还是工作都很有帮助。
-CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术。它是一种由开发者定义的安全性政策性申明，通过CSP指定可信的内容来源，让WEB处于一个安全的运行环境中。
-一个CSP头由多组CSP策略组成，中间由分号分隔,如下所示：
-...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/30</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CSP">CSP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="XSS">XSS</a>
     
 </div>
             
@@ -1222,9 +1226,40 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 31
+        Total : 32
         </div>
         <!-- search  -->
         
@@ -1237,6 +1272,11 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
     
     <div class="archive-year"> 2021 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/08</span><a class="archive-post-title" href="/2021/12/08/2021-autunm-recruitment-summary/">一个双非安全菜鸡的秋招总结</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1460,6 +1500,8 @@ CSP的基础CSP的全称Content Security Policy，用来防御XSS攻击的技术
         <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
     
         <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="求职"><span class="iconfont-archer">&#xe606;</span>求职</span>
     
         <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
     
