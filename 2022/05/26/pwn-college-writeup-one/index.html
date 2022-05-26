@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="hurricane618">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="hurricane618">
+    
+    <meta name="keywords" content="hexo,web security,pwn,ctf,hurricane618,代码审计,iot">
+    
+    <meta name="description" content="hurricane618's blog">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>pwn.college 学习笔记（1） · 风之栖息地|hurricane618&#39;s blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/hurricane_favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)          })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-121933059-1', 'auto');
+        ga('send', 'pageview');
+     </script>
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/">风之栖息地</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">pwn.college 学习笔记（1）</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href="/">风之栖息地</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            pwn.college 学习笔记（1）
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class="post-intro-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">7.5k</span>阅读时长: <span class="post-count reading-time">27 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2022/05/26</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <img src="/2022/05/26/pwn-college-writeup-one/1.png">
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前一段时间找到了<code>pwn.college</code>这个网站，发现里面的模块划分的十分详细，题目也简单容易上手，非常适合我这种菜鸡作为训练题，于是从年前开始一直刷到了现在。中间由于写论文和答辩的事情耽误了很久，到目前为止也只刷完了一半的模块，为了巩固学到的一些内容，将其整理成学习笔记的方式，也欢迎各位师傅一起讨论。最后之所以不把具体的题解放出来，一是因为其中有很多题目都是举一反三的性质，全部写出来会显得很啰嗦；二是因为该网站的创始人说尽量不要在网上公开writeup，这个是他们的课程练习网站。综上，我只在这里记录题目中的关键思路和学到的知识点。</p>
+<h2 id="module1-程序IO交互模块"><a href="#module1-程序IO交互模块" class="headerlink" title="module1 程序IO交互模块"></a>module1 程序IO交互模块</h2><h3 id="命令行与shell"><a href="#命令行与shell" class="headerlink" title="命令行与shell"></a>命令行与shell</h3><p><code>env xxx -i</code> 能够以<code>-i</code>后面的参数为环境变量执行xxx程序，是一个能快速修改执行程序环境变量的方法。</p>
+<p>level36：一开始理解错了题目的意思，搞了半天没想到直接用命令行的管道<code>|</code>就解决了。。。</p>
+<p>linux shell中的利用管道控制程序的输入即为在管道的左侧，比如，<code>xxxx | /program</code>，控制程序的输出即为管道右侧，比如<code>/program | xxxx</code>。如果进程很快就结束了，有个trick是读取大文件拖延读取的速度，使得check能够正常进行，而不会因为前面的进程执行太快导致check失败。（针对rev程序）</p>
+<p>level66：本来想的是用find的exec选项使用<code>ld-linux-x86-64.so.2</code>加载二进制执行，结果有权限的问题。最后这样成功执行 <code>find /challenge -name &quot;embryoio_level66&quot; -type f -exec {} \;</code>。</p>
+<p>level72：可以直接用fd号在shell中进行文件句柄的重定向。</p>
+<p>level88、89：从shell脚本控制<code>argv[0]</code>的骚操作。一个是利用软连接，<code>ln -s /challenge/embryoio_level88 /tmp/zxygjb</code>，这样执行<code>/tmp/zxygjb</code>就能变成执行<code>/challenge/embryoio_level88</code>，但是它的<code>argc[0]</code>是<code>/tmp/zxygjb</code>。另外一个是控制<code>PATH</code>环境变量，让<code>/tmp</code>加入<code>PATH</code>中，这样直接执行<code>zxygjb</code>即可，这样就利用shell完成了对<code>argv[0]</code>的控制。</p>
+<p>level90：shell中的文件管道的使用，比较有意思的一点是向管道写数据必须用<code>&gt;</code>，从管道读数据时必须用<code>&lt;</code>。还有一点是写管道的时候必须要用<code>&amp;</code>把进程挂到后台。<code>echo &quot;smctvvbb&quot; &gt;  myfifo &amp;; /challenge/embryoio_level90 0&lt;myfifo</code></p>
+<p>level93：完全不知道怎么先把管道中的内容输出出来，再输入数据。最后参考了群中师傅的思路，<code>cat outfifo &amp;; cat &gt; infifo;</code>这样就可以先获得输出的内容，再利用<code>cat</code>输入什么输出什么的特点向管道中写数据。</p>
+<p>level97：使用<code>kill -signum pid</code>可以发送指定的信号给指定的进程。</p>
+<p>level140：<code>/dev/tcp/IP/Port</code>访问这个文件即可获得与IP:Port通信交互的能力。然而这道题必须要用shell脚本来建立tcp连接，真是恶心🤢。我看到的一个writeup中有一个骚操作，那就是把python3.8改成bash就能绕过检查，笑死🤣。</p>
+<h3 id="C"><a href="#C" class="headerlink" title="C"></a>C</h3><p>用C语言程序实现stdin和stdout的重定向，需要利用dup2重新设置文件描述符的指向。语法<code>dup2(fd, 0);</code>，这里的意思就是拿fd文件描述符替换标准输入，这样fd内的数据就会被当做程序的输入。</p>
+<p>level60：终于来到了拿C语言写管道的阶段，这里有点坑的地方在于需要开两个子进程，一个子进程拿来执行level程序，另外一个拿来执行cat程序，现在想想好像和python的也是一样的，都是必须要生成两个子进程去处理。</p>
+<p>level69：规定必须要用bash，但是不一定必须要从shell中执行，也可以是其他程序调用命令执行函数执行程序，随后用shell调用该程序，这样就能更细粒度的控制程序，比如这道题能够用C语言的<code>execve</code>执行程序且argv为空。很神奇是吧，如果是shell必然不可能为空。最后，shell -&gt; C程序 -&gt; challenge。</p>
+<p>level73：可以使用<code>chdir</code>改变工作目录，这样配合shell脚本可以制造出父进程和子进程的工作目录不一样。</p>
+<h3 id="Python"><a href="#Python" class="headerlink" title="Python"></a>Python</h3><p>level48：使用pwntools的process执行进程并用管道通信时会出现错误，而使用subprocess则没有问题，这是很神奇的地方。最后写在一个脚本文件中，在ipython里<code>%run xxx.py</code>执行脚本，即可获得flag。另外一种执行的方式是把所有语句都写成一行，通过<code>;</code>进行分割。</p>
+<p>level54：我用level48的脚本去处理结果发现它的checker每次检查都是<code>docker-init</code>，不太懂为啥会变成docker的子进程了，脚本上一层的python去哪里了，不会是因为执行太快的原因？最后采用完整的管道通信解决了这个问题。</p>
+<p>level75：让我知道了python脚本也是没有办法使得argv为空执行程序的，C语言真的强，可控制能力无敌。整活小能手！</p>
+<p>level76：还是一样的发现python脚本的env名称竟然也不能设置成数字，C语言无敌。</p>
+<p>level103：没想到管道文件必须要同时有一个进程读，一个进程写才能继续往下执行，否则会一直阻塞。而且不能把进程用<code>&amp;</code>挂在后台。。。真是无语，挂在后台之后进程会处于stop状态，因此我的方法是开两个ssh连接，一边开一个python脚本，一个脚本写一个脚本读且作为stdin输入。</p>
+<p>level106：打开管道文件之后要从里面读数据不能用<code>read()</code>或者<code>readlines()</code>，也不知道为啥，可能是因为管道文件永远没有尽头？只能使用<code>read(size)</code>和<code>readline()</code>的方式读。</p>
+<p>level107：要打开191的文件描述符，从这里我发现可以直接用<code>os.dup2(0,191)</code>。即可过check，然后通过<code>process(&quot;/challenge/embryoio_level107&quot;, close_fds=False)</code>启动进程，再接收数据输入密码即可通过。</p>
+<p>level109：一道神奇的题目，需要从stdout中读数据，那么原来的stdout怎么办呢？答案是使用sys.stdin强行读取输入并将输入传给stdout。<code>p1 = process(&quot;/challenge/embryoio_level109&quot;, stdout=sys.stdin)</code>。这里一开始没想到能成功，sys能强行读取shell中获得的输入数据，所以就算看不见实际上还是传输给了stdout。而如果只是打开某个文件，因为只是单向通道，所以这道题是怎么样都过不了的，毕竟又要读又要写必须是双向才行。</p>
+<p>level128：需要输入500个signal，肯定要用脚本，这里有个问题就是一开始我是一个一个信号的recv，然而最后进程崩掉了，我想估计是缓冲区的内容太多了，所以现在都是一口气接收所有的signal，然后发送一个recv一下，这样保证缓冲区不会多到崩掉进程。</p>
+<p>level142：要手写C语言的网络通信，其中的<code>write</code>刚开始sb了，长度参数用的<code>sizeof(buf)</code>，这个直接导致写入了一些非法字符，应该是<code>strlen(buf)</code>才对。</p>
+<p>收获最大的就是万物皆可拿pwntools做进程的IO控制，是真的方便，虽然题目要求要用C语言之类的，但你可以在启动题目上用C语言程序启动，然后拿pwntools控制这个C语言程序的IO，与原来相比中间多嵌套一层程序启动。</p>
+<h2 id="module2-程序误用模块"><a href="#module2-程序误用模块" class="headerlink" title="module2 程序误用模块"></a>module2 程序误用模块</h2><p>寻找具有SUID权限的程序</p>
+<ul>
+<li><code>find / -user root -perm -4000 -print 2&gt;/dev/null</code></li>
+<li><code>find / -perm -u=s -type f 2&gt;/dev/null</code></li>
+<li><code>find / -user root -perm -4000-exec ls -ldb {} ;</code></li>
+</ul>
+<p>对于一些做数据操作的命令，可以先对flag文件做操作，之后再进行逆操作查看原始数据获得flag。比如：<code>bzip2 -c /flag | bzip2 -d</code>。</p>
+<p>对于<code>zip</code>和<code>unzip</code>压缩和解压是分开的程序，首先用zip压缩flag文件，然后unzip解压文件并输出内容。</p>
+<p><code>tar -cvf h618.tar /flag;tar xf h618.tar -O</code>，这还是延续压缩+解压的思路。在网上看到另外一个利用<code>-I</code>执行额外程序的方法获得flag。<code>tar xf /flag -I &#39;/bin/sh -c &quot;cat 1&gt;&amp;2&quot;&#39;</code>。</p>
+<p><code>ar -q h618.ar /flag;cat h618.ar</code>。能够直接从里面读取原始数据，看起来ar更像是一个整合数据的程序，没有对内容做压缩处理。</p>
+<p><code>echo &quot;/flag&quot; | cpio -o</code>，cpio命令必须从管道把需要打包文件的字符串传递进去。</p>
+<p><code>genisoimage -sort /flag</code>这个神奇的地方在于，虽然因为格式问题而报错了，但是却把flag的内容输出出来。</p>
+<p><code>find /flag -exec cat {} \;</code>，find寻找到文件之后可以执行一些操作。</p>
+<p><code>setarch x86_64 cat /flag</code></p>
+<p><a href="https://www.hi-linux.com/posts/61543.html" target="_blank" rel="noopener">https://www.hi-linux.com/posts/61543.html</a> socat入门教程 挺好的，<code>socat - /flag</code>能直接读文件内容。</p>
+<p><code>whiptail --textbox /flag 10 60</code>，一个shell窗口程序。</p>
+<p>awk sed这种专门处理输入输出的程序直接随便写</p>
+<p>ed编辑器 直接<code>ed /flag</code> 然后输入p，打印数据</p>
+<p>level37直接给了chown的权限，那无敌了，直接改文件的所属用户后可以随便读写。</p>
+<p><code>cp /flag /dev/stdout</code>，这个很绝！利用linux里面的输出设备文件打印数据。</p>
+<p><code>mv /usr/bin/cat /usr/bin/mv;执行程序;mv /flag</code>，mv同样也是很骚的操作，因为这个指令本身不能输出所以必须要想办法操作别的文件，先把cat拷贝到mv的位置上，再给假的mv上特权位，最后读取flag。</p>
+<p><code>perl -ne print /flag</code>，参考神仙网站<a href="https://gtfobins.github.io/gtfobins/perl/" target="_blank" rel="noopener">https://gtfobins.github.io/gtfobins/perl/</a></p>
+<p><code>python -c &#39;print(open(&quot;/flag&quot;).read())&#39;</code></p>
+<p>没想到ruby直接用命令行会有安全警告，只能写脚本执行文件读取。</p>
+<p><code>bash -p</code>，获得root权限</p>
+<p><code>date -f /flag</code>，直接报错输出文件中的内容</p>
+<p><code>gcc -E -x c /flag</code>，这里gcc必须要指定语言才能预编译。</p>
+<p><code>wget --post-file=/flag http://127.0.0.1:8088</code>。有点坑，使用wget的-I参数读取文件中的内容时，报错输出会强制转换成小写字母。</p>
+<p><code>ssh-keygen</code>能用-D参数加载动态库执行代码。直接写一个ORW的动态库去读flag。</p>
+<h3 id="module2-小总结"><a href="#module2-小总结" class="headerlink" title="module2 小总结"></a>module2 小总结</h3><p>思路一：利用程序自身的输出功能<br>思路二：利用程序可以执行外部命令的功能<br>思路三：利用程序伪造某个路径中的文件，然后该文件能够以root权限执行<br>思路四：利用程序读文件报错输出信息<br>思路五：利用程序执行脚本的功能编写读文件操作</p>
+<h2 id="module3-汇编模块"><a href="#module3-汇编模块" class="headerlink" title="module3 汇编模块"></a>module3 汇编模块</h2><p>注意这系列的题必须以send的方式输入，如果末尾存在<code>\x0a</code>，会继续读下一条指令，结果又无法读，导致错误。虽然我一开始使用滑板指令填充绕过了，但这种操作还是有点蠢。。</p>
+<p><code>python /challenge/debug.py x</code>，x为level的数字，这样可以调试不同level的程序，能够清晰的看到汇编执行之后寄存器的结果和栈的变化，做的很nice！</p>
+<p>gcc的汇编器使用<code>gcc -nostdlib -static exit.s -o exit</code>。objdump输出文件的汇编。<code>objdump -M intel -d exit.elf</code></p>
+<p>level5：有点搞笑的地方，这道题考点是取余，我直接随机到一个<code>mod1</code>，什么都不用输直接拿到flag，这波啊，这波是强运拿flag。</p>
+<p>level17：这里的<code>jmp 0x51</code>中的数字是间接跳转的偏移而不是相对当前地址的偏移。还有就是pwntools的汇编函数无法直接对这条语句做汇编转二进制，因此我是直接用的<code>\xeb\x51</code>。<code>\xeb</code>是相对跳转的op操作码。</p>
+<p>level19：写跳转表的题目</p>
+<p>level20：题目描述有问题。。。说要4字的数据，其实只有2字数据相加。。所以每次间隔4字节，累加到rax中再除就ok了。循环是需要有两个jmp指令来控制的，一个jmp控制条件，一个jmp控制循环体结束之后返回到条件判断处。</p>
+<p>level21：调了快一个小时终于过了。细节点：在调用函数的时候x64函数规约是要从rdi传参数，所以需要保存数据到栈上，调用之后再恢复。同样的原因，rax是返回值的目标寄存器，因此也需要保存到栈上。第二个细节点在于cmp，cmp是第一个参数减去第二个参数产生的结果来设置标记位，一定要记住是第一个参数减第二个参数。第三个细节点，写的是一个函数所以末尾一定要有ret指令。第四个细节点，它说明的逻辑必须全部实现，它会有多套数据去检测逻辑。</p>
+<p>level23：又是调了好久。。。最好用上r8，r9这些寄存器，这样能方便很多，不用通过栈去保存寄存器的值。最后因为一个判断条件卡了很久，它有一组数据是有数量相同的情况，这时应该是保留前面较小的值，有一个技巧是cmp的条件可以根据比较的数据的位置直接一一对应，如果是相反的位置可以对比较符号直接取反。</p>
+<h2 id="module4-shellcode模块"><a href="#module4-shellcode模块" class="headerlink" title="module4 shellcode模块"></a>module4 shellcode模块</h2><p>调试shellcode的方法有2个：</p>
+<ol>
+<li>直接用汇编写成<code>.s</code>的汇编文件，用gcc编译之后拿gdb调试或者strace追踪</li>
+<li>写一个shellcode的loader程序，输入shellcode的raw数据进去后直接调用执行</li>
+</ol>
+<p>调试shellcode技巧与注意事项：</p>
+<ol>
+<li>可以自己加硬编码断点int3</li>
+<li>异架构的shellcode可使用qemu执行，-strace能追踪，-g可以调试</li>
+<li>某些libc函数会吞特殊字符，比如空格，换行，空字符。</li>
+<li>注意当某条指令出现bad字符时可以等效替换成其他指令来避免</li>
+<li>当条件限制过多的时候可以分阶段注入shellcode，先写一个小shellcode，通过小shellcode写入更多shellcode并执行</li>
+<li>如果你的shellcode会因为不可抗力被修改，可以反复调试跳过这部分，或者利用这种修改去构造shellcode</li>
+<li>可以使用mprotect系统调用去修改内存页的读写执行权限，达到执行shellcode的目的</li>
+<li>JIT功能通常为了速度会保留可写+可执行的内存页，这天然适合shellcode的执行</li>
+<li>利用nop<code>\x90</code>滑板指令来解决地址随机的问题，这样我们跳到一个较低地址后能直接滑到最终的shellcode</li>
+</ol>
+<p>level1-3：level1是orw的shellcode去读flag，重在一个经典。刚开始一直以为是要返回一个shell，搞了半天结果发现权限不够，折腾之后知道了必须是<code>bash -p /bin/sh</code>。level2是滑板指令的运用。level3是ban了0x00。</p>
+<p>level4：ban了0x48。这个稍微麻烦一点，因为操作rax、rbx等通用寄存器时会产生0x48，但在测试的时候发现这个对r8、r9等寄存器没有限制，而这些寄存器的操作不会产生0x48。</p>
+<p>level5-6：level5卡了有点久，既然无法用实时去改指令的方法，那么采用在栈上改数据然后跳过去的方法。这道题简直是究极折磨。level6直接在前面插入0x1000的nop即可。</p>
+<p>level7：把输入输出全关了，尝试写文件来获得结果。结果我自己测试的shellcode是完全没有问题，但不知道为啥在实际运行的时候就是有问题。。百思不得其解。最后搜索一番，发现有chmod大法，直接改flag的权限，感觉这个方法是能够通杀的。</p>
+<p>level8：题目要求shellcode只能有0x12字节，肯定不能是完整的shellcode，应该是要两段才能完成。但发现怎么弄都不行。。。最后还是用chmod做的，不过要对shellcode做一定程度上的缩减。最后用固定的地址去获取flag字符串的位置，没想到成功了，这里flag末尾的<code>\x00</code>可以不用传输过去，默认空间中都是0。最终执行<code>chmod(&quot;/flag&quot;, 4)</code>，改成我们可读的文件权限即可。</p>
+<p>level9：题目在每10字节后插入10字节的0xcc，直接拿上面的shellcode魔改一下，中间间隔的10字节用nop填充。</p>
+<p>level10-12：level10会对每8字节用冒泡排序处理。有点奇怪。。。感觉没什么用直接拿level8的就过了。level11关闭stdin，意味着不能进行二段shellcode注入，然而我直接一段就好了🤣。level12要求shellcode字符必须独立，还是用的前面的shellcode直接通杀。</p>
+<p>level13：题目要求12字节的shellcode。。。我的天，意味着原来的利用chmod的思路不行了。这里需要结合软连接来做，先把/flag软连接到本地生成一个字符名的文件，再对这个文件使用chmod，没想到对软连接文件做chmod会直接影响到本体文件。</p>
+<p>level14：题目要求只用6字节的shellcode。这个时候就必须要结合shellcode执行时的具体环境了，在执行时rdx=mmap的地址并且rax=0，这样是可以直接用rdx来代替基地址，且能直接调用read再次读入shellcode。</p>
+<p>在研究的时候发现一个神奇的指令<code>cdq</code>，可以使得rdx=0，以后可以在写shellcode的时候用到。</p>
+<h2 id="module5-沙箱逃逸模块"><a href="#module5-沙箱逃逸模块" class="headerlink" title="module5 沙箱逃逸模块"></a>module5 沙箱逃逸模块</h2><p>level1-2：level1直接路径穿越拿到flag。level2要写shellcode，使用shellcode的<code>chroot(&quot;../../&quot;)</code>实现根目录转移突破沙箱，再读flag。</p>
+<p>level3：通过<code>..</code>跳出目录的方法似乎不行了，估计是把<code>..</code>禁止了。然后想到利用软连接，在第一次文件打开时开启正确的flag，结果也不行。。。最后的思路是创建一个子目录，然后chroot进去就能把之前的chroot刷新掉，因为linux内核只维护一个chroot，所以之后再利用老办法读flag即可。</p>
+<p>level4-7：通过这道题又学到新的操作了，这里的shellcode只能使用openat、write、read、sendfile，既然出现了openat，去查了这个函数的功能发现配合之前的程序启动时的open可以对沙箱外的文件做读操作。<code>/challenge/babyjail_level4 /</code>，打开根目录之后直接用openat来打开flag。level5也是类似的，不过有了linkat，必须要把flag连接到tmp的沙箱中。level6和level7的思路和上面很雷同。</p>
+<p>level8：这道题比较有意思，它没有额外打开沙箱之外的文件描述符，那么该怎么绕过呢。翻了群里面的消息之后发现，可以利用父进程打开fd，然后fork出子进程去执行程序。构造一个C语言写的封装器去执行程序，这样fork就能带上父进程的fd。看了某个其他人的做法，有点厉害，直接在shell中传文件描述符。<code>/challenge/babyjail_level8 0 &lt; shellcode-raw 3&lt;/</code></p>
+<p>level9：这道题没有限制在某个目录，而限制了syscall只能为<code>close</code>、<code>stat</code>、<code>fstat</code>、<code>lstat</code>。一开始对那个32位的限制摸不着头脑，原来是32位的系统调用可以执行的意思。。。只能执行32位的系统调用造成一些麻烦，比如我在用rsp当做字符串地址传参数时地址会超过4字节，导致最后系统调用打开文件失败。这里学到的小技巧是用汇编的标记，配合<code>lea</code>指令去获得字符串地址。</p>
+<p>level10：这道题只有read和exit两个syscall可以用。似乎只能read数据到固定地址上，然后cmp去逐一比较，但后来想到exit是能外带数据的，把读入的内容当做退出的返回值就能逐字节泄露flag。(发现一点神奇的地方在于exit只会读寄存器的最低字节的内容，所以直接向rdi传数据也只读取最低一字节为返回值)</p>
+<p>level11：这道题只有read和nanotime可以用，看来这次是要使用延时的方法爆破flag内容了。nanotime调用的参数必须要是指针，这点需要注意一下。比较核心的汇编是一段比较数据的操作。</p>
+<p>level12：这道题进一步对syscall做了限制，只能使用read。那么看来要做二分判断必须全部采用汇编的操作实现。这里有两种思路，其一是利用汇编执行复杂的任务造成执行延时，其二是造成死循环来延时。复杂任务暂时不知道该如何写汇编。。因此这里直接写成死循环去判断。其中如果触发了死循环，可以通过限制recv的timeout来辅助判断，如果是循环中肯定会因为timeout限制超时，因此计算时间间隔可以判断是否存在超时现象，存在的话就代表成功触发。</p>
+<p>level13：这题在fork出子进程中执行shellcode，且只有read、write、exit可以使用。刚开始一头雾水，不知道是什么意思，在阅读完源代码之后发现是需要控制子进程发送指令父进程，父进程解析指令并执行，而这个交互的过程是通过socket完成。这道题延伸出了两种解题思路，第一种是利用它会提示错误的输入数据，每9字节泄露flag。第二种思路是手动在读取到的flag数据前写入<code>print_msg</code>的字符，然后整个字符串就会成为一条合法指令，直接输出flag内容。</p>
+<h2 id="module6-调试器模块"><a href="#module6-调试器模块" class="headerlink" title="module6 调试器模块"></a>module6 调试器模块</h2><p>没啥好说的直接就是学习gdb的一些操作。</p>
+<p>level1：学习run，start，continue</p>
+<p>level2：学会查看寄存器的值</p>
+<p>level3：学到了<code>set disassembly-flavor intel</code>可以设置成intel的格式。然后查看栈上的数据。</p>
+<p>level4-5：level4学到了display指令，可以在执行完一条语句之后显示内容。比如<code>display/8i $rip</code>，可以在每次执行之后打印8条指令。然后在读输入的位置下断点，观察栈地址上变化的值，其实很容易就能看到在rbp-0x18的位置处写入随机值，然后上面还会有上一次的随机数存在。level5也是类似的，但是题目要求用脚本去执行，我这里偷懒了，直接手动用同样的方法得到flag。</p>
+<p>level6：学到了set修改动态调试中的数据。这里是直接把存储的临时变量改成更大的数字，这样不用做那么多次输入直接进入win。<code>set {int}($rbp-0x1c)=0x3f</code></p>
+<p>level7：这题直接王炸！给了一个方法call，能够直接调用win函数拿到flag。<code>call (void)win()</code></p>
+<h2 id="module7-逆向工程模块"><a href="#module7-逆向工程模块" class="headerlink" title="module7 逆向工程模块"></a>module7 逆向工程模块</h2><p>前面几道题基本上是调整输入数据的顺序，比如调整位置，位置逆向，排序等等。直接用gdb或者strings去动静态结合调试就能过，连IDA都用不上。</p>
+<p>随后开始对输入做异或，多轮的算法操作（异或、排序、逆向），排序完全没有卵用，可能这就是试探你是不是真的去思考了。</p>
+<p>之后的题越来越难，可以通过scp把题目下载下来，用IDA等现代工具去做逆向分析。</p>
+<p>level7.1：需要注意一下switch跳转表的逆向，有一个长度为5的xor轮转key。在查了资料之后发现switch超过4了之后会被优化为跳转表的形式，这样需要用到ida里面的switch识别的功能，在edit-&gt;other-&gt;specify switch idiom。</p>
+<p>level9：出现对输入数据做md5的操作，但这个操作是不可逆的，那么该怎么办呢？题目一开始给了5个次机会可以修改地址上的数据，仔细逆向能知道这个地址是程序的基地址，因此可以当做一种动态patch，并且还把整个程序所在的页设置成了rwx。我们就能直接patch跳转指令，直接进读flag的逻辑。指令可以通过pwntools直接生成，也可以查指令手册，或者用keypatch。</p>
+<p>level11：增加了对代码完整性的检查，然而这个检查很弱，因为检查本身对自己并没有保护，所以能够直接破坏检查之后，再进行原有的patch操作。在第二个题目需要注意条件跳转的不同类型，长跳转和短跳转有不同的操作码，在patch的时候需要注意。</p>
+<p>level12：开始了yan85虚拟机的逆向过程。比较坑的一点是我刚开始没发现程序中有memcmp函数，原来还是有输入对比，只不过关键的数据被虚拟化保护了。下面是逆向出的几个指令，通过解读前面的几个指令，可以知道是向0x65偏移的地方写入我们的输入数据，然后与0x85偏移的内容作比较，0x85的内容可以从指令中看出来。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">IMM 是定义立即数</span><br><span class="line">STM 是在相对偏移中写入数据</span><br><span class="line">ADD 是在首位立即数上面加第二位立即数</span><br><span class="line">SYS 系统调用 根据第一个常量调用不同的syscall 第二参数是保存返回结果的寄存器</span><br></pre></td></tr></table></figure>
+<p>level13：多了两个指令CMP和LDM。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CMP 是比较第一个参数和第二个参数的大小</span><br><span class="line">LDM 是在相对偏移中读数据</span><br></pre></td></tr></table></figure>
+<p>level14-15：多了一些对内存中数据的变换操作，比如写入内存的数据再取出来加上一个数，这里需要注意的是类型都是char，所以数据都是单字节大小，超过256不会保留高位。level15雷同的题目，不过这里在比较上更加简洁，直接采用寄存器做比较。</p>
+<p>level16：从这里开始就是完整的Yan85虚拟机。又多了STK和JMP指令，并且整个程序是采用vmcode解释执行，已经是一道完整的虚拟机题目了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">STK 是第一个参数pop，第二个参数push</span><br><span class="line">JMP 是跳转指令，第一个参数是条件，第二个参数是指令位置</span><br></pre></td></tr></table></figure>
+<p>最后逆向出来的结果是循环CMP比较，通过JMP执行跳转。里面还有STK进行栈空间利用。<br>这道题最后是利用动态调试的方式做出来的，受到sakura的提示，用gdb动态定位到cmp的地方，获取待比较的数据，这样可以逐字节的获得key的值，并且学到了gdb脚本的一些操作。</p>
+<p>level17：在level16的基础上对写入的数据做了add，因此需要把add的数据也要获取到。</p>
+<p>level18：需要你输入虚拟机的opcode，它会执行你的虚拟机指令。这样的话就需要写opcode编码器了。然后利用open，直接输出flag。ORW的经典思路，主要的问题是需要写一个编码器，这个虚拟机指令是3字节为单位，第一字节opcode，第二第三字节是参数。有一点很烦的是level18.0的虚拟机指令和level18.1的虚拟机指令结构上有不同，一个opcode在第一位，另外一个在第二位，并且操作码也有所不同，这两点是需要注意的。</p>
+<p>level19：会对所有的寄存器，操作码，系统调用码做随机化，所以我们需要通过执行一些指令来逐渐判断。在进一步逆向程序，发现它的随机种子是和flag相关的，而flag是固定的值，因此它每次随机的结果是固定的，这样的话逐个猜解就能完成最后的orw。</p>
+<ol>
+<li><p>对于第一题因为有编码提示，所以直接一条一条指令的尝试，观察它的编码输出结果就能推测出指令的opcode。第二题没有了提示，就只能观察程序的行为了。需要确定IMM、STK、SYS，至少三条指令。以及参数寄存器a、b、c。</p>
+</li>
+<li><p>IMM可以通过第二个参数报错的方法确定，因为第二个参数可以是任意一字节的数据。STK可以通过STK NONE NONE的指令去测试。SYS可以通过找未知寄存器来确定，如果第一个参数报了未知寄存器的错误，那么大概率就不是SYS指令。</p>
+</li>
+<li><p>SYS的调用号确定方法，exit能观察到直接退出；在sleep后跟着exit能观察到程序延迟；open能观察调用返回值确定，我们去打开/flag文件，观察返回值是否为4；read可以将a设置为0和4后观察程序行为的不同，第一参数为0其他同样为0的话会直接返回0，如果第一参数为4则会报错返回-1；write则是第一参数为0和1时程序返回有所不同。要区分是read到代码段还是内存段，可以配合write判断，如果read的数据修改了内存中的内容，那么就是read到内存的调用，以此类推。</p>
+</li>
+<li><p>对于a参数，可以通过exit的返回值来确定；对于c参数，可以使用write输出数据，如果能成功输出内容，代表就是c；对于b参数，同样使用write，如果输出的数据产生了偏移，那么就是b。</p>
+</li>
+</ol>
+<p>至此，我们推测出了所有要使用的内容。</p>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
+            </p><p>原文链接：<a href="https://hurricane618.me/2022/05/26/pwn-college-writeup-one/">https://hurricane618.me/2022/05/26/pwn-college-writeup-one/</a>
+            </p><p>发表日期：<a href="https://hurricane618.me/2022/05/26/pwn-college-writeup-one/">May 26th 2022, 8:14:01 pm</a>
+            </p><p>更新日期：<a href="https://hurricane618.me/2022/05/26/pwn-college-writeup-one/">May 26th 2022, 8:16:15 pm</a>
+            </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2021/12/08/2021-autunm-recruitment-summary/" title="一个双非安全菜鸡的秋招总结">
+                    <div class="prevTitle">一个双非安全菜鸡的秋招总结</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "https://hurricane618.me/2022/05/26/pwn-college-writeup-one/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "pwn.college 学习笔记（1）"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://hurricane618.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:hurricane618@hotmail.com" class="iconfont-archer email" title="email"></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/hurricane618" class="iconfont-archer github" target="_blank" title="github"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//twitter.com/hurricane_618" class="iconfont-archer twitter" target="_blank" title="twitter"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title="rss"></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a> record <a href="https://beian.miit.gov.cn">蜀ICP备17007526号</a> and <a href="http://hurricane618.me/love/">love</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+    
+    <span id="busuanzi_container_site_uv">已经有 <span id="busuanzi_value_site_uv"></span> 个不明生物光临此地</span>
+    
+    </div>
+    
+</footer>
+
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#module1-程序IO交互模块"><span class="toc-number">2.</span> <span class="toc-text">module1 程序IO交互模块</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#命令行与shell"><span class="toc-number">2.1.</span> <span class="toc-text">命令行与shell</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#C"><span class="toc-number">2.2.</span> <span class="toc-text">C</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Python"><span class="toc-number">2.3.</span> <span class="toc-text">Python</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#module2-程序误用模块"><span class="toc-number">3.</span> <span class="toc-text">module2 程序误用模块</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#module2-小总结"><span class="toc-number">3.1.</span> <span class="toc-text">module2 小总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#module3-汇编模块"><span class="toc-number">4.</span> <span class="toc-text">module3 汇编模块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#module4-shellcode模块"><span class="toc-number">5.</span> <span class="toc-text">module4 shellcode模块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#module5-沙箱逃逸模块"><span class="toc-number">6.</span> <span class="toc-text">module5 沙箱逃逸模块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#module6-调试器模块"><span class="toc-number">7.</span> <span class="toc-text">module6 调试器模块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#module7-逆向工程模块"><span class="toc-number">8.</span> <span class="toc-text">module7 逆向工程模块</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 33
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2022 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span><a class="archive-post-title" href="/2022/05/26/pwn-college-writeup-one/">pwn.college 学习笔记（1）</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2021 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/08</span><a class="archive-post-title" href="/2021/12/08/2021-autunm-recruitment-summary/">一个双非安全菜鸡的秋招总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/09</span><a class="archive-post-title" href="/2021/06/09/2021-face-has-some-problems/">记最近一个月面瘫那点事</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/15</span><a class="archive-post-title" href="/2021/05/15/hw2021-summary/">hw2021 蓝队总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/28</span><a class="archive-post-title" href="/2021/04/28/linux-kernel-security-summary/">Linux 内核安全机制总结</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/17</span><a class="archive-post-title" href="/2020/12/17/2020xhlj-iot-pwn/">西湖论剑 IoT闯关赛 2020 pwn3 ezarmpwn</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href="/2020/10/26/2020-bytectf-gun/">2020 bytectf gun writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/12</span><a class="archive-post-title" href="/2020/10/12/2020-tctf-final-jit/">2020 TCTF final SecureJIT writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href="/2020/09/15/2020qwb-qwxf-pwn/">2020强网杯 强网先锋のpwn</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href="/2020/08/07/glibc-pwn-off-by-one-1/">glibc堆利用之off by one的两道CTF题目</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2020/08/01/2020rctf-some-pwn/">2020RCTF 几道pwn题的复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/13</span><a class="archive-post-title" href="/2020/01/13/algorithm-course-summary/">算法课程总结</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/27</span><a class="archive-post-title" href="/2019/11/27/docker-mysql-problem-check/">Docker中的Mysql配置问题处理与思考</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/11</span><a class="archive-post-title" href="/2019/11/11/cnss-recruit-pwn-1/">CNSS招新题中的一道ROP题</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/14</span><a class="archive-post-title" href="/2019/09/14/fancy-rop-practice/">花式栈溢出学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/26</span><a class="archive-post-title" href="/2019/07/26/basic-rop-practice/">基础ROP学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/24</span><a class="archive-post-title" href="/2019/05/24/2019rctf-some-writeup/">2019RCTF 部分Web的WriteUp</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span><a class="archive-post-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">2019DDCTF 未解决的web题 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">2019DDCTF 部分我解决的题目writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/31</span><a class="archive-post-title" href="/2019/03/31/2019TCTF-web-writeup/">2019TCTF web writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href="/2019/03/02/serial-ports-translation-cn/">快速寻找串行接口</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/18</span><a class="archive-post-title" href="/2019/02/18/yingshi-camera-firmware-extract/">萤石某摄像头的安全分析--固件提取</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/03</span><a class="archive-post-title" href="/2019/02/03/thinkphp-5-0-23-rce/">thinkphp 5.0.23 rce分析和复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/27</span><a class="archive-post-title" href="/2019/01/27/haozi-xss-challenges/">haozi xss 挑战赛 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href="/2019/01/24/code-breaking-lumenserial/">code-breaking lumenserial 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/10</span><a class="archive-post-title" href="/2019/01/10/code-breaking-esay-wp/">code-breaking easy部分题目writeup</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/15</span><a class="archive-post-title" href="/2018/08/15/google-ctf-beginner-part2/">Google CTF Beginner Part2</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2018/08/01/dianfengjikeCTF-web/">巅峰极客CTF 部分Web复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/18</span><a class="archive-post-title" href="/2018/07/18/google-ctf-beginner-part1/">Google CTF Beginner Part1</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href="/2018/07/08/google-ctf-beginner-js-safe-1/">Google CTF Beginner JS Safe 1 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/01</span><a class="archive-post-title" href="/2018/07/01/phpmyadmin4-8-1-background-LFI/">phpmyadmin4.8.1 后台LFI</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/30</span><a class="archive-post-title" href="/2018/06/30/csp-bypass-summary/">CSP绕过总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span><a class="archive-post-title" href="/2018/06/26/new-start/">新的开始</a>
+        </li>
+    
+    </ul></div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
+    
+        <span class="sidebar-tag-name" data-tags="fmt"><span class="iconfont-archer">&#xe606;</span>fmt</span>
+    
+        <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
+    
+        <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
+    
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
+        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="hw"><span class="iconfont-archer">&#xe606;</span>hw</span>
+    
+        <span class="sidebar-tag-name" data-tags="总结"><span class="iconfont-archer">&#xe606;</span>总结</span>
+    
+        <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
+    
+        <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
+    
+        <span class="sidebar-tag-name" data-tags="ARM"><span class="iconfont-archer">&#xe606;</span>ARM</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
+    
+        <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="求职"><span class="iconfont-archer">&#xe606;</span>求职</span>
+    
+        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+        <span class="sidebar-tag-name" data-tags="Linux"><span class="iconfont-archer">&#xe606;</span>Linux</span>
+    
+        <span class="sidebar-tag-name" data-tags="Kernel"><span class="iconfont-archer">&#xe606;</span>Kernel</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br>
+    1、请确保node版本大于6.2<br>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
+    
+        <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "hurricane618"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
