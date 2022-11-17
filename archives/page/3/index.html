@@ -365,6 +365,43 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2019/03/31/2019TCTF-web-writeup/">
+            
+                <span>2019TCTF web writeup</span>
+        </a>
+        <div class="abstract-content">
+            wallbreaker easy这道题在比赛的时候专注在imagick上面，但是由于是最新版本，以前的bypass漏洞已经修补。。。之后由于复试的原因没有仔细研究，现在开始复现。
+这道题给了一个webshell，密码是backdoor，可以直接用菜刀连接，然而用phpinfo查看禁用函数，发现已经把所有执行命令的函数都ban了，并且知道操作系统是ubuntu18.04.
+
+所以这是一个受限制的webshell绕过disable_function的问题
+bypass disable_function的方法绕过disable_function也是一个老生常谈的问题了。总结一下大概有一下四种：...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/31</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="JAVA">JAVA</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2019/03/02/serial-ports-translation-cn/">
             
                 <span>快速寻找串行接口</span>
@@ -674,42 +711,6 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
             <!-- date  -->
             <div class="abstract-date">
                 <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/18</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2018/07/08/google-ctf-beginner-js-safe-1/">
-            
-                <span>Google CTF Beginner JS Safe 1 复现</span>
-        </a>
-        <div class="abstract-content">
-            周末看了看GoogleCTF的beginner题目，感觉有些题目还不错，这里就先分析其中一道题JS Safe。
-题目
-分析与操作这道题有点high，作为一个JS调试新手，着实爽了一把。题目给了一个Html网页，里面有两段JS代码，看来是JS代码分析的题目。
-
-我们先看其中的一段，前两个是解密用的参数，看到open_safe这个函数，password必须是CTF{xxxx}的格式，读取其中的数据代入判断。if中把我们的输入代入了x函数。
-
-我们的password会在env的g参数中被编码，a是读数组数据，b是创建函数，c是加操作，d是ascii码转换。
-之后，根据code中的字母在env中...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/07/08</span>
             </div>
             <!-- tags  -->
             
@@ -1290,9 +1291,10 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     
     
     
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 33
+        Total : 34
         </div>
         <!-- search  -->
         
@@ -1305,6 +1307,11 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
     
     <div class="archive-year"> 2022 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/18</span><a class="archive-post-title" href="/2022/11/18/ios-system-security-framework-study-1/">iOS系统安全框架演进学习</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1512,6 +1519,8 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
     
+        <span class="sidebar-tag-name" data-tags="人生"><span class="iconfont-archer">&#xe606;</span>人生</span>
+    
         <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
     
         <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
@@ -1549,6 +1558,10 @@ MOAR(PWN)考察了一个细节点，当我们处于man手册的状态...
         <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
     
         <span class="sidebar-tag-name" data-tags="求职"><span class="iconfont-archer">&#xe606;</span>求职</span>
+    
+        <span class="sidebar-tag-name" data-tags="ios"><span class="iconfont-archer">&#xe606;</span>ios</span>
+    
+        <span class="sidebar-tag-name" data-tags="安全机制"><span class="iconfont-archer">&#xe606;</span>安全机制</span>
     
         <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
     
@@ -1589,9 +1602,9 @@ jsonContent:
         <div class="sidebar-panel-categories">
     <div class="sidebar-categories-name">
     
-        <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
-    
         <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+        <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
     
     </div>
     <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>

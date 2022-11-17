@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="hurricane618">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="hurricane618">
+    
+    <meta name="keywords" content="hexo,web security,pwn,ctf,hurricane618,代码审计,iot">
+    
+    <meta name="description" content="hurricane618's blog">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>iOS系统安全框架演进学习 · 风之栖息地|hurricane618&#39;s blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/hurricane_favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <!-- <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)          })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-121933059-1', 'auto');
+        ga('send', 'pageview');
+     </script> -->
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VW7DP47D51"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-VW7DP47D51');
+    </script>
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/">风之栖息地</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">iOS系统安全框架演进学习</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href="/">风之栖息地</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            iOS系统安全框架演进学习
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class="post-intro-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="ios">ios</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="安全机制">安全机制</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">4.7k</span>阅读时长: <span class="post-count reading-time">17 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2022/11/18</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>学习完王铁磊大佬在华为的分享视频，记录总结一些有用的内容。还会根据分享的内容再额外补充一些其他相关内容。</p>
+<p>##操作系统的演化与安全发展</p>
+<p>从计算机整体的发展演化方向来看，可以将其安全分为四个阶段：</p>
+<ul>
+<li>1970~1980：基础理论模型阶段</li>
+<li>1980~2000：服务器安全阶段</li>
+<li>2000~2010：个人电脑安全阶段</li>
+<li>2010~2020：移动设备安全阶段</li>
+</ul>
+<p>计算机系统业务的变迁引起威胁模型的变迁，进而引起系统安全研究重点的变迁。</p>
+<h3 id="1970-1980-系统安全理论模型大发展"><a href="#1970-1980-系统安全理论模型大发展" class="headerlink" title="1970~1980 系统安全理论模型大发展"></a>1970~1980 系统安全理论模型大发展</h3><p>从一开始的单片机里的单用户、资源独占，发展到巨型机的分时、资源共享、多用户模式。</p>
+<p>问题：如何管理用户权限、防止越权访问、篡改机密信息？</p>
+<p>经过学术界讨论之后形成了基本共识 安全三要素CIA：</p>
+<ul>
+<li>机密性</li>
+<li>完整性</li>
+<li>可用性</li>
+</ul>
+<p>在此之后，James P.Anderson在<code>Computer Security Technology Planning Study</code>中提出了Reference Monitor的概念，用户的访问需要通过Reference Monitor裁决判断，这种控制模型逐渐演变成了后来的可信理论基础。（类似于法官的存在）</p>
+<p>数据访问控制基本模型：</p>
+<p>D.Bell和L.LaPadula提出BLP模型（数据机密性基本原则）</p>
+<ul>
+<li>在BLP模型下，如果一个系统的初试状态是安全的，那么经过一系列符合规则的状态转换后，该系统还是安全的</li>
+<li>形式化证明了计算机系统可以通过对层级机密信息访问控制约束，确保计算机系统中数据的机密性（人话：如果约束条件足够安全，则访问即为安全）</li>
+</ul>
+<p>Biba模型（数据完整性基本原则）</p>
+<p>BLP和Biba模型奠定了Reference Monitor Policy的理论基础。（类似于法律条文）</p>
+<p>操作系统安全设计基本原则（The Protection of Information in Computer System, 1975）</p>
+<ul>
+<li><strong>Open design 开放设计</strong></li>
+<li><strong>Separation of privilege 权限分离</strong></li>
+<li><strong>Least privilege 最小权限</strong></li>
+<li>Economy of mechanism 经济原则</li>
+<li>Fail-safe defaults 默认失败</li>
+<li>Complete mediation 完全鉴权</li>
+<li>Least common mechanism 最小公共机制</li>
+<li>Psychological acceptability 界面简单易用</li>
+</ul>
+<h3 id="1980-2000-操作系统-服务器快速发展"><a href="#1980-2000-操作系统-服务器快速发展" class="headerlink" title="1980~2000 操作系统/服务器快速发展"></a>1980~2000 操作系统/服务器快速发展</h3><p>服务器市场兴起，通用操作系统快速发展，系统安全在不断探索中形成了基本框架：</p>
+<ul>
+<li>内核与用户态隔离</li>
+<li>用户态进程内存隔离</li>
+<li>实现了以用户用户/群组为主体，文件等资源为客体，读写执行等为粒度的访问控制体系</li>
+</ul>
+<p>两类访问控制</p>
+<ul>
+<li>DAC自主访问控制<ul>
+<li>客体的拥有者（Owner）可以自定义客体访问策略</li>
+</ul>
+</li>
+<li>MAC强制访问控制<ul>
+<li>全局预定义访问策略，拥有者（Owner）也无权修改</li>
+</ul>
+</li>
+</ul>
+<p>整体层级分成 User -&gt; Kernel -&gt; Hardware 三层结构</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">  User Space</span><br><span class="line"></span><br><span class="line">            +-----------------+            +------------------+</span><br><span class="line">            |                 |            |                  |</span><br><span class="line">            |    Process1     |            |    Process2      |</span><br><span class="line">            |                 |            |                  |</span><br><span class="line">            +--------+--------+            +---------+--------+</span><br><span class="line">                     |                               |</span><br><span class="line">                     |                               |</span><br><span class="line">                     |                               |</span><br><span class="line">+--------------------------------------------------------------------------+</span><br><span class="line">                     |                               |</span><br><span class="line">                     |                               |</span><br><span class="line"> Kernel Space        |                               |</span><br><span class="line">                     |                               |</span><br><span class="line">                     v                               v</span><br><span class="line">      +--------------+-------------------------------+-------------+</span><br><span class="line">      |                                                            |</span><br><span class="line">      |                                                            |</span><br><span class="line">      |                                   +--------------------+   |</span><br><span class="line">      |                                   |                    |   |</span><br><span class="line">      |      Kernel                       |                    |   |</span><br><span class="line">      |                                   |       Drivers      |   |</span><br><span class="line">      |                                   |                    |   |</span><br><span class="line">      |                                   +--------------------+   |</span><br><span class="line">      |                                                            |</span><br><span class="line">      +------------------------------------------------------------+</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">+---------------------------------------------------------------------------+</span><br><span class="line"></span><br><span class="line"> Hardware</span><br><span class="line">            +-------------+    +----------------+   +------------------+</span><br><span class="line">            |             |    |                |   |                  |</span><br><span class="line">            |   CPUs      |    |     Memory     |   |     Devices      |</span><br><span class="line">            |             |    |                |   |                  |</span><br><span class="line">            +-------------+    +----------------+   +------------------+</span><br></pre></td></tr></table></figure>
+<p>产生安全威胁的核心原因：<strong>共享！</strong></p>
+<p>基本对策：隔离和控制</p>
+<ul>
+<li>修墙——隔离</li>
+<li>门禁——控制</li>
+</ul>
+<p>安全的副作用：</p>
+<ul>
+<li>效率降低</li>
+<li>易用性下降</li>
+</ul>
+<p><strong>系统安全逐渐成为业务发展的绊脚石</strong></p>
+<p>补充：从这一阶段起，漏洞利用开始登上舞台</p>
+<p>世界上第一个蠕虫 1988年 Morris蠕虫 利用栈溢出传播自己</p>
+<p>phrack杂志（从1985年存活至今）1996年发布第一篇完整的栈溢出攻击指南 <a href="http://phrack.org/issues/49/14.html" target="_blank" rel="noopener">http://phrack.org/issues/49/14.html</a></p>
+<h3 id="2000-2010-个人电脑-互联网大发展"><a href="#2000-2010-个人电脑-互联网大发展" class="headerlink" title="2000~2010 个人电脑/互联网大发展"></a>2000~2010 个人电脑/互联网大发展</h3><p>以Windows/Linux为代表的操作系统快速普及</p>
+<ul>
+<li>基本以自主访问控制为主</li>
+<li>2003年由NSA主导的SELinux才被纳入Linux</li>
+</ul>
+<p>个人计算机系统迎来了安全问题的集中爆发</p>
+<ul>
+<li>混乱的程序分发渠道（xxx软件家园）、毫无安全约束的执行环境（root+无沙箱+无杀毒的裸奔）</li>
+<li>恶意代码三驾马车——病毒、木马、蠕虫</li>
+</ul>
+<p>可信计算组织（TCG）由AMD、惠普、IBM、intel和微软等硬件、软件、服务供应商组成。他们提出了TPM，想打造产业链上的软件硬件的可信环境，思路是在硬件层面提供可信根，用途：可信启动、完整性度量、磁盘加密、密钥管理，但由于商业上的种种利益牵扯，最后草草收场。</p>
+<p>补充：那些年的传奇事件</p>
+<p>2004年 18岁德国少年编写震荡破蠕虫</p>
+<p>2006年 25岁李俊编写的熊猫烧香病毒（他也是武汉男生病毒和QQ尾巴病毒的作者）</p>
+<p>2010年 首个网络武器级别的病毒被发现 震网病毒 目标伊朗核电站 里面包含4个0day</p>
+<h3 id="2010-2020-移动互联网-智能手机大爆发"><a href="#2010-2020-移动互联网-智能手机大爆发" class="headerlink" title="2010~2020 移动互联网/智能手机大爆发"></a>2010~2020 移动互联网/智能手机大爆发</h3><p>目睹了桌面操作系统的乱象后，Apple在iOS系统中开始创新与变革。</p>
+<p>问题：如何根治PC时代的毒瘤？</p>
+<p>iOS初期安全建设三驾马车</p>
+<ul>
+<li>可信启动 -&gt; 确保内核启动完整性，且不可降级</li>
+<li>App Store + 强制代码签名 -&gt; 垄断App分发渠道（通过技术手段巩固地位）</li>
+<li>应用沙盒 -&gt; 限制App能力</li>
+</ul>
+<p>结果：恶意代码基本消失，软件开发者的权益得到一定保障，生态逐渐繁荣</p>
+<p><strong>系统安全建设成为Apple生态的基石</strong></p>
+<p>新安全需求不断涌现：移动设备承载了大量个人数据，遗失问题成为用户痛点，如何保障遗失手机的数据安全？（隐私问题开始出现）</p>
+<p>iOS4的数据层级保护，分成A、B、C、D四类密钥管理，实现数据的严格保护。</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A（256bit AES）</td>
+<td>只有解锁状态才能使用</td>
+</tr>
+<tr>
+<td>B（Curve 25519）</td>
+<td>公钥一直可用，私钥只能解锁状态使用</td>
+</tr>
+<tr>
+<td>C（256bit AES）</td>
+<td>启动后用户至少解锁手机一次才可使用</td>
+</tr>
+<tr>
+<td>D（256bit AES）</td>
+<td>一直可用</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">+-------------------+                            +----------------------+</span><br><span class="line">|                   |                            |                      |</span><br><span class="line">|                   +---------------------------&gt;+    File System Key   |</span><br><span class="line">|  Hardware Key     |                            |                      |</span><br><span class="line">|                   |                            +----------+-----------+</span><br><span class="line">|                   |                                       |</span><br><span class="line">|                   |    +------------------+    +----------v-----------+     +-------------------+</span><br><span class="line">|                   +---&gt;+                P |    |                    P |     |                 P |</span><br><span class="line">+-------------------+    |                  |    |    File Metadata     |     |                   |</span><br><span class="line">                         |   Class Key      +---&gt;+   +---------------+  +----&gt;+                   |</span><br><span class="line">+-------------------+    |                  |    |   |               |  |     |   File Contents   |</span><br><span class="line">|                   +---&gt;+                  |    |   | File Key      |  |     |                   |</span><br><span class="line">|                   |    |                  |    |   +---------------+  |     |                   |</span><br><span class="line">|  Passcode Key     |    +------------------+    +----------------------+     +-------------------+</span><br><span class="line">|                   |</span><br><span class="line">+-------------------+</span><br></pre></td></tr></table></figure>
+<p>在创建文件时会随机生成File Key，File Key保护文件内容。<br>上面四类Class Key保护文件的File Key。<br>Class Key被硬件Key和一个Passcode Key同时保护。<br>File System Key保护File Metadata（文件头以及加密后的File key）。</p>
+<p>File System Key没有受到保护，但它存在的意义是什么？苹果比较取巧的通过File System Key来标记文件是否存在，消除数据时直接删key就行。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><table>
+<thead>
+<tr>
+<th>时间</th>
+<th>阶段</th>
+<th>典型安全需求</th>
+<th>典型研究成果/实践</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1970-1980</td>
+<td>OS基础理论模型大发展</td>
+<td>计算机能否在军事领域应用</td>
+<td>CIA三元组、Reference Monitor概念、BLP和Biba模型</td>
+</tr>
+<tr>
+<td>1980-2000</td>
+<td>服务器时代</td>
+<td>多用户隔离</td>
+<td>用户态内核态层级隔离、强制/自主访问控制</td>
+</tr>
+<tr>
+<td>2000-2010</td>
+<td>个人电脑时代</td>
+<td>恶意代码</td>
+<td>虚拟机、可信计算</td>
+</tr>
+<tr>
+<td>2010-2020</td>
+<td>移动设备时代</td>
+<td>隐私与数据保护</td>
+<td>应用沙盒、数据层级保护</td>
+</tr>
+</tbody>
+</table>
+<p>从苹果的例子中能够发现，好的安全架构是能够带动业务增长。</p>
+<h2 id="阴云不散的幽灵——漏洞"><a href="#阴云不散的幽灵——漏洞" class="headerlink" title="阴云不散的幽灵——漏洞"></a>阴云不散的幽灵——漏洞</h2><p>以为漏洞只是打个patch而已，但没想到成为整个行业的痛点。漏洞指信息系统在设计、实现、部署、管理等环节中的缺陷，被攻击利用后可导致信息系统违背原有安全策略。</p>
+<p>利用网络服务组件中的漏洞，攻击者可以轻易远程获取计算机设备的控制权。墙上的小洞，让攻击者具备穿墙术，隔离+控制的基本安全框架受到严峻挑战。</p>
+<p>漏洞成因广泛，形态复杂，利用手段多样。</p>
+<p>软件：</p>
+<ul>
+<li>内存安全漏洞 70%</li>
+<li>逻辑类型及其他 30%</li>
+</ul>
+<p>硬件：</p>
+<ul>
+<li>Rowhammer</li>
+<li>Meltdown</li>
+</ul>
+<p>思考：SoC是硬件漏洞？软件漏洞？如果定位为软件漏洞，但它是固化在芯片中，无法通过升级解决问题</p>
+<p>内存安全漏洞：uaf、类型混淆、溢出写、越界读、未初始化等。构造操作原语：</p>
+<ul>
+<li>非法读</li>
+<li>非法写</li>
+<li>非法执行</li>
+</ul>
+<p>这三者还能互相转换，最后构造出破坏安全策略的恶意利用。</p>
+<p>现在大部分还存在多层隔离，最小化信任边界、拉长漏洞攻击链。</p>
+<p>比如现在要完成一个RCE漏洞利用：某程序内部RCE+沙箱逃逸+权限提升+信息泄露。</p>
+<p>利用漏洞突破iOS防护成为新威胁：</p>
+<ul>
+<li>BootRom漏洞加载定制化的内核，直接打破iOS硬件可信链</li>
+<li>越狱直接威胁App Store垄断地位</li>
+<li>逃过沙盒窃取用户隐私</li>
+</ul>
+<p>整个行业在焦虑漏洞治理方面的问题：</p>
+<ul>
+<li>如何在新软件开发过程中消除漏洞？运用新的语言机制例如苹果Swift和安卓Kotlin</li>
+<li>如何在现有软件代码中发现漏洞？动态fuzz，静态代码分析，人工审计</li>
+<li>如何在代码编译阶段增强代码安全性？最经典的canary，以及llvm模块</li>
+<li>如何在软件运行阶段阻断漏洞利用？更好的内存管理方案，使得漏洞被触发也难以利用</li>
+<li>如何降低软件被攻击后给整个系统带来的破坏？有效的隔离方案</li>
+</ul>
+<h2 id="iOS安全架构演化过程"><a href="#iOS安全架构演化过程" class="headerlink" title="iOS安全架构演化过程"></a>iOS安全架构演化过程</h2><h3 id="早期阶段"><a href="#早期阶段" class="headerlink" title="早期阶段"></a>早期阶段</h3><p>防御机制</p>
+<ul>
+<li>可信启动</li>
+<li>代码签名</li>
+<li>数据层级保护</li>
+<li>ASLR和KASLR</li>
+<li>SEP（用于密钥管理的专用芯片处理器，自带SEPROM）</li>
+<li>KPP（保证内核运行时完整性）</li>
+<li>……</li>
+</ul>
+<p>苹果在早期的防御基础上做了更进一步的安全加固 </p>
+<p>参考blackhat <a href="https://i.blackhat.com/USA-19/Thursday/us-19-Krstic-Behind-The-Scenes-Of-IOS-And-Mas-Security.pdf" target="_blank" rel="noopener">https://i.blackhat.com/USA-19/Thursday/us-19-Krstic-Behind-The-Scenes-Of-IOS-And-Mas-Security.pdf</a></p>
+<p>参考 苹果安全白皮书</p>
+<h3 id="更安全的可信启动"><a href="#更安全的可信启动" class="headerlink" title="更安全的可信启动"></a>更安全的可信启动</h3><p>安全启动属于从源头上防守。在原有可信启动的基础上进一步加强。</p>
+<p><strong>减少攻击面：在第一次解锁之前禁止使用usb</strong></p>
+<p>开机第一次解锁之前，USB接口停用（不允许任何USB交互，包括充电）</p>
+<p>影响：虽然降低了用户体验，但封杀了一个很大的攻击面（GreyShift 解锁11.3之前系统的漏洞）</p>
+<p><strong>启动过程中安全编译选项拉满，保证启动程序不出内存问题</strong></p>
+<p>BootROM作为根基依次验证下一环节的签名，大概的启动流程分为两个层次：</p>
+<img src="/2022/11/18/ios-system-security-framework-study-1/1.png">
+<p>（1）AP（32位系统）</p>
+<p>从SecureROM开始为根基，去验证LLB/iBoot，LLB/iBoot验证iOS内核，iOS内核再去验证用户态程序。</p>
+<p>（2）SEP（64位系统）</p>
+<p>SEP处理器拥有独立的安全启动链</p>
+<p>自从iOS14开始，苹果在A13芯片（iPhone11）之后的机型上，使用增强编译组件，确保iBoot中没有内存漏洞。代价则是启动的性能。</p>
+<img src="/2022/11/18/ios-system-security-framework-study-1/2.png">
+<ul>
+<li>SEPOS基于L4微内核</li>
+<li>独立的AES和随机数引擎</li>
+<li>独立I2C Bus</li>
+<li>实时内存加密</li>
+</ul>
+<p>完全不信任AP侧的数据，因此设计出了Memory Protection Engine，功能十分强大。写入AP侧共享内存中的数据会被加密，并且有完整性校验，只有SEP侧可以解密。AP侧如果修改了这段内存中的数据，导致之后的完整性检验失败，内核会直接panic。</p>
+<p>补充：</p>
+<p>盘古大佬 blackhat上研究苹果的可信启动 <a href="https://raw.githubusercontent.com/windknown/presentations/master/Attack_Secure_Boot_of_SEP.pdf" target="_blank" rel="noopener">https://raw.githubusercontent.com/windknown/presentations/master/Attack_Secure_Boot_of_SEP.pdf</a></p>
+<p>在上面的blackhat链接中介绍了苹果新一代的T2安全芯片，以及最新的安全启动流程。看样子是mac电脑的安全启动，不知道手机会不会借鉴这个流程。</p>
+<img src="/2022/11/18/ios-system-security-framework-study-1/3.png">
+<h3 id="KTRR和APRR"><a href="#KTRR和APRR" class="headerlink" title="KTRR和APRR"></a>KTRR和APRR</h3><p>KTRR和ATRR属于自底向上的防守，为了解决KPP的缺点。</p>
+<p><strong>KPP（Kernel Patch Protection）</strong></p>
+<p>一种纯软件实现的安全机制，主要目标用于检查内核运行时的完整性，代码实现运行在EL3层，用户态代码在EL0层，内核在EL1层。为了增加效率，仅在浮点数计算时调用KPP进行内核完整性检查。FPU（协处理器，用来处理浮点数）</p>
+<ul>
+<li>启动时，将内核代码段与只读内存段进行hash，并禁用FPU执行浮点运算。</li>
+<li>EL0/EL1使用FPU后触发异常，EL1尝试启用FPU，随后进入EL3，在EL3中检查内核代码段和只读段hash是否变化</li>
+<li>IRQ异常时再次进入EL3，禁用FPU</li>
+</ul>
+<img src="/2022/11/18/ios-system-security-framework-study-1/4.png">
+<p><strong>KPP存在的设计缺陷</strong></p>
+<p>并不阻止篡改内核本身，而是找了一个不太影响性能的入口点去检测完整性（调用FPU指令时），因此造成了两个攻击点。</p>
+<p>攻击点1：</p>
+<ul>
+<li>攻击者可修改内核后立即恢复，大概率不会触发KPP检查（参考盘古越狱iOS 9.3.3）</li>
+<li>KPP依然存在价值，使得攻击变得不那么稳定</li>
+</ul>
+<p>攻击点2：</p>
+<ul>
+<li><a href="https://www.cnblogs.com/liqiuhao/p/9450093.html" target="_blank" rel="noopener">TOCTTOU攻击</a>（Time-of-check to time-of-use）：内核中存在单一KPP检查入口，在入口点前恢复内核，KPP检查完后再次patch内核。</li>
+<li>完美绕过KPP（Luca Todesco iOS 10.1.2越狱）</li>
+</ul>
+<p>思考：如果将KPP检查点放在IRQ异常而不是调用FPU异常，是否效果会更好？</p>
+<p>有没有办法在篡改发生时就阻止，而不是主动/定时检测？苹果的答案就是KTRR</p>
+<p><strong>KTRR（Kernel Text Readonly Region）</strong></p>
+<p>希望能从硬件层面阻止篡改内核代码段和只读段的一切尝试，KPP被彻底放弃。</p>
+<p>硬件实现（作用于MMU和IOMMU）</p>
+<ul>
+<li>设计了三个系统寄存器<ul>
+<li>ROR Base：只读可执行物理地址起始</li>
+<li>ROR End：只读可执行物理地址结束</li>
+<li>ROR Lock：KTRR启用</li>
+</ul>
+</li>
+<li>需要修改内核物理内存布局，将只读可执行的内容放在一起，不能和读写内存交替</li>
+</ul>
+<p>效果：几乎不可绕过（曾经出现过两次公开绕过案例，苹果快速修补）内核只读段在运行时无法被修改，内核shellcode无法实现，ROP成为内核代码执行的唯一攻击路径。</p>
+<p>对抗：攻击者使用Patch读写数据段来代替Patch内核，达到相同或者类似的效果</p>
+<p>苹果的应对：将更多读写段数据移到只读段，但是存在巨大困难点。1）很多数据在系统启动后还是有需求去改写，即便没有需求，也无法在系统启动的前期完成初始化；2）非ARM标准，后期维护困难。</p>
+<p>KTRR的缺陷：</p>
+<ul>
+<li>对于只读数据的保护，只能覆盖到系统早期启动（MMU初始化前）时能确定下来的内容</li>
+<li>一些后期有需求修改，又是十分重要的数据，无法保护，无法处理Data only attack</li>
+</ul>
+<p>为了解决KTRR的问题，苹果提出了APRR，一个新的硬件特性。</p>
+<p><strong>APRR（<a href="https://support.apple.com/guide/security/kernel-integrity-protection-secb1caeb4bc/1/web/1" target="_blank" rel="noopener">Access Permission Restriction Register</a>）</strong></p>
+<p>APRR保护</p>
+<ul>
+<li>页表</li>
+<li>cdhash（代码签名白名单）</li>
+<li>Code Directory Blob（进程Entitlement权限相关属性）</li>
+</ul>
+<p>APRR实现原理</p>
+<ul>
+<li>将关键数据所在的页表项做了特殊标记，这些数据只有特定的代码段才有权限进行读写等操作</li>
+<li>这些代码段所在地址形成一个bitmap，存在一个苹果自定义的寄存器中</li>
+<li>设置bitmap的gadget仅存在于PPLTRAMP段的第一个页中</li>
+</ul>
+<p>效果：</p>
+<ul>
+<li>关键数据仅有PPLTRAMP段的第一个页作为入口去访问，并且gadget很有限 -&gt; 缓解Data only attack</li>
+<li>修改关键数据必须先获得CPU执行权限 -&gt; ROP成为唯一的攻击方法</li>
+</ul>
+<h3 id="PAC"><a href="#PAC" class="headerlink" title="PAC"></a>PAC</h3><p>PAC（Pointer Authentication Code）：ARM v8.3的新特性。PAC属于自底向上+封锁关键路径的思路。实现原理：</p>
+<ul>
+<li>利用arm64 64位指针高位冗余特性，对内存中的关键指针加上认证信息</li>
+<li>在指针被解引用或者当做控制流跳转目的地址前校验指针的完整性</li>
+</ul>
+<img src="/2022/11/18/ios-system-security-framework-study-1/5.png">
+<p>PAC的执行流程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">                +-----------+----------------------------------+</span><br><span class="line">                | len = 25  |           len = 39               |</span><br><span class="line">                +----------------------------------------------+</span><br><span class="line">                |           |                                  |</span><br><span class="line">                |           |      pointer                     |</span><br><span class="line">                |           |                                  |</span><br><span class="line">                +-----------+----------+-----------------------+</span><br><span class="line">                                       |</span><br><span class="line">                                       |</span><br><span class="line">                                       |</span><br><span class="line">                                       |</span><br><span class="line">                                       |                     +------------------+</span><br><span class="line">                                       |                     |                  |</span><br><span class="line">                                       v                     |    APDAKey       |</span><br><span class="line">                          +------------+------------+        |                  |</span><br><span class="line">+----------------+        |                         |        |    APDBKey       |</span><br><span class="line">|                |        |                         |        |                  |</span><br><span class="line">|    modifier    +-------&gt;+   PAC instructions      +&lt;-------+    APIAKey       |</span><br><span class="line">|                |        |                         |        |                  |</span><br><span class="line">+----------------+        |                         |        |    APIBKey       |</span><br><span class="line">                          +------------+------------+        |                  |</span><br><span class="line">                                       |                     |    APGAKey       |</span><br><span class="line">                                       |                     |                  |</span><br><span class="line">                                       |                     |                  |</span><br><span class="line">                                       |                     |                  |</span><br><span class="line">                                       |                     +------------------+</span><br><span class="line">                                       |</span><br><span class="line">                                       |</span><br><span class="line">                                       |</span><br><span class="line">                                       |</span><br><span class="line">                                       v</span><br><span class="line">                 +----------+----------+-----------------------+</span><br><span class="line">                 |          |                                  |</span><br><span class="line">                 | PAC part |       pointer                    |</span><br><span class="line">                 |          |                                  |</span><br><span class="line">                 +----------+----------------------------------+</span><br></pre></td></tr></table></figure>
+<p>一共有五个硬件Key，只能使用无法读取；modifier为一个用户可控的输入内容，最后得到的检验值放在指针前面。</p>
+<p>基于硬件支持实现对指针的完整性保护，Apple芯片遥遥领先业界，从iPhone XS开始，商业化应用PAC。</p>
+<p>iOS12：基于PAC的控制流完整性<br>iOS14：基于PAC的控制流完整性+部分数据指针完整性（重点防护攻击者常用）</p>
+<p>整个安全机制涉及：编译器 + 内核开发 + 攻击手段学习（研究攻击者喜欢的数据指针）</p>
+<p>实现的效果：正向（vptr、vtbl完整性、callback完整性）+ 反向（栈返回地址）的CFI + 部分数据指针保护</p>
+<ul>
+<li>彻底消除了直接控制流劫持的漏洞利用</li>
+<li>极大限制了攻击者内存破坏能力</li>
+</ul>
+<p>现在要攻击iOS，必须要先通过漏洞构造有限地址读写，之后才有机会构造代码执行，并不能直接通过漏洞进行控制流劫持。</p>
+<h3 id="攻击面的变化"><a href="#攻击面的变化" class="headerlink" title="攻击面的变化"></a>攻击面的变化</h3><img src="/2022/11/18/ios-system-security-framework-study-1/6.png">
+<h3 id="苹果的下一步"><a href="#苹果的下一步" class="headerlink" title="苹果的下一步"></a>苹果的下一步</h3><p>针对用户隐私</p>
+<ul>
+<li>iOS 14.5 启用App Tracking Transparency，强制App公示收集使用的用户信息</li>
+<li>iOS 15将推出“应用隐私报告”和更细粒度的“限制追踪用户”功能</li>
+</ul>
+<p>ARM v8.5</p>
+<ul>
+<li>Memory Tagging</li>
+<li>性能损耗 vs 安全收益</li>
+</ul>
+<h3 id="一些思考"><a href="#一些思考" class="headerlink" title="一些思考"></a>一些思考</h3><p>为什么Apple持续在安全投入？</p>
+<ul>
+<li>系统安全是iOS生态的基石</li>
+<li>系统安全是iOS业务特性的一部分</li>
+<li>系统安全是Apple商业模型的护城河</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>系统安全经过理论探索到原型实践，总结出“隔离+访问控制”的基本架构，但是在个人电脑时代问题频出。</p>
+<p>iOS以可信计算为基础，打造全新的iOS生态，安全成为iOS生态和业务模式的护城河</p>
+<p>随着安全机制不断改进，内存安全迎来拐点</p>
+<p>安全的博弈属性和木桶效应注定对抗不会止步（各类逻辑漏洞开始爆发）</p>
+<p>漏洞防御过程中四大难题</p>
+<ul>
+<li>攻击面多样性</li>
+<li>漏洞多样性</li>
+<li>漏洞利用方法的多样性</li>
+<li>能达到攻击目标的路径的多样性</li>
+</ul>
+<p>三种策略</p>
+<ul>
+<li>从源头上防御：减少漏洞的产生，减少攻击面，增加攻击环节</li>
+<li>封锁关键路径：封锁漏洞触发-&gt;漏洞利用的中间环节</li>
+<li>自底向上：依赖硬件安全特性支撑软件安全</li>
+</ul>
+<h2 id="其他有用资料"><a href="#其他有用资料" class="headerlink" title="其他有用资料"></a>其他有用资料</h2><p>google p0 ios内核漏洞近况 <a href="https://googleprojectzero.blogspot.com/2020/06/a-survey-of-recent-ios-kernel-exploits.html" target="_blank" rel="noopener">https://googleprojectzero.blogspot.com/2020/06/a-survey-of-recent-ios-kernel-exploits.html</a></p>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
+            </p><p>原文链接：<a href="https://hurricane618.me/2022/11/18/ios-system-security-framework-study-1/">https://hurricane618.me/2022/11/18/ios-system-security-framework-study-1/</a>
+            </p><p>发表日期：<a href="https://hurricane618.me/2022/11/18/ios-system-security-framework-study-1/">November 18th 2022, 12:42:44 am</a>
+            </p><p>更新日期：<a href="https://hurricane618.me/2022/11/18/ios-system-security-framework-study-1/">November 18th 2022, 12:42:44 am</a>
+            </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2022/05/26/pwn-college-writeup-one/" title="pwn.college 学习笔记（1）">
+                    <div class="prevTitle">pwn.college 学习笔记（1）</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "https://hurricane618.me/2022/11/18/ios-system-security-framework-study-1/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "iOS系统安全框架演进学习"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://hurricane618.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:hurricane618@hotmail.com" class="iconfont-archer email" title="email"></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/hurricane618" class="iconfont-archer github" target="_blank" title="github"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//twitter.com/hurricane_618" class="iconfont-archer twitter" target="_blank" title="twitter"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title="rss"></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a> record <a href="https://beian.miit.gov.cn">蜀ICP备17007526号</a> and <a href="http://hurricane618.me/love/">love</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+    
+    <span id="busuanzi_container_site_uv">已经有 <span id="busuanzi_value_site_uv"></span> 个不明生物光临此地</span>
+    
+    </div>
+    
+</footer>
+
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1970-1980-系统安全理论模型大发展"><span class="toc-number">1.</span> <span class="toc-text">1970~1980 系统安全理论模型大发展</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1980-2000-操作系统-服务器快速发展"><span class="toc-number">2.</span> <span class="toc-text">1980~2000 操作系统/服务器快速发展</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2000-2010-个人电脑-互联网大发展"><span class="toc-number">3.</span> <span class="toc-text">2000~2010 个人电脑/互联网大发展</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2010-2020-移动互联网-智能手机大爆发"><span class="toc-number">4.</span> <span class="toc-text">2010~2020 移动互联网/智能手机大爆发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#小结"><span class="toc-number">5.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#阴云不散的幽灵——漏洞"><span class="toc-number"></span> <span class="toc-text">阴云不散的幽灵——漏洞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#iOS安全架构演化过程"><span class="toc-number"></span> <span class="toc-text">iOS安全架构演化过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#早期阶段"><span class="toc-number">1.</span> <span class="toc-text">早期阶段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#更安全的可信启动"><span class="toc-number">2.</span> <span class="toc-text">更安全的可信启动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#KTRR和APRR"><span class="toc-number">3.</span> <span class="toc-text">KTRR和APRR</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PAC"><span class="toc-number">4.</span> <span class="toc-text">PAC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#攻击面的变化"><span class="toc-number">5.</span> <span class="toc-text">攻击面的变化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#苹果的下一步"><span class="toc-number">6.</span> <span class="toc-text">苹果的下一步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#一些思考"><span class="toc-number">7.</span> <span class="toc-text">一些思考</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number"></span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他有用资料"><span class="toc-number"></span> <span class="toc-text">其他有用资料</span></a>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 34
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2022 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/18</span><a class="archive-post-title" href="/2022/11/18/ios-system-security-framework-study-1/">iOS系统安全框架演进学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span><a class="archive-post-title" href="/2022/05/26/pwn-college-writeup-one/">pwn.college 学习笔记（1）</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2021 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/08</span><a class="archive-post-title" href="/2021/12/08/2021-autunm-recruitment-summary/">一个双非安全菜鸡的秋招总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/09</span><a class="archive-post-title" href="/2021/06/09/2021-face-has-some-problems/">记最近一个月面瘫那点事</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/15</span><a class="archive-post-title" href="/2021/05/15/hw2021-summary/">hw2021 蓝队总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/28</span><a class="archive-post-title" href="/2021/04/28/linux-kernel-security-summary/">Linux 内核安全机制总结</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/17</span><a class="archive-post-title" href="/2020/12/17/2020xhlj-iot-pwn/">西湖论剑 IoT闯关赛 2020 pwn3 ezarmpwn</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href="/2020/10/26/2020-bytectf-gun/">2020 bytectf gun writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/12</span><a class="archive-post-title" href="/2020/10/12/2020-tctf-final-jit/">2020 TCTF final SecureJIT writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href="/2020/09/15/2020qwb-qwxf-pwn/">2020强网杯 强网先锋のpwn</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href="/2020/08/07/glibc-pwn-off-by-one-1/">glibc堆利用之off by one的两道CTF题目</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2020/08/01/2020rctf-some-pwn/">2020RCTF 几道pwn题的复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/13</span><a class="archive-post-title" href="/2020/01/13/algorithm-course-summary/">算法课程总结</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/27</span><a class="archive-post-title" href="/2019/11/27/docker-mysql-problem-check/">Docker中的Mysql配置问题处理与思考</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/11</span><a class="archive-post-title" href="/2019/11/11/cnss-recruit-pwn-1/">CNSS招新题中的一道ROP题</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/14</span><a class="archive-post-title" href="/2019/09/14/fancy-rop-practice/">花式栈溢出学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/26</span><a class="archive-post-title" href="/2019/07/26/basic-rop-practice/">基础ROP学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/24</span><a class="archive-post-title" href="/2019/05/24/2019rctf-some-writeup/">2019RCTF 部分Web的WriteUp</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span><a class="archive-post-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">2019DDCTF 未解决的web题 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">2019DDCTF 部分我解决的题目writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/31</span><a class="archive-post-title" href="/2019/03/31/2019TCTF-web-writeup/">2019TCTF web writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href="/2019/03/02/serial-ports-translation-cn/">快速寻找串行接口</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/18</span><a class="archive-post-title" href="/2019/02/18/yingshi-camera-firmware-extract/">萤石某摄像头的安全分析--固件提取</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/03</span><a class="archive-post-title" href="/2019/02/03/thinkphp-5-0-23-rce/">thinkphp 5.0.23 rce分析和复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/27</span><a class="archive-post-title" href="/2019/01/27/haozi-xss-challenges/">haozi xss 挑战赛 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href="/2019/01/24/code-breaking-lumenserial/">code-breaking lumenserial 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/10</span><a class="archive-post-title" href="/2019/01/10/code-breaking-esay-wp/">code-breaking easy部分题目writeup</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/15</span><a class="archive-post-title" href="/2018/08/15/google-ctf-beginner-part2/">Google CTF Beginner Part2</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2018/08/01/dianfengjikeCTF-web/">巅峰极客CTF 部分Web复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/18</span><a class="archive-post-title" href="/2018/07/18/google-ctf-beginner-part1/">Google CTF Beginner Part1</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href="/2018/07/08/google-ctf-beginner-js-safe-1/">Google CTF Beginner JS Safe 1 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/01</span><a class="archive-post-title" href="/2018/07/01/phpmyadmin4-8-1-background-LFI/">phpmyadmin4.8.1 后台LFI</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/30</span><a class="archive-post-title" href="/2018/06/30/csp-bypass-summary/">CSP绕过总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span><a class="archive-post-title" href="/2018/06/26/new-start/">新的开始</a>
+        </li>
+    
+    </ul></div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="人生"><span class="iconfont-archer">&#xe606;</span>人生</span>
+    
+        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
+    
+        <span class="sidebar-tag-name" data-tags="fmt"><span class="iconfont-archer">&#xe606;</span>fmt</span>
+    
+        <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
+    
+        <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
+    
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
+        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="hw"><span class="iconfont-archer">&#xe606;</span>hw</span>
+    
+        <span class="sidebar-tag-name" data-tags="总结"><span class="iconfont-archer">&#xe606;</span>总结</span>
+    
+        <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
+    
+        <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
+    
+        <span class="sidebar-tag-name" data-tags="ARM"><span class="iconfont-archer">&#xe606;</span>ARM</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
+    
+        <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="求职"><span class="iconfont-archer">&#xe606;</span>求职</span>
+    
+        <span class="sidebar-tag-name" data-tags="ios"><span class="iconfont-archer">&#xe606;</span>ios</span>
+    
+        <span class="sidebar-tag-name" data-tags="安全机制"><span class="iconfont-archer">&#xe606;</span>安全机制</span>
+    
+        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+        <span class="sidebar-tag-name" data-tags="Linux"><span class="iconfont-archer">&#xe606;</span>Linux</span>
+    
+        <span class="sidebar-tag-name" data-tags="Kernel"><span class="iconfont-archer">&#xe606;</span>Kernel</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br>
+    1、请确保node版本大于6.2<br>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+        <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "hurricane618"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
