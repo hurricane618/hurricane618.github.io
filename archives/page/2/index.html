@@ -365,6 +365,39 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2020/10/12/2020-tctf-final-jit/">
+            
+                <span>2020 TCTF final SecureJIT writeup</span>
+        </a>
+        <div class="abstract-content">
+            第一次打final 被打的头都炸了，555555。过去三周了，还是水一下这道签到题。
+题目情况作者搞到了一个ruby的jit——rubi，其中打了patch，让执行代码的区域变成不可写的情况。
+12345678910111213141516diff --git a/engine.c b/engine.cindex 79e83d2..2350d59 100644--- a/engine.c+++ b/engine.c@@ -137,6 +137,11 @@ static int execute(char *source)init();lex(source);parser();+ long ...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/10/12</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="fmt">fmt</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2020/09/15/2020qwb-qwxf-pwn/">
             
                 <span>2020强网杯 强网先锋のpwn</span>
@@ -649,36 +682,6 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
             <!-- date  -->
             <div class="abstract-date">
                 <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/24</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">
-            
-                <span>2019DDCTF 未解决的web题 writeup</span>
-        </a>
-        <div class="abstract-content">
-            homebrew event loop一道python的代码审计题目，题目的入口点会检测url中携带的参数并且初始化session的值。
-123456789101112def entry_point():	  querystring = urllib.unquote(request.query_string)	  request.event_queue = []	  if querystring == '' or (not querystring.startswith('action:')) or len(querystring) &gt; 100:		    querystring =...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/04/29</span>
             </div>
             <!-- tags  -->
             
@@ -1288,14 +1291,9 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
     
     
     
-    
-    
-    
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 35
+        Total : 36
         </div>
         <!-- search  -->
         
@@ -1305,6 +1303,20 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
     
     
     
+    
+    <div class="archive-year"> 2023 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/14</span><a class="archive-post-title" href="/2023/03/14/selinux-source-code-kernel-part/">SELinux源码分析--内核态</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
     
     <div class="archive-year"> 2022 </div>
     <ul class="year-list">
@@ -1525,6 +1537,8 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
     
+        <span class="sidebar-tag-name" data-tags="娱乐"><span class="iconfont-archer">&#xe606;</span>娱乐</span>
+    
         <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
     
         <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
@@ -1561,15 +1575,19 @@ nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &
     
         <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
     
+        <span class="sidebar-tag-name" data-tags="SELinux"><span class="iconfont-archer">&#xe606;</span>SELinux</span>
+    
+        <span class="sidebar-tag-name" data-tags="源码分析"><span class="iconfont-archer">&#xe606;</span>源码分析</span>
+    
         <span class="sidebar-tag-name" data-tags="求职"><span class="iconfont-archer">&#xe606;</span>求职</span>
     
         <span class="sidebar-tag-name" data-tags="ios"><span class="iconfont-archer">&#xe606;</span>ios</span>
     
         <span class="sidebar-tag-name" data-tags="安全机制"><span class="iconfont-archer">&#xe606;</span>安全机制</span>
     
-        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
-    
         <span class="sidebar-tag-name" data-tags="人生"><span class="iconfont-archer">&#xe606;</span>人生</span>
+    
+        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
     
         <span class="sidebar-tag-name" data-tags="Linux"><span class="iconfont-archer">&#xe606;</span>Linux</span>
     
@@ -1608,9 +1626,9 @@ jsonContent:
         <div class="sidebar-panel-categories">
     <div class="sidebar-categories-name">
     
-        <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
-    
         <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+        <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
     
     </div>
     <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>

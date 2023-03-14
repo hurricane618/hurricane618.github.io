@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="hurricane618">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="hurricane618">
+    
+    <meta name="keywords" content="hexo,web security,pwn,ctf,hurricane618,代码审计,iot">
+    
+    <meta name="description" content="hurricane618's blog">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>SELinux源码分析--内核态 · 风之栖息地|hurricane618&#39;s blog</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/hurricane_favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <!-- <script>
+        (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)          })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-121933059-1', 'auto');
+        ga('send', 'pageview');
+     </script> -->
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VW7DP47D51"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-VW7DP47D51');
+    </script>
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/">风之栖息地</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">SELinux源码分析--内核态</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href="/">风之栖息地</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg1.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            SELinux源码分析--内核态
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class="post-intro-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="SELinux">SELinux</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="源码分析">源码分析</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">2.6k</span>阅读时长: <span class="post-count reading-time">10 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2023/03/14</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>为了更加熟悉SELinux，针对这个安全机制的源码部分做了一些梳理，结合了官方的指南丰富了其中的源码实现细节。SELinux博大精深，这篇讲述该机制的内核部分实现，包括贯穿整个机制的两个核心——对系统行为的检查以及标签的转换，以及比较核心的数据和接口。</p>
+<p>备注：我的源码分析中忽略了mls机制，在一些检查点中针对mls有额外的处理。</p>
+<h2 id="核心流程一：对系统调用行为的鉴权"><a href="#核心流程一：对系统调用行为的鉴权" class="headerlink" title="核心流程一：对系统调用行为的鉴权"></a>核心流程一：对系统调用行为的鉴权</h2><p>我这里拿<code>fork</code>系统调用为例子🌰，整个调用过程核心流程如下图所示：</p>
+<img src="/2023/03/14/selinux-source-code-kernel-part/selinux行为鉴权.png">
+<p>首先是系统调用的入口函数里会存在一些hook点，比如这里的fork系统调用在<code>copy_process</code>中存在<code>security_task_alloc</code>，而这个是LSM的hook点位。SELinux的<code>hooks.c</code>中<code>selinux_hooks</code>结构体数组将SELinux相关的检查函数用<code>LSM_HOOK_INIT</code>设置到对应的hook点上。</p>
+<p>在某个进程触发fork系统调用，到达安全检测点会跳转到<code>selinux_task_alloc</code>函数。该函数则是SELinux检测这个系统调用是否有权限执行。不同的系统调用有不同的检查逻辑，最终会调用的权限检查函数也有所不同，<code>fork</code>系统调用的检查函数是<code>avc_has_perm</code>。</p>
+<p><code>avc_has_perm</code>函数在<code>avc.c</code>中，用于检查系统调用是否被授权。其中有两个主要函数分别为<code>avc_has_perm_noaudit</code>和<code>avc_audit</code>，<code>avc_has_perm_noaudit</code>主要做具体的权限检查，而<code>avc_audit</code>则是记录avc日志信息。</p>
+<p><code>avc_has_perm_noaudit</code>首先给自己加上rcu的读锁，然后从已有的avc数据中查找是否缓存过，找得到就直接复制一份出来，没有找到则进入<code>avc_compute_av</code>计算av数据。根据av数据中的规则权限和请求的权限求得这次请求是否被允许，如果行为不允许，会进入<code>avc_denied</code>将这次的av结果更新。</p>
+<p><code>avc_compute_av</code>主要包含两个函数，其一是 <code>security_compute_av</code>，负责计算av数据；其二是<code>avc_insert</code>将计算到的avc数据插入缓存中。<code>security_compute_av</code>通过<code>ssid</code>和<code>tsid</code>在sidtab中搜索到<code>scontext</code>和<code>tcontext</code>进入到整个流程的核心函数<code>context_struct_compute_av</code>。</p>
+<p><code>context_struct_compute_av</code>函数含有多个检查访问是否合法的步骤。</p>
+<ol>
+<li>avd内容的初始化；</li>
+<li>遍历检查对象类和权限，并根据节点的类型（AVTAB_ALLOWED、AVTAB_AUDITALLOW、AVTAB_AUDITDENY、AVTAB_XPERMS）将数据整合进avd中；</li>
+<li><code>cond_compute_av</code>检查是否有条件语句规则包含在这次的访问判断中，如果存在则会对权限做修改；</li>
+<li>通过<code>constraint_expr_eval</code>查看是否存在额外约束，根据额外约束移除权限；</li>
+<li>如果进程标签转换正在执行，需要检测是否有<code>transition</code>或<code>dyntransition</code>权限，是否有角色的改变。</li>
+<li>检查是否有<code>typebounds</code>规则约束应用在这次访问中，根据额外约束修正权限</li>
+<li>这些结果都保存在avd数据中</li>
+</ol>
+<p><code>avc_audit</code>会先利用<code>avc_audit_required</code>检查是否要记录audit日志，再调用<code>slow_avc_audit</code>函数构造具体的日志信息。<code>avc_audit_required</code>内部会先把请求的权限和取反后的允许权限做与操作，这样就能得到是否拒绝该行为。但这里会有另外一个位<code>avd-&gt;auditdeny</code>，如果该位被置为0，则这个拒绝行为不会被记录在audit日志中。</p>
+<p>当整个鉴权过程结束之后会从<code>selinux_task_alloc</code>返回，一路返回到fork自身的<code>copy_process</code>中继续系统调用执行。</p>
+<h2 id="核心流程二：进程的标签转换"><a href="#核心流程二：进程的标签转换" class="headerlink" title="核心流程二：进程的标签转换"></a>核心流程二：进程的标签转换</h2><p>SELinux中存在一种规则type_transition，让一个带着标签的进程，执行另外一个带着标签的文件时，发生标签转换，从原有的标签转换成其他设置的标签。</p>
+<p><code>type_transition unconfined_t secure_services_exec_t : process ext_gateway_t;</code></p>
+<p><code>unconfined_t</code>的进程执行了带着<code>secure_services_exec_t</code>的文件，触发标签转换，该文件执行成功变成进程后为<code>ext_gateway_t</code>。但要真正的执行转换还需要有三个权限：</p>
+<p>（1）<code>allow unconfined_t ext_gateway_t : process transition;</code>标签间的转换权限</p>
+<p>（2）<code>allow unconfined_t secure_services_exec_t : file { execute read getattr };</code>进程执行文件的权限</p>
+<p>（3）<code>allow ext_gateway_t secure_services_exec_t : file entrypoint;</code>转换标签必须有进入点权限</p>
+<p>因为是要拉起另外一个进程所以入口都是在do_execveat_common中。</p>
+<img src="/2023/03/14/selinux-source-code-kernel-part/selinux标签转换.png">
+<p><strong>整个过程分为三个阶段</strong></p>
+<p>第一个阶段是检查进程标签转换的标签内容</p>
+<p>首先从程序执行入口处进入<code>alloc_bprm</code>，这里会分配<code>linux_binprm</code>结构体，这个结构体记录了二进制执行程序的相关信息，包括核心的凭证和权限，参数，环境变量，文件名等内容。经过一系列的字符串拷贝和参数检查，进入到<code>bprm_execve</code>执行新的二进制程序。<code>bprm_execve</code>函数中有LSM的hook点位<code>security_bprm_creds_for_exec</code>，最终调用<code>selinux_bprm_creds_for_exec</code>。</p>
+<p><code>selinux_bprm_creds_for_exec</code>会调用<code>security_transition_sid</code>检查程序的标签转换内容，而这个函数只是<code>security_compute_sid</code>的一层封装，<code>security_compute_sid</code>中会确认是否需要计算新的sid。大概分成下面的流程：</p>
+<ol>
+<li>搜索sidtab中的ssid和tsid，获得<code>scontext</code>和<code>tcontext</code>；</li>
+<li>设置用户id、角色id和标签类型；</li>
+<li>检查是否有<code>type_transition</code>规则在av数据中或者条件av数据中</li>
+<li>如果存在标签转换，检查是否有<code>role_transition</code>角色转换，并设置好角色</li>
+<li>检查新的标签内容是否合法，不合法内容将会被日志记录；</li>
+<li>调用<code>sidtab_context_to_sid</code>获得新标签的sid，并在sidtab中更新</li>
+</ol>
+<p>第二个阶段检查进程是否有转换等权限</p>
+<p>从<code>selinux_bprm_creds_for_exec</code>中执行完<code>security_transition_sid</code>后，会有许多的<code>avc_has_perm</code>函数用来确认是否有相关的转换权限。首先会检查，是否有<code>execute_no_trans</code>权限，拥有该权限会直接返回，没有则继续检查<code>transition</code>、<code>entrypoint</code>等其他权限。</p>
+<p>第三个阶段检查执行二进制的相关权限</p>
+<p>在前面两个阶段的检查结束后，会返回到<code>bprm_execve</code>中继续执行到<code>exec_binprm</code>，这个函数会调用<code>search_binary_handler</code>寻找二进制文件相应的处理器，并在处理其中执行它的<code>.load_binary</code>函数指针执行到<code>load_xxx_binary</code>中，这些函数最后的入口点在<code>begin_new_exec</code>。</p>
+<p><code>begin_new_exec</code>会在最后执行<code>security_bprm_committing_creds</code>和<code>security_bprm_committed_creds</code>这两个hook点对应，<code>selinux_bprm_committing_creds</code>和<code>selinux_bprm_committed_creds</code>。第一个函数用于进程初始化凭证，这里会检查是否有权限限制，第二个函数针对不会继承信号状态的进程做信号清除。</p>
+<h2 id="核心数据和接口"><a href="#核心数据和接口" class="headerlink" title="核心数据和接口"></a>核心数据和接口</h2><h3 id="SELinux状态信息的全局变量"><a href="#SELinux状态信息的全局变量" class="headerlink" title="SELinux状态信息的全局变量"></a>SELinux状态信息的全局变量</h3><p><code>struct selinux_state selinux_state;</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">selinux_state</span> &#123;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_SECURITY_SELINUX_DISABLE</span></span><br><span class="line">	<span class="keyword">bool</span> disabled;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_SECURITY_SELINUX_DEVELOP</span></span><br><span class="line">	<span class="keyword">bool</span> enforcing;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	<span class="keyword">bool</span> checkreqprot;</span><br><span class="line">	<span class="keyword">bool</span> initialized;</span><br><span class="line">	<span class="keyword">bool</span> policycap[__POLICYDB_CAP_MAX];</span><br><span class="line"></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">page</span> *<span class="title">status_page</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">mutex</span> <span class="title">status_lock</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">selinux_avc</span> *<span class="title">avc</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">selinux_policy</span> __<span class="title">rcu</span> *<span class="title">policy</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">mutex</span> <span class="title">policy_mutex</span>;</span></span><br><span class="line">&#125; __randomize_layout;</span><br></pre></td></tr></table></figure>
+<p>一个记录SELinux的全局状态的结构体，里面包括了SELinux的开启状态，是否为enforcing模式，是否初始化，规则指针，avc记录缓存指针等信息。</p>
+<h3 id="hooks挂载函数表"><a href="#hooks挂载函数表" class="headerlink" title="hooks挂载函数表"></a>hooks挂载函数表</h3><p>hooks挂载都在hooks.c文件中，把SELinux的检查函数挂载在不同系统调用的安全函数hook点中。</p>
+<p><code>static struct security_hook_list selinux_hooks[] __lsm_ro_after_init</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">LSM_HOOK_INIT(inode_create, selinux_inode_create),</span><br><span class="line">LSM_HOOK_INIT(inode_link, selinux_inode_link),</span><br><span class="line">LSM_HOOK_INIT(inode_unlink, selinux_inode_unlink),</span><br><span class="line">LSM_HOOK_INIT(inode_symlink, selinux_inode_symlink),</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h3 id="av数据管理"><a href="#av数据管理" class="headerlink" title="av数据管理"></a>av数据管理</h3><p>管理av数据的相关结构体</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">selinux_avc</span> &#123;</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> avc_cache_threshold;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">avc_cache</span> <span class="title">avc_cache</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">avc_cache</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">hlist_head</span>	<span class="title">slots</span>[<span class="title">AVC_CACHE_SLOTS</span>];</span> <span class="comment">/* head for avc_node-&gt;list */</span></span><br><span class="line">	<span class="keyword">spinlock_t</span>		slots_lock[AVC_CACHE_SLOTS]; <span class="comment">/* lock for writes */</span></span><br><span class="line">	<span class="keyword">atomic_t</span>		lru_hint;	<span class="comment">/* LRU hint for reclaim scan */</span></span><br><span class="line">	<span class="keyword">atomic_t</span>		active_nodes;</span><br><span class="line">	u32			latest_notif;	<span class="comment">/* latest revocation notification */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">avc_node</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">avc_entry</span>	<span class="title">ae</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">hlist_node</span>	<span class="title">list</span>;</span> <span class="comment">/* anchored in avc_cache-&gt;slots[i] */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">rcu_head</span>		<span class="title">rhead</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">avc_entry</span> &#123;</span></span><br><span class="line">	u32			ssid;</span><br><span class="line">	u32			tsid;</span><br><span class="line">	u16			tclass;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">av_decision</span>	<span class="title">avd</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">avc_xperms_node</span>	*<span class="title">xp_node</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">av_decision</span> &#123;</span></span><br><span class="line">	u32 allowed;</span><br><span class="line">	u32 auditallow;</span><br><span class="line">	u32 auditdeny;</span><br><span class="line">	u32 seqno;</span><br><span class="line">	u32 flags;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>selinux_avc-&gt;avc_cache.slots是挂着avc_node的list。而avc_code的ae管理着基本的请求源和目标对象的id值，通过这两个id能找到对应的标签，avd则是记录请求的权限。</p>
+<h3 id="策略数据管理"><a href="#策略数据管理" class="headerlink" title="策略数据管理"></a>策略数据管理</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* The policy database */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">policydb</span> &#123;</span></span><br><span class="line">	<span class="keyword">int</span> mls_enabled;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* symbol tables */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">symtab</span> <span class="title">symtab</span>[<span class="title">SYM_NUM</span>];</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> p_commons symtab[SYM_COMMONS]</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> p_classes symtab[SYM_CLASSES]</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> p_roles symtab[SYM_ROLES]</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> p_types symtab[SYM_TYPES]</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> p_users symtab[SYM_USERS]</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> p_bools symtab[SYM_BOOLS]</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> p_levels symtab[SYM_LEVELS]</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> p_cats symtab[SYM_CATS]</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* symbol names indexed by (value - 1) */</span></span><br><span class="line">	<span class="keyword">char</span>		**sym_val_to_name[SYM_NUM];</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* class, role, and user attributes indexed by (value - 1) */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">class_datum</span> **<span class="title">class_val_to_struct</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">role_datum</span> **<span class="title">role_val_to_struct</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">user_datum</span> **<span class="title">user_val_to_struct</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">type_datum</span> **<span class="title">type_val_to_struct</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* type enforcement access vectors and transitions */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">avtab</span> <span class="title">te_avtab</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* role transitions */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">hashtab</span> <span class="title">role_tr</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* file transitions with the last path component */</span></span><br><span class="line">	<span class="comment">/* quickly exclude lookups when parent ttype has no rules */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">ebitmap</span> <span class="title">filename_trans_ttypes</span>;</span></span><br><span class="line">	<span class="comment">/* actual set of filename_trans rules */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">hashtab</span> <span class="title">filename_trans</span>;</span></span><br><span class="line">	<span class="comment">/* only used if policyvers &lt; POLICYDB_VERSION_COMP_FTRANS */</span></span><br><span class="line">	u32 compat_filename_trans_count;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* bools indexed by (value - 1) */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">cond_bool_datum</span> **<span class="title">bool_val_to_struct</span>;</span></span><br><span class="line">	<span class="comment">/* type enforcement conditional access vectors and transitions */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">avtab</span> <span class="title">te_cond_avtab</span>;</span></span><br><span class="line">	<span class="comment">/* array indexing te_cond_avtab by conditional */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">cond_node</span> *<span class="title">cond_list</span>;</span></span><br><span class="line">	u32 cond_list_len;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* role allows */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">role_allow</span> *<span class="title">role_allow</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* security contexts of initial SIDs, unlabeled file systems,</span></span><br><span class="line"><span class="comment">	   TCP or UDP port numbers, network interfaces and nodes */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">ocontext</span> *<span class="title">ocontexts</span>[<span class="title">OCON_NUM</span>];</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* security contexts for files in filesystems that cannot support</span></span><br><span class="line"><span class="comment">	   a persistent label mapping or use another</span></span><br><span class="line"><span class="comment">	   fixed labeling behavior. */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">genfs</span> *<span class="title">genfs</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* range transitions table (range_trans_key -&gt; mls_range) */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">hashtab</span> <span class="title">range_tr</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* type -&gt; attribute reverse mapping */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">ebitmap</span> *<span class="title">type_attr_map_array</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">ebitmap</span> <span class="title">policycaps</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">ebitmap</span> <span class="title">permissive_map</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* length of this policy when it was loaded */</span></span><br><span class="line">	<span class="keyword">size_t</span> len;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> policyvers;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> reject_unknown : <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> allow_unknown : <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">	u16 process_class;</span><br><span class="line">	u32 process_trans_perms;</span><br><span class="line">&#125; __randomize_layout;</span><br></pre></td></tr></table></figure>
+<p>比较关键的成员是两个avtab，里面记录了av相关的数据内容，用于计算访问权限。</p>
+<h3 id="selinuxfs对外接口"><a href="#selinuxfs对外接口" class="headerlink" title="selinuxfs对外接口"></a>selinuxfs对外接口</h3><p>SELinux文件系统的文件接口，用户态通过这些接口与内核功能交互。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">tree_descr</span> <span class="title">selinux_files</span>[] = &#123;</span></span><br><span class="line">		[SEL_LOAD] = &#123;<span class="string">"load"</span>, &amp;sel_load_ops, S_IRUSR|S_IWUSR&#125;,</span><br><span class="line">		[SEL_ENFORCE] = &#123;<span class="string">"enforce"</span>, &amp;sel_enforce_ops, S_IRUGO|S_IWUSR&#125;,</span><br><span class="line">		[SEL_CONTEXT] = &#123;<span class="string">"context"</span>, &amp;transaction_ops, S_IRUGO|S_IWUGO&#125;,</span><br><span class="line">		[SEL_ACCESS] = &#123;<span class="string">"access"</span>, &amp;transaction_ops, S_IRUGO|S_IWUGO&#125;,</span><br><span class="line">		[SEL_CREATE] = &#123;<span class="string">"create"</span>, &amp;transaction_ops, S_IRUGO|S_IWUGO&#125;,</span><br><span class="line">		[SEL_RELABEL] = &#123;<span class="string">"relabel"</span>, &amp;transaction_ops, S_IRUGO|S_IWUGO&#125;,</span><br><span class="line">		[SEL_USER] = &#123;<span class="string">"user"</span>, &amp;transaction_ops, S_IRUGO|S_IWUGO&#125;,</span><br><span class="line">		[SEL_POLICYVERS] = &#123;<span class="string">"policyvers"</span>, &amp;sel_policyvers_ops, S_IRUGO&#125;,</span><br><span class="line">		[SEL_COMMIT_BOOLS] = &#123;<span class="string">"commit_pending_bools"</span>, &amp;sel_commit_bools_ops, S_IWUSR&#125;,</span><br><span class="line">		[SEL_MLS] = &#123;<span class="string">"mls"</span>, &amp;sel_mls_ops, S_IRUGO&#125;,</span><br><span class="line">		[SEL_DISABLE] = &#123;<span class="string">"disable"</span>, &amp;sel_disable_ops, S_IWUSR&#125;,</span><br><span class="line">		[SEL_MEMBER] = &#123;<span class="string">"member"</span>, &amp;transaction_ops, S_IRUGO|S_IWUGO&#125;,</span><br><span class="line">		[SEL_CHECKREQPROT] = &#123;<span class="string">"checkreqprot"</span>, &amp;sel_checkreqprot_ops, S_IRUGO|S_IWUSR&#125;,</span><br><span class="line">		[SEL_REJECT_UNKNOWN] = &#123;<span class="string">"reject_unknown"</span>, &amp;sel_handle_unknown_ops, S_IRUGO&#125;,</span><br><span class="line">		[SEL_DENY_UNKNOWN] = &#123;<span class="string">"deny_unknown"</span>, &amp;sel_handle_unknown_ops, S_IRUGO&#125;,</span><br><span class="line">		[SEL_STATUS] = &#123;<span class="string">"status"</span>, &amp;sel_handle_status_ops, S_IRUGO&#125;,</span><br><span class="line">		[SEL_POLICY] = &#123;<span class="string">"policy"</span>, &amp;sel_policy_ops, S_IRUGO&#125;,</span><br><span class="line">		[SEL_VALIDATE_TRANS] = &#123;<span class="string">"validatetrans"</span>, &amp;sel_transition_ops,</span><br><span class="line">					S_IWUGO&#125;,</span><br><span class="line">		<span class="comment">/* last one */</span> &#123;<span class="string">""</span>&#125;</span><br><span class="line">	&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="sidtab结构"><a href="#sidtab结构" class="headerlink" title="sidtab结构"></a>sidtab结构</h3><p>记录标签内容和对应sid值，在鉴权过程中可以只通过sid值找到标签。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sidtab_entry</span> &#123;</span></span><br><span class="line">	u32 sid;</span><br><span class="line">	u32 hash;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">context</span> <span class="title">context</span>;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> CONFIG_SECURITY_SELINUX_SID2STR_CACHE_SIZE &gt; 0</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sidtab_str_cache</span> __<span class="title">rcu</span> *<span class="title">cache</span>;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">hlist_node</span> <span class="title">list</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">union</span> sidtab_entry_inner &#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sidtab_node_inner</span> *<span class="title">ptr_inner</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sidtab_node_leaf</span>  *<span class="title">ptr_leaf</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sidtab_node_leaf</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sidtab_entry</span> <span class="title">entries</span>[<span class="title">SIDTAB_LEAF_ENTRIES</span>];</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sidtab_node_inner</span> &#123;</span></span><br><span class="line">	<span class="keyword">union</span> sidtab_entry_inner entries[SIDTAB_INNER_ENTRIES];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sidtab_isid_entry</span> &#123;</span></span><br><span class="line">	<span class="keyword">int</span> <span class="built_in">set</span>;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sidtab_entry</span> <span class="title">entry</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sidtab_convert_params</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">convert_context_args</span> *<span class="title">args</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sidtab</span> *<span class="title">target</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sidtab</span> &#123;</span></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * lock-free read access only for as many items as a prior read of</span></span><br><span class="line"><span class="comment">	 * 'count'</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">union</span> sidtab_entry_inner roots[SIDTAB_MAX_LEVEL + <span class="number">1</span>];</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * access atomically via &#123;READ|WRITE&#125;_ONCE(); only increment under</span></span><br><span class="line"><span class="comment">	 * spinlock</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	u32 count;</span><br><span class="line">	<span class="comment">/* access only under spinlock */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sidtab_convert_params</span> *<span class="title">convert</span>;</span></span><br><span class="line">	<span class="keyword">bool</span> frozen;</span><br><span class="line">	<span class="keyword">spinlock_t</span> lock;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> CONFIG_SECURITY_SELINUX_SID2STR_CACHE_SIZE &gt; 0</span></span><br><span class="line">	<span class="comment">/* SID -&gt; context string cache */</span></span><br><span class="line">	u32 cache_free_slots;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">cache_lru_list</span>;</span></span><br><span class="line">	<span class="keyword">spinlock_t</span> cache_lock;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* index == SID - 1 (no entry for SECSID_NULL) */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sidtab_isid_entry</span> <span class="title">isids</span>[<span class="title">SECINITSID_NUM</span>];</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Hash table for fast reverse context-to-sid lookups. */</span></span><br><span class="line">	DECLARE_HASHTABLE(context_to_sid, SIDTAB_HASH_BITS);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://hurricane618.me">hurricane618</a>
+            </p><p>原文链接：<a href="https://hurricane618.me/2023/03/14/selinux-source-code-kernel-part/">https://hurricane618.me/2023/03/14/selinux-source-code-kernel-part/</a>
+            </p><p>发表日期：<a href="https://hurricane618.me/2023/03/14/selinux-source-code-kernel-part/">March 14th 2023, 11:56:59 pm</a>
+            </p><p>更新日期：<a href="https://hurricane618.me/2023/03/14/selinux-source-code-kernel-part/">March 14th 2023, 11:56:59 pm</a>
+            </p><p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2022/11/27/seven-years-of-my-life1/" title="我的人生七年（一）">
+                    <div class="prevTitle">我的人生七年（一）</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "https://hurricane618.me/2023/03/14/selinux-source-code-kernel-part/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "SELinux源码分析--内核态"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://hurricane618.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:hurricane618@hotmail.com" class="iconfont-archer email" title="email"></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/hurricane618" class="iconfont-archer github" target="_blank" title="github"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//twitter.com/hurricane_618" class="iconfont-archer twitter" target="_blank" title="twitter"></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title="rss"></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a> record <a href="https://beian.miit.gov.cn">蜀ICP备17007526号</a> </span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">已经有 <span id="busuanzi_value_site_pv"></span> 个不明生物光临此地</span>
+    
+    </div>
+    
+</footer>
+
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#核心流程一：对系统调用行为的鉴权"><span class="toc-number">1.</span> <span class="toc-text">核心流程一：对系统调用行为的鉴权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#核心流程二：进程的标签转换"><span class="toc-number">2.</span> <span class="toc-text">核心流程二：进程的标签转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#核心数据和接口"><span class="toc-number">3.</span> <span class="toc-text">核心数据和接口</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SELinux状态信息的全局变量"><span class="toc-number">3.1.</span> <span class="toc-text">SELinux状态信息的全局变量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#hooks挂载函数表"><span class="toc-number">3.2.</span> <span class="toc-text">hooks挂载函数表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#av数据管理"><span class="toc-number">3.3.</span> <span class="toc-text">av数据管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#策略数据管理"><span class="toc-number">3.4.</span> <span class="toc-text">策略数据管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#selinuxfs对外接口"><span class="toc-number">3.5.</span> <span class="toc-text">selinuxfs对外接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sidtab结构"><span class="toc-number">3.6.</span> <span class="toc-text">sidtab结构</span></a></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 36
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2023 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/14</span><a class="archive-post-title" href="/2023/03/14/selinux-source-code-kernel-part/">SELinux源码分析--内核态</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2022 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/27</span><a class="archive-post-title" href="/2022/11/27/seven-years-of-my-life1/">我的人生七年（一）</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/18</span><a class="archive-post-title" href="/2022/11/18/ios-system-security-framework-study-1/">iOS系统安全框架演进学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span><a class="archive-post-title" href="/2022/05/26/pwn-college-writeup-one/">pwn.college 学习笔记（1）</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2021 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/08</span><a class="archive-post-title" href="/2021/12/08/2021-autunm-recruitment-summary/">一个双非安全菜鸡的秋招总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/09</span><a class="archive-post-title" href="/2021/06/09/2021-face-has-some-problems/">记最近一个月面瘫那点事</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/15</span><a class="archive-post-title" href="/2021/05/15/hw2021-summary/">hw2021 蓝队总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/28</span><a class="archive-post-title" href="/2021/04/28/linux-kernel-security-summary/">Linux 内核安全机制总结</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/17</span><a class="archive-post-title" href="/2020/12/17/2020xhlj-iot-pwn/">西湖论剑 IoT闯关赛 2020 pwn3 ezarmpwn</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/26</span><a class="archive-post-title" href="/2020/10/26/2020-bytectf-gun/">2020 bytectf gun writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/12</span><a class="archive-post-title" href="/2020/10/12/2020-tctf-final-jit/">2020 TCTF final SecureJIT writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/15</span><a class="archive-post-title" href="/2020/09/15/2020qwb-qwxf-pwn/">2020强网杯 强网先锋のpwn</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/07</span><a class="archive-post-title" href="/2020/08/07/glibc-pwn-off-by-one-1/">glibc堆利用之off by one的两道CTF题目</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2020/08/01/2020rctf-some-pwn/">2020RCTF 几道pwn题的复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/13</span><a class="archive-post-title" href="/2020/01/13/algorithm-course-summary/">算法课程总结</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/27</span><a class="archive-post-title" href="/2019/11/27/docker-mysql-problem-check/">Docker中的Mysql配置问题处理与思考</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/11</span><a class="archive-post-title" href="/2019/11/11/cnss-recruit-pwn-1/">CNSS招新题中的一道ROP题</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/14</span><a class="archive-post-title" href="/2019/09/14/fancy-rop-practice/">花式栈溢出学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/26</span><a class="archive-post-title" href="/2019/07/26/basic-rop-practice/">基础ROP学习</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/24</span><a class="archive-post-title" href="/2019/05/24/2019rctf-some-writeup/">2019RCTF 部分Web的WriteUp</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span><a class="archive-post-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">2019DDCTF 未解决的web题 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/19</span><a class="archive-post-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">2019DDCTF 部分我解决的题目writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/31</span><a class="archive-post-title" href="/2019/03/31/2019TCTF-web-writeup/">2019TCTF web writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span><a class="archive-post-title" href="/2019/03/02/serial-ports-translation-cn/">快速寻找串行接口</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/18</span><a class="archive-post-title" href="/2019/02/18/yingshi-camera-firmware-extract/">萤石某摄像头的安全分析--固件提取</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/03</span><a class="archive-post-title" href="/2019/02/03/thinkphp-5-0-23-rce/">thinkphp 5.0.23 rce分析和复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/27</span><a class="archive-post-title" href="/2019/01/27/haozi-xss-challenges/">haozi xss 挑战赛 writeup</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/24</span><a class="archive-post-title" href="/2019/01/24/code-breaking-lumenserial/">code-breaking lumenserial 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/10</span><a class="archive-post-title" href="/2019/01/10/code-breaking-esay-wp/">code-breaking easy部分题目writeup</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/15</span><a class="archive-post-title" href="/2018/08/15/google-ctf-beginner-part2/">Google CTF Beginner Part2</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/01</span><a class="archive-post-title" href="/2018/08/01/dianfengjikeCTF-web/">巅峰极客CTF 部分Web复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/18</span><a class="archive-post-title" href="/2018/07/18/google-ctf-beginner-part1/">Google CTF Beginner Part1</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href="/2018/07/08/google-ctf-beginner-js-safe-1/">Google CTF Beginner JS Safe 1 复现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/01</span><a class="archive-post-title" href="/2018/07/01/phpmyadmin4-8-1-background-LFI/">phpmyadmin4.8.1 后台LFI</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/30</span><a class="archive-post-title" href="/2018/06/30/csp-bypass-summary/">CSP绕过总结</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span><a class="archive-post-title" href="/2018/06/26/new-start/">新的开始</a>
+        </li>
+    
+    </ul></div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="娱乐"><span class="iconfont-archer">&#xe606;</span>娱乐</span>
+    
+        <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
+    
+        <span class="sidebar-tag-name" data-tags="PHP"><span class="iconfont-archer">&#xe606;</span>PHP</span>
+    
+        <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
+    
+        <span class="sidebar-tag-name" data-tags="fmt"><span class="iconfont-archer">&#xe606;</span>fmt</span>
+    
+        <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
+    
+        <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
+    
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
+        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
+    
+        <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
+    
+        <span class="sidebar-tag-name" data-tags="hw"><span class="iconfont-archer">&#xe606;</span>hw</span>
+    
+        <span class="sidebar-tag-name" data-tags="总结"><span class="iconfont-archer">&#xe606;</span>总结</span>
+    
+        <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
+    
+        <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
+    
+        <span class="sidebar-tag-name" data-tags="ARM"><span class="iconfont-archer">&#xe606;</span>ARM</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
+    
+        <span class="sidebar-tag-name" data-tags="XSS"><span class="iconfont-archer">&#xe606;</span>XSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="SELinux"><span class="iconfont-archer">&#xe606;</span>SELinux</span>
+    
+        <span class="sidebar-tag-name" data-tags="源码分析"><span class="iconfont-archer">&#xe606;</span>源码分析</span>
+    
+        <span class="sidebar-tag-name" data-tags="求职"><span class="iconfont-archer">&#xe606;</span>求职</span>
+    
+        <span class="sidebar-tag-name" data-tags="ios"><span class="iconfont-archer">&#xe606;</span>ios</span>
+    
+        <span class="sidebar-tag-name" data-tags="安全机制"><span class="iconfont-archer">&#xe606;</span>安全机制</span>
+    
+        <span class="sidebar-tag-name" data-tags="人生"><span class="iconfont-archer">&#xe606;</span>人生</span>
+    
+        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+    
+        <span class="sidebar-tag-name" data-tags="Linux"><span class="iconfont-archer">&#xe606;</span>Linux</span>
+    
+        <span class="sidebar-tag-name" data-tags="Kernel"><span class="iconfont-archer">&#xe606;</span>Kernel</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br>
+    1、请确保node版本大于6.2<br>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+        <span class="sidebar-category-name" data-categories="技术"><span class="iconfont-archer">&#xe60a;</span>技术</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "hurricane618"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
