@@ -365,6 +365,39 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2023/06/17/makefile-study-notes/">
+            
+                <span>Makefile学习笔记</span>
+        </a>
+        <div class="abstract-content">
+            前言这篇学习笔记是根据陈浩写的《跟我一起写Makefile》系列文章总结出的内容，这个系列文章对Makefile的讲解深入浅出，对于新人十分友好。推荐大家在有时间的情况下，通读全文。
+在写文章到一半的时候，惊闻陈浩老师离世，中文互联网永远失去了一位充满理想的技术人，写这篇文章也是感谢陈浩老师为我们贡献了如此之多的好博文，您永远都是我的榜样。希望中国的程序员不要那么的苦逼，不是每天996，而是真正的在探索技术，利用技术来提升自己的生产力。
+这是第一次感受到程序员身体健康的重要性，也希望广大程序员朋友积极锻炼身体，身体才是革命的本钱。
+Makefile思维导图
+一些有用的例子将所有.c文件编...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2023/06/17</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="makefile">makefile</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2023/03/14/selinux-source-code-kernel-part/">
             
                 <span>SELinux源码分析--内核态</span>
@@ -664,37 +697,6 @@ babymessage一道神奇的栈溢出题目，有三个功能，写name，写messa
         <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
     
         <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2020/08/07/glibc-pwn-off-by-one-1/">
-            
-                <span>glibc堆利用之off by one的两道CTF题目</span>
-        </a>
-        <div class="abstract-content">
-            b00ks这是一道asis ctf 2016的题目，主要功能是书本记录，除了基本的书本的增删改查功能，还有一个作者名称的改变。程序是一个基本保护除了canary其他全开的64位程序。
-调试写exp的过程参考了ctf-wiki，先知社区一篇文章，和另外一个博客。很多细节上面的文章已经写的很详细了，我补充一些其他细节点。
-这里漏洞的问题是出现在程序自定义的读取函数中，在读完规定长度的数据之后又会在末尾填一个0，这样就会溢出一个空字节。这种漏洞被称为OBO（off by one），这里一共使用了两次，第一次是先把作者name全部填满，这样溢出的0字节就在下一个区域中，随后这个程序有一个管理全局...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/08/07</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
     
         <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
     
@@ -1304,9 +1306,18 @@ babymessage一道神奇的栈溢出题目，有三个功能，写name，写messa
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 36
+        Total : 37
         </div>
         <!-- search  -->
         
@@ -1319,6 +1330,11 @@ babymessage一道神奇的栈溢出题目，有三个功能，写name，写messa
     
     <div class="archive-year"> 2023 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/17</span><a class="archive-post-title" href="/2023/06/17/makefile-study-notes/">Makefile学习笔记</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1562,13 +1578,13 @@ babymessage一道神奇的栈溢出题目，有三个功能，写name，写messa
     
         <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
     
-        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
-    
-        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
-    
         <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
     
         <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
+        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
     
         <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
     
@@ -1577,6 +1593,8 @@ babymessage一道神奇的栈溢出题目，有三个功能，写name，写messa
         <span class="sidebar-tag-name" data-tags="hw"><span class="iconfont-archer">&#xe606;</span>hw</span>
     
         <span class="sidebar-tag-name" data-tags="总结"><span class="iconfont-archer">&#xe606;</span>总结</span>
+    
+        <span class="sidebar-tag-name" data-tags="makefile"><span class="iconfont-archer">&#xe606;</span>makefile</span>
     
         <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
     

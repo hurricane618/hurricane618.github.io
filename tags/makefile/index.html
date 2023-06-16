@@ -365,329 +365,27 @@
     
     
     <article class="index-post">
-        <a class="abstract-title" href="/2022/05/26/pwn-college-writeup-one/">
+        <a class="abstract-title" href="/2023/06/17/makefile-study-notes/">
             
-                <span>pwn.college 学习笔记（1）</span>
+                <span>Makefile学习笔记</span>
         </a>
         <div class="abstract-content">
-            
-前言之前一段时间找到了pwn.college这个网站，发现里面的模块划分的十分详细，题目也简单容易上手，非常适合我这种菜鸡作为训练题，于是从年前开始一直刷到了现在。中间由于写论文和答辩的事情耽误了很久，到目前为止也只刷完了一半的模块，为了巩固学到的一些内容，将其整理成学习笔记的方式，也欢迎各位师傅一起讨论。最后之所以不把具体的题解放出来，一是因为其中有很多题目都是举一反三的性质，全部写出来会显得很啰嗦；二是因为该网站的创始人说尽量不要在网上公开writeup，这个是他们的课程练习网站。综上，我只在这里记录题目中的关键思路和学到的知识点。
-module1 程序IO交互模块命令行与shel...
+            前言这篇学习笔记是根据陈浩写的《跟我一起写Makefile》系列文章总结出的内容，这个系列文章对Makefile的讲解深入浅出，对于新人十分友好。推荐大家在有时间的情况下，通读全文。
+在写文章到一半的时候，惊闻陈浩老师离世，中文互联网永远失去了一位充满理想的技术人，写这篇文章也是感谢陈浩老师为我们贡献了如此之多的好博文，您永远都是我的榜样。希望中国的程序员不要那么的苦逼，不是每天996，而是真正的在探索技术，利用技术来提升自己的生产力。
+这是第一次感受到程序员身体健康的重要性，也希望广大程序员朋友积极锻炼身体，身体才是革命的本钱。
+Makefile思维导图
+一些有用的例子将所有.c文件编...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
             <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2022/05/26</span>
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2023/06/17</span>
             </div>
             <!-- tags  -->
             
             <div class="abstract-tags">
     
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2020/12/17/2020xhlj-iot-pwn/">
-            
-                <span>西湖论剑 IoT闯关赛 2020 pwn3 ezarmpwn</span>
-        </a>
-        <div class="abstract-content">
-            文章首发于安全客 https://www.anquanke.com/post/id/224972
-前言打了安恒举办的西湖论剑比赛，题目都是跑在一个开发板上的，通过数据线连接开发板的otg接口能访问题目环境。pwn题目一共有三道，其中有一道题目因为逻辑上的问题导致能比较简单的获得flag，另外一道题目是boa服务器在处理http认证过程中，发生栈溢出。我们这里分析的是这次比赛的第三道pwn题ezarmpwn。
-题目分析通过file和checksec能够知道程序为32位的arm小端程序，开启NX保护，没有PIE和canary保护。
-
-主办方给出的libc为2.30，把libc解压的文件夹和题...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/12/17</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="IOT">IOT</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="ARM">ARM</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2020/10/26/2020-bytectf-gun/">
-            
-                <span>2020 bytectf gun writeup</span>
-        </a>
-        <div class="abstract-content">
-            这周打了一下ByteCTF，发现差距还是很大的，现在的很多堆菜单题都上2.31，新版本的题目需要多熟悉熟悉。
-分析checksec保护全开，逆向的时候发现其中有prctl函数，用seccomp-tools查看沙箱逻辑。
-
-看这个逻辑只能使用orw的方法获得flag。整个程序主要由三个功能，射击子弹，上膛子弹，购买子弹，购买子弹会malloc，同时有一次向chunk写数据的机会，购买的子弹会通过一个18字节大小的数据结构管理。chunk指向分配的堆块，next指向其他堆块形成一个链表，flag是标志位分别有0，1，2，表示不同的状态。
-12345struct &#123;    char*...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/10/26</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2020/10/12/2020-tctf-final-jit/">
-            
-                <span>2020 TCTF final SecureJIT writeup</span>
-        </a>
-        <div class="abstract-content">
-            第一次打final 被打的头都炸了，555555。过去三周了，还是水一下这道签到题。
-题目情况作者搞到了一个ruby的jit——rubi，其中打了patch，让执行代码的区域变成不可写的情况。
-12345678910111213141516diff --git a/engine.c b/engine.cindex 79e83d2..2350d59 100644--- a/engine.c+++ b/engine.c@@ -137,6 +137,11 @@ static int execute(char *source)init();lex(source);parser();+ long ...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/10/12</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="fmt">fmt</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2020/09/15/2020qwb-qwxf-pwn/">
-            
-                <span>2020强网杯 强网先锋のpwn</span>
-        </a>
-        <div class="abstract-content">
-            受到摸鱼和各种项目压力之后，终于发出来了，这次是强网杯中强网先锋的4道pwn题，剩下的pwn题还在陆续复现ing，在做了在做了ing
-babymessage一道神奇的栈溢出题目，有三个功能，写name，写message，输出buf，其中message的数据会被strcopy到buf上。这里的溢出点是在写message的功能上，一开始只能够溢出16字节，覆盖掉栈变量+rbp的值。这里如果只是看反编译的代码是看不出问题的，一定要观察汇编代码，这也是我经常失误的地方不太爱看汇编，555555。
-这里的写message的函数里带着一个局部变量size，而这个变量因为是局部变量，它是受到rbp的值...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/09/15</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2020/08/01/2020rctf-some-pwn/">
-            
-                <span>2020RCTF 几道pwn题的复现</span>
-        </a>
-        <div class="abstract-content">
-            博客长草严重，上半年摸鱼太久。最近趁着有空开始复现之前的一些题目，这次做了2020RCTF的几道pwn题，本来还想着把MIPS那道题做出来再发，结果发现MIPS的调试还有很多问题，所以就先发常规一点的题。
-note最经典的菜单堆题，还是note管理系统。64位程序，保护全开。主要功能有new，sell，show，edit，经典的增删查改，除了基本功能之外，还有两个额外的功能，一个是super note，一个是越界写数据但是只能操作一次。
-这个题的super note是个幌子，最后完全没有用到。它的数据结构是三个部分组成，开头是一个指针指向我们申请的message区域，第二块是size，表...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/08/01</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="heap">heap</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/05/24/2019rctf-some-writeup/">
-            
-                <span>2019RCTF 部分Web的WriteUp</span>
-        </a>
-        <div class="abstract-content">
-            一年一度的RCTF开始了，又能学一波骚操作，RCTF的web题目去年就非常好，今年也特别出色。由于研究所月赛的原因没有参与其中，所以赛后来复现一下。
-nextphp123456789101112&lt;?php if (isset($_GET['a'])) &#123; eval($_GET['a']); &#125; else &#123; show_source(__FILE__); &#125;
-一个代码执行，但是肯定没有这么简单，执行phpinfo查看到disable_function之后，发现禁用了已知范围内的所有危险函数，并且还把之前考差过的putenv也禁用了。这样就没有办...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/24</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/04/29/2019ddctf-unsolved-writeup/">
-            
-                <span>2019DDCTF 未解决的web题 writeup</span>
-        </a>
-        <div class="abstract-content">
-            homebrew event loop一道python的代码审计题目，题目的入口点会检测url中携带的参数并且初始化session的值。
-123456789101112def entry_point():	  querystring = urllib.unquote(request.query_string)	  request.event_queue = []	  if querystring == '' or (not querystring.startswith('action:')) or len(querystring) &gt; 100:		    querystring =...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/04/29</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/04/19/2019ddctf-my-solutions-writeup/">
-            
-                <span>2019DDCTF 部分我解决的题目writeup</span>
-        </a>
-        <div class="abstract-content">
-            我得说DDCTF真的是脑洞太大，一言难尽。。。 
-滴~文件包含，需要一些转换。转成hex值之后两次base64。 
-12345678910# -*- coding: utf-8 -*- import base64 import binascii text = raw_input('text: ') text = binascii.b2a_hex(text) print text print base64.b64encode(base64.b64encode(text))
-拿到index.php源码 
-123456789101112131415161718192021222324&lt;?...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/04/19</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/03/31/2019TCTF-web-writeup/">
-            
-                <span>2019TCTF web writeup</span>
-        </a>
-        <div class="abstract-content">
-            wallbreaker easy这道题在比赛的时候专注在imagick上面，但是由于是最新版本，以前的bypass漏洞已经修补。。。之后由于复试的原因没有仔细研究，现在开始复现。
-这道题给了一个webshell，密码是backdoor，可以直接用菜刀连接，然而用phpinfo查看禁用函数，发现已经把所有执行命令的函数都ban了，并且知道操作系统是ubuntu18.04.
-
-所以这是一个受限制的webshell绕过disable_function的问题
-bypass disable_function的方法绕过disable_function也是一个老生常谈的问题了。总结一下大概有一下四种：...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/31</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="PHP">PHP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="JAVA">JAVA</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags="makefile">makefile</a>
     
 </div>
             
@@ -695,10 +393,6 @@ bypass disable_function的方法绕过disable_function也是一个老生常谈�
     </article>
     
     <!-- paginator  -->
-    
-    <nav class="page-nav">
-        <span class="page-number current">1</span><a class="page-number" href="/tags/CTF/page/2/">2</a><a class="extend next" rel="next" href="/tags/CTF/page/2/">NEXT &#62;</a>
-    </nav>
     
 </main>
             <!-- profile -->

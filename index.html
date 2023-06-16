@@ -378,6 +378,39 @@ height:50vh;
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2023/06/17/makefile-study-notes/">
+            
+                <span>Makefile学习笔记</span>
+        </a>
+        <div class="abstract-content">
+            前言这篇学习笔记是根据陈浩写的《跟我一起写Makefile》系列文章总结出的内容，这个系列文章对Makefile的讲解深入浅出，对于新人十分友好。推荐大家在有时间的情况下，通读全文。
+在写文章到一半的时候，惊闻陈浩老师离世，中文互联网永远失去了一位充满理想的技术人，写这篇文章也是感谢陈浩老师为我们贡献了如此之多的好博文，您永远都是我的榜样。希望中国的程序员不要那么的苦逼，不是每天996，而是真正的在探索技术，利用技术来提升自己的生产力。
+这是第一次感受到程序员身体健康的重要性，也希望广大程序员朋友积极锻炼身体，身体才是革命的本钱。
+Makefile思维导图
+一些有用的例子将所有.c文件编...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2023/06/17</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="makefile">makefile</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2023/03/14/selinux-source-code-kernel-part/">
             
                 <span>SELinux源码分析--内核态</span>
@@ -669,39 +702,6 @@ module1 程序IO交互模块命令行与shel...
         <a class="post-tag" href="javascript:void(0);" data-tags="IOT">IOT</a>
     
         <a class="post-tag" href="javascript:void(0);" data-tags="ARM">ARM</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2020/10/26/2020-bytectf-gun/">
-            
-                <span>2020 bytectf gun writeup</span>
-        </a>
-        <div class="abstract-content">
-            这周打了一下ByteCTF，发现差距还是很大的，现在的很多堆菜单题都上2.31，新版本的题目需要多熟悉熟悉。
-分析checksec保护全开，逆向的时候发现其中有prctl函数，用seccomp-tools查看沙箱逻辑。
-
-看这个逻辑只能使用orw的方法获得flag。整个程序主要由三个功能，射击子弹，上膛子弹，购买子弹，购买子弹会malloc，同时有一次向chunk写数据的机会，购买的子弹会通过一个18字节大小的数据结构管理。chunk指向分配的堆块，next指向其他堆块形成一个链表，flag是标志位分别有0，1，2，表示不同的状态。
-12345struct &#123;    char*...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/10/26</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
     
 </div>
             
@@ -1417,9 +1417,18 @@ module1 程序IO交互模块命令行与shel...
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 36
+        Total : 37
         </div>
         <!-- search  -->
         
@@ -1432,6 +1441,11 @@ module1 程序IO交互模块命令行与shel...
     
     <div class="archive-year"> 2023 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/17</span><a class="archive-post-title" href="/2023/06/17/makefile-study-notes/">Makefile学习笔记</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1675,13 +1689,13 @@ module1 程序IO交互模块命令行与shel...
     
         <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
     
-        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
-    
-        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
-    
         <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
     
         <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
+    
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
+        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
     
         <span class="sidebar-tag-name" data-tags="docker"><span class="iconfont-archer">&#xe606;</span>docker</span>
     
@@ -1690,6 +1704,8 @@ module1 程序IO交互模块命令行与shel...
         <span class="sidebar-tag-name" data-tags="hw"><span class="iconfont-archer">&#xe606;</span>hw</span>
     
         <span class="sidebar-tag-name" data-tags="总结"><span class="iconfont-archer">&#xe606;</span>总结</span>
+    
+        <span class="sidebar-tag-name" data-tags="makefile"><span class="iconfont-archer">&#xe606;</span>makefile</span>
     
         <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
     
