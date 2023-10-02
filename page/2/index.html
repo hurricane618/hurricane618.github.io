@@ -378,6 +378,43 @@ height:50vh;
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2020/12/17/2020xhlj-iot-pwn/">
+            
+                <span>西湖论剑 IoT闯关赛 2020 pwn3 ezarmpwn</span>
+        </a>
+        <div class="abstract-content">
+            文章首发于安全客 https://www.anquanke.com/post/id/224972
+前言打了安恒举办的西湖论剑比赛，题目都是跑在一个开发板上的，通过数据线连接开发板的otg接口能访问题目环境。pwn题目一共有三道，其中有一道题目因为逻辑上的问题导致能比较简单的获得flag，另外一道题目是boa服务器在处理http认证过程中，发生栈溢出。我们这里分析的是这次比赛的第三道pwn题ezarmpwn。
+题目分析通过file和checksec能够知道程序为32位的arm小端程序，开启NX保护，没有PIE和canary保护。
+
+主办方给出的libc为2.30，把libc解压的文件夹和题...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/12/17</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="ARM">ARM</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="IOT">IOT</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2020/10/26/2020-bytectf-gun/">
             
                 <span>2020 bytectf gun writeup</span>
@@ -660,41 +697,6 @@ over安恒月赛的题目，首先看程序保护，开启了NX，不能写shell
             <!-- date  -->
             <div class="abstract-date">
                 <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/09/14</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="ROP">ROP</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="stackoverflow">stackoverflow</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2019/07/26/basic-rop-practice/">
-            
-                <span>基础ROP学习</span>
-        </a>
-        <div class="abstract-content">
-            最近开始入门pwn，在白泽新手oj那里学了一波之后开始自己学剩下的内容。看到atum大佬推荐的三道基础ROP题目，就练习一下，学习思路总结经验。在网上找题的过程中发现vss基本上绝迹了。。。辛苦一番之后终于找到，为了后面的人也能快速找到题目我就把三道题一起上传了。
-http://hurricane618.me/resource/basic-rop/vss
-http://hurricane618.me/resource/basic-rop/ropasaurusrex
-http://hurricane618.me/resource/basic-rop/r0pbaby
-r0pbaby一道强化版...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/07/26</span>
             </div>
             <!-- tags  -->
             
@@ -1435,9 +1437,28 @@ r0pbaby一道强化版...
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 37
+        Total : 38
         </div>
         <!-- search  -->
         
@@ -1450,6 +1471,11 @@ r0pbaby一道强化版...
     
     <div class="archive-year"> 2023 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/03</span><a class="archive-post-title" href="/2023/10/03/my-recommendation-list-1/">那些年我看过的番剧、电视剧、电影以及玩过的游戏</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1688,7 +1714,9 @@ r0pbaby一道强化版...
     
         <span class="sidebar-tag-name" data-tags="Kernel"><span class="iconfont-archer">&#xe606;</span>Kernel</span>
     
-        <span class="sidebar-tag-name" data-tags="娱乐"><span class="iconfont-archer">&#xe606;</span>娱乐</span>
+        <span class="sidebar-tag-name" data-tags="PA"><span class="iconfont-archer">&#xe606;</span>PA</span>
+    
+        <span class="sidebar-tag-name" data-tags="ARM"><span class="iconfont-archer">&#xe606;</span>ARM</span>
     
         <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
     
@@ -1698,9 +1726,13 @@ r0pbaby一道强化版...
     
         <span class="sidebar-tag-name" data-tags="fmt"><span class="iconfont-archer">&#xe606;</span>fmt</span>
     
+        <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
+    
         <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
     
-        <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
+        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
+    
+        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
     
         <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
     
@@ -1708,21 +1740,15 @@ r0pbaby一道强化版...
     
         <span class="sidebar-tag-name" data-tags="Mysql"><span class="iconfont-archer">&#xe606;</span>Mysql</span>
     
-        <span class="sidebar-tag-name" data-tags="ROP"><span class="iconfont-archer">&#xe606;</span>ROP</span>
-    
-        <span class="sidebar-tag-name" data-tags="stackoverflow"><span class="iconfont-archer">&#xe606;</span>stackoverflow</span>
-    
-        <span class="sidebar-tag-name" data-tags="makefile"><span class="iconfont-archer">&#xe606;</span>makefile</span>
-    
         <span class="sidebar-tag-name" data-tags="hw"><span class="iconfont-archer">&#xe606;</span>hw</span>
     
         <span class="sidebar-tag-name" data-tags="总结"><span class="iconfont-archer">&#xe606;</span>总结</span>
     
+        <span class="sidebar-tag-name" data-tags="makefile"><span class="iconfont-archer">&#xe606;</span>makefile</span>
+    
         <span class="sidebar-tag-name" data-tags="IOT"><span class="iconfont-archer">&#xe606;</span>IOT</span>
     
         <span class="sidebar-tag-name" data-tags="heap"><span class="iconfont-archer">&#xe606;</span>heap</span>
-    
-        <span class="sidebar-tag-name" data-tags="ARM"><span class="iconfont-archer">&#xe606;</span>ARM</span>
     
         <span class="sidebar-tag-name" data-tags="CSP"><span class="iconfont-archer">&#xe606;</span>CSP</span>
     
@@ -1738,9 +1764,11 @@ r0pbaby一道强化版...
     
         <span class="sidebar-tag-name" data-tags="安全机制"><span class="iconfont-archer">&#xe606;</span>安全机制</span>
     
-        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
+        <span class="sidebar-tag-name" data-tags="娱乐"><span class="iconfont-archer">&#xe606;</span>娱乐</span>
     
         <span class="sidebar-tag-name" data-tags="人生"><span class="iconfont-archer">&#xe606;</span>人生</span>
+    
+        <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
     
         <span class="sidebar-tag-name" data-tags="Linux"><span class="iconfont-archer">&#xe606;</span>Linux</span>
     
