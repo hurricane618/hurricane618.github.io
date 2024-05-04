@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://hurricane618.me/"/>
-  <updated>2023-10-02T16:10:37.416Z</updated>
+  <updated>2024-05-04T16:05:58.558Z</updated>
   <id>https://hurricane618.me/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ARM安全特性PA(Pointer Authentication)的技术洞察</title>
+    <link href="https://hurricane618.me/2024/05/05/pointer-authentication-collection-1/"/>
+    <id>https://hurricane618.me/2024/05/05/pointer-authentication-collection-1/</id>
+    <published>2024-05-04T16:05:58.000Z</published>
+    <updated>2024-05-04T16:05:58.558Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>ARM v8.3 版本中新增了基于硬件的安全特性PA(Pointer Authentication)，并新增了一组相关指令pac和aut，pac*指令用于对目标指针做签名，签名内容存放于指针头部的空余空间中，而aut*指令用于校验存放于指针头部的签名内容是否正确，由此达到控制流完整性(CFI)和数据流完整性(DFI)的保护。</p><h2 id="防御篇"><a href="#防御篇" class="headerlink" title="防御篇"></a>防御篇</h2><h3 id="增强PA的检查功能"><a href="#增强PA的检查功能" class="headerlink" title="增强PA的检查功能"></a>增强PA的检查功能</h3><p>来自论文 <strong>PAC it up: Towards Pointer Integrity using ARM Pointer Authentication</strong></p><p>论文里面提到了PAC的致命缺陷是会有重用，包括PA code的重用，PA签名gadget，指针本体重放等形式。针对这种情况，作者做了优化的安全方案来解决它。</p><p>提到了两种PAC的攻击模型：</p><p><strong>恶意PAC生成</strong></p><ul><li>PAC生成的gadget，使得攻击者可以利用片段来完成签名操作</li></ul><p><strong>PAC重用攻击</strong></p><ul><li>回滚一个PAC签名的指针为之前签名的指针值</li><li>替换签名指针为使用相等PA modifier的另外一个签名指针</li></ul><p>重用攻击相当于也可以小范围的操纵程序控制流，只不过并不能无限制的任意跳转。</p><p><strong>增强方案</strong></p><p>（1）增加函数类型作为签名输入值</p><p>针对返回地址的PAC签名，可以增加函数类型type-id信息，这样就算替换为其他签名值，但函数类型不一致的情况下还是会校验为失败。</p><p>（2）数据指针类型的DFI校验方案</p><p>作者将数据指针的使用分为两种情况，一个是on-load类型，一个是on-use类型。</p><p>on-load类型指针使用是解引用之后的值会残留在寄存器中，这点是需要单独进行PAC签名保护的内容。</p><p>on-use类型指针使用是解引用之后使用会被清除，因此可以使用一些优化组合的PAC指令。</p><p>（3）针对指针类型转换场景的处理</p><p>在这种指针类型转换的情况下，会去掉原始PAC签名，再使用新的类型信息进行PAC签名，这样在指针使用时会用新的类型做校验，而不会出现报错</p><h3 id="利用PA增强已有防御机制"><a href="#利用PA增强已有防御机制" class="headerlink" title="利用PA增强已有防御机制"></a>利用PA增强已有防御机制</h3><p>来自论文 <strong>Protecting the stack with PACed canaries</strong></p><p>从论文的标题就能看出，它的想法是利用pac指令加强canary机制。</p><p>canary机制是防止栈溢出的核心防御，但它的缺点是容易受到信息泄露和暴力破解攻击。</p><p>文章中提到了三个脆弱点：</p><ol><li>单一程序运行时canary值为固定数据（进程唯一）；</li><li>canary数据存储在不安全内存中，容易被篡改；</li><li>只在栈帧的尾部插入检测，无法检测到局部变量的溢出；</li></ol><p>作者针对性提出基于PAC的canary方案：</p><ol><li>能够保护栈中的局部单一变量；</li><li>不需要一定在安全空间中存储canary数据；</li><li>能够针对性的对每个函数调用做到唯一的canary；</li><li>整体方案利用硬件特性，性能较好；</li></ol><p>作者最后的方案也是比较简单粗暴，直接在每个局部buffer后面插入检测canary，同时每个canary都是经过PAC签名过的值，这个签名的modifier为SP指针的后48bit，再加上函数的类型id值。这样插入的每个canary都会不同，一旦被篡改就会被检测出来。</p><p>但这样会额外插入很多指令，但总的来说和原来的stack canary的方案相比，性能开销几乎相同，但能做到更多的防御能力。</p><h3 id="利用PA做内存漏洞检测"><a href="#利用PA做内存漏洞检测" class="headerlink" title="利用PA做内存漏洞检测"></a>利用PA做内存漏洞检测</h3><p>来自论文 <strong>Hardware-based Always-On Heap Memory Safety</strong></p><p>这篇论文使用了基于硬件的堆内存边界检查和释放使用类漏洞，类似于Asan。</p><p>开篇提出现有边界检查的问题：</p><ol><li>用于边界检查和元数据存储的额外指令开销</li><li>复杂的元数据处理</li></ol><p>作者提出了五大挑战：</p><ol><li>寄存器扩展</li><li>边界检查操作</li><li>元数据扩散</li><li>高内存开销</li><li>复杂的元数据处理方案</li></ol><p>以上面五个挑战为目标，作者提出了针对性的解决方案</p><ol><li>采用PA指令相关的签名和验签方式，可以把指针的签名信息保存在指针的头部中，而不需要扩展寄存器或者手动做元数据扩散，指针本身的拷贝动作即可代替元数据扩散的动作；（解决挑战1和3）</li><li>针对挑战2，在指针解引用的时候去做边界检查，因为PAC签名之后，在指针使用之前一定会有验签操作，所以边界检查可以一并在那时进行；（解决挑战2）</li><li>通过hash表的方式做索引，可快速查找某个指针的边界范围，以此来快速判断改次指针访问是否存在越界行为；（解决挑战4和5）</li></ol><p>作者接下来描述了更为具体的方案细节，其中涉及到软件和硬件两个部分内容。</p><p>软件上的修改包括：</p><ul><li>新增特殊指令集的扩展：作者开发了新的指令集来进行边界检查</li><li>编译器的修改：通过修改编译器中的编译流程，在malloc和free的过程中增加检查指令</li><li>操作系统的修改：需要适配刚刚新增的指令集，以及指令的异常处理</li></ul><p>硬件上的内容，对于我这种软件工程师就有点看不太懂了，主要包含两个状态机运行。</p><p>来自论文 <strong>PACMem: Enforcing Spatial and Temporal Memory Safety via ARM Pointer Authentication</strong></p><p>这篇论文做的比上面一篇更加完善，功能和方案都更为成熟。主要目标是利用PAC指令用更低的开销，检查更多的内存问题。</p><p>作者的切入点是各种消毒器的内存开销、体积开销、性能开销都非常巨大，通过他们研究的基于PAC的消毒器能很好的优化上面的问题。（这个切入点真的太好了，一下子就拔高了不少）</p><p>整个思路和上面的硬件论文差不多，会创建一个表结构来存储指针基地址，创建时间戳，对象大小信息。其中比较有意思的是创建时间戳，它是利用随机数和SP寄存器两个输入值，用PAC算出来的一个数据，可以当做是这个chunk的一种唯一标识。</p><p>当然，这种计算方式肯定会有一定概率出现PAC数据冲突，作者给出的解决冲突策略也是最简单的那一类，直接原数据减一，直到没有冲突为止。</p><p>元数据的创建点非常的显而易见的在malloc上，当chunk创建时会将对应的信息转换为我们维护的表结构数据，并在chunk的生命周期中进行维护。</p><p>检查点的位置也是非常的明显，当指针有解引用动作时会触发hash表中的检测。检测分为两个点：</p><ol><li>对象此时是否存在，看创建时间戳；</li><li>对象此时是否存在越界，看对象大小和基地址相加得到的范围；</li></ol><p>在兼容性方面，签名指针往未签名的模块中转移时，PACMem会检测这个是否存在异常，并去掉PAC签名值，使其转换为正常的指针。当未签名的指针向保护模块转移时，PACMem会当做新的chunk生成对其生成元数据，这个元数据会填充进最小的基地址和最大的对象大小，以此来保证兼容性。</p><p>除了上述的主要方案，还做了一些性能优化策略。</p><ol><li>循环访问的优化：只会在循环开始之前检查一次是否有问题，如果是指针循环增加or减少，那么会优化为只检查最终结果；</li><li>针对重复地址的优化：如果能确定地址是重复一样的场景，那么第二次的地址检测会被优化；</li><li>仅写入数据检查优化：默认场景下是读写都会做安全检查，但有些时候出于性能考虑，可以只做写入数据时检查，以此来增加检测效率；</li></ol><p>总结，整体来说检测缓冲区溢出、释放后使用、双重释放等堆栈类型问题的开销有所下降，但PACMem和ASan相比，检测的漏洞类型还是少了一些，ASan还能够检测内存泄漏、未初始化内存等问题。</p><h2 id="攻击篇"><a href="#攻击篇" class="headerlink" title="攻击篇"></a>攻击篇</h2><h3 id="苹果的PA实现分析"><a href="#苹果的PA实现分析" class="headerlink" title="苹果的PA实现分析"></a>苹果的PA实现分析</h3><p>来自论文 <strong>Demystifying Pointer Authentication on Apple M1</strong></p><p>如果PA同时在EL0和EL1开启，那么EL0获得的签名可以在EL1通过验证。（Linux内核为了防止这个问题，在用户态内核态切换的时候会刷新PA相关的密钥）这是一种跨层攻击。</p><p>作者在分析苹果的实现过程中发现：</p><ul><li>苹果存在特殊的硬件机制，能阻止我们观测到真实的PA密钥</li><li>苹果的PAC指令和ARM原生的指令行为不一致</li></ul><p>在逆向苹果PA的时候一些技巧：</p><ul><li>通过测试函数获取最基本的苹果特殊PA寄存器识别码</li><li>通过EL1和EL2层寄存器的映射来解决寄存器别名的问题</li><li>通过以上两步不断地搜索内核中的指令信息，如果又遇到了未知内容，则再次重复1-2步</li></ul><p>苹果在自己PA模式使能之后，pacia等签名指令，不会使用EL1层的IA key了，而是会使用EL2层的IA key</p><img src="/2024/05/05/pointer-authentication-collection-1/1.png"><p>苹果在硬件层面魔改的pac指令操作。主要在这几个方面：</p><ul><li>额外的密钥寄存器</li><li>针对主机和虚拟机之间场景的寄存器</li><li>使能苹果PA模式的特殊控制寄存器</li><li>苹果PA签名算法和高通的QARMA不同，还存在一些盐值异或操作</li></ul><p>讲述PAC签名的不同层/不同环境签名替换的攻击方式，比如在用户态签名的pac值，在内核态使用。但这种只能适用于没有密钥切换的场景，但无论的苹果还是Linux都会在切换层级的时候进行密钥切换。</p><ul><li>跨VM的攻击方式（宿主机和虚拟机之间的跨越攻击）</li><li>跨密钥key的攻击方式（Akey和Bkey相同的情况）</li><li>如果PA针对某个指针的签名都是一样的值，那么攻击者可以拷贝这个值来复用签名，导致重用攻击</li><li>跨EL层的攻击（如果EL层之间切换时没更新密钥，就会存在这个问题）</li></ul><img src="/2024/05/05/pointer-authentication-collection-1/2.png"><p>上述是苹果每个Key的进程依赖性，和每个签名指令在用户态和内核态的使用情况。</p><p>苹果使用IB签名返回地址指针，IA签名其他类型函数指针，DA用于内核数据指针签名，DB用于用户态数据指针，GA用于签名中断向量表和极为敏感的数据区域。</p><p>针对PAC的攻击面分析：</p><ul><li>PAC没有保护的数据指针</li><li>PAC没有保护的中断上下文数据</li><li>签名gadget</li><li>密钥泄露</li></ul><h3 id="苹果的PA实现中的漏洞"><a href="#苹果的PA实现中的漏洞" class="headerlink" title="苹果的PA实现中的漏洞"></a>苹果的PA实现中的漏洞</h3><p>比较早去分析苹果PA机制缺陷的是来自工业界的顶级团队，google P0和腾讯keen。</p><p>里面提到的一些方法论的攻击面分析：</p><ul><li>PA的内存密钥泄露</li><li>跨EL层的PAC伪造，比如在用户态利用PAC指令签名内核指针</li><li>如果存在密钥通用的情况，可能会有不同PAC密钥签名指令的伪造攻击</li><li>PAC签名的gadget，利用gadget为自己的指针做签名</li><li>PAC的暴力求解</li></ul><p>但上面的攻击面在作者实际探索的时候，发现苹果已经做了很多考虑，上面的攻击面除了gadget和暴力求解基本上没有作用。并且把怀疑对象放在了硬件上，苹果的硬件针对密钥做了特殊处理。</p><p>以及出现过一个巨搞笑的地方，只做了比较，但没有跳转或者其他动作，直接返回了</p><img src="/2024/05/05/pointer-authentication-collection-1/3.png"><p>P0在博客发现一年之后的blackhat上发表了更为详细的绕过思路，其中有一段采用中断机制的bypass思路。下面列出其中一个中断bypass：</p><img src="/2024/05/05/pointer-authentication-collection-1/4.png"><p>之后，学术界也开始了苹果PA的分析之路。也正是上面的论文所做的事情，它分析了苹果硬件中做的骚操作，并把它通过虚拟机测试展示了出来。从中挖掘出了一个签名gadget和一些没有保护到的敏感数据指针。</p><p><strong>37C3上爆料的惊天利用链</strong></p><p>其中有涉及到苹果PAC的bypass，我是有点不明所以，门槛太高已经处在无法理解的阶段了。放一张攻击链的演示图，给大家看看。比较邪门的是那个芯片级漏洞，不知道是怎么出来的，众说纷纭。</p><img src="/2024/05/05/pointer-authentication-collection-1/5.png"><p>图片来自：<a href="https://securelist.com/operation-triangulation-the-last-hardware-mystery/111669/" target="_blank" rel="noopener">https://securelist.com/operation-triangulation-the-last-hardware-mystery/111669/</a></p><p>相关事件文章合集：<a href="https://securelist.com/trng-2023/" target="_blank" rel="noopener">https://securelist.com/trng-2023/</a></p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>利用PAC指令已经能做到很多事情了，包括强化PAC本身的检测机制，增强已有防御机制，以及检测更多类型的内存漏洞。作为ARM v8.3新增的指令，随着苹果的大力推进，已经在商用上有了大力发展。而最新的MTE，谷歌就抢先进行了商用，不知道这算不算一种军备竞赛？</p><p>PA机制最出彩的地方就是复用了地址前面的空余位置做签名值，低开销并且不需要额外保存签名信息，原有的指针拷贝也能完全复用。整体的设计思路基本上封死了控制流劫持，因为你要先攻破PA机制才能做到代码执行，但要攻击PA机制很多时候又需要依靠代码执行，这就成了一种循环依赖的鸡生蛋问题。当然，看了上面各个大厂实验室的分析思路，PA在实现过程中还存在一些瑕疵，但只要经过一段时间的锤炼，绝对能成为杀手级的漏洞缓解机制，或许能为内存漏洞盖上棺材板吧？让我们拭目以待！</p><p>内存漏洞被封杀殆尽之后，下一个会是什么呢？逻辑漏洞可能会成为下一个战场吗？变幻莫测的逻辑漏洞如何有效的进行封杀预防呢？这些应该都是接下来安全从业人员需要考虑的事情吧。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;ARM v8.3 版本中新增了基于硬件的安全特性PA(Pointer Authentication)，并新增了一组相关指令pac和aut，p
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="https://hurricane618.me/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+      <category term="ARM" scheme="https://hurricane618.me/tags/ARM/"/>
+    
+      <category term="PA" scheme="https://hurricane618.me/tags/PA/"/>
+    
+  </entry>
   
   <entry>
     <title>那些年我看过的番剧、电视剧、电影以及玩过的游戏</title>
@@ -301,11 +328,11 @@
       <category term="技术" scheme="https://hurricane618.me/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-      <category term="ARM" scheme="https://hurricane618.me/tags/ARM/"/>
-    
       <category term="CTF" scheme="https://hurricane618.me/tags/CTF/"/>
     
       <category term="IOT" scheme="https://hurricane618.me/tags/IOT/"/>
+    
+      <category term="ARM" scheme="https://hurricane618.me/tags/ARM/"/>
     
   </entry>
   
@@ -387,9 +414,9 @@
     
       <category term="CTF" scheme="https://hurricane618.me/tags/CTF/"/>
     
-      <category term="heap" scheme="https://hurricane618.me/tags/heap/"/>
-    
       <category term="stackoverflow" scheme="https://hurricane618.me/tags/stackoverflow/"/>
+    
+      <category term="heap" scheme="https://hurricane618.me/tags/heap/"/>
     
   </entry>
   
@@ -442,9 +469,9 @@
     
       <category term="CTF" scheme="https://hurricane618.me/tags/CTF/"/>
     
-      <category term="heap" scheme="https://hurricane618.me/tags/heap/"/>
-    
       <category term="ROP" scheme="https://hurricane618.me/tags/ROP/"/>
+    
+      <category term="heap" scheme="https://hurricane618.me/tags/heap/"/>
     
   </entry>
   
@@ -524,9 +551,9 @@
       <category term="技术" scheme="https://hurricane618.me/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-      <category term="stackoverflow" scheme="https://hurricane618.me/tags/stackoverflow/"/>
-    
       <category term="ROP" scheme="https://hurricane618.me/tags/ROP/"/>
+    
+      <category term="stackoverflow" scheme="https://hurricane618.me/tags/stackoverflow/"/>
     
   </entry>
   
@@ -552,9 +579,9 @@
       <category term="技术" scheme="https://hurricane618.me/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-      <category term="stackoverflow" scheme="https://hurricane618.me/tags/stackoverflow/"/>
-    
       <category term="ROP" scheme="https://hurricane618.me/tags/ROP/"/>
+    
+      <category term="stackoverflow" scheme="https://hurricane618.me/tags/stackoverflow/"/>
     
   </entry>
   
@@ -580,9 +607,9 @@
       <category term="技术" scheme="https://hurricane618.me/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-      <category term="stackoverflow" scheme="https://hurricane618.me/tags/stackoverflow/"/>
-    
       <category term="ROP" scheme="https://hurricane618.me/tags/ROP/"/>
+    
+      <category term="stackoverflow" scheme="https://hurricane618.me/tags/stackoverflow/"/>
     
   </entry>
   
