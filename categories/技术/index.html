@@ -365,6 +365,38 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href="/2024/12/31/C-language-performance-optimization-guide/">
+            
+                <span>C语言性能优化指南</span>
+        </a>
+        <div class="abstract-content">
+            前言在甲方待了一段时间发现，在企业中想要提升安全性或者落地某个新的安全能力，总是需要和业务性能进行对比。如果某个安全特性的性能开销过大，那么对于业务来讲是一种不可接受的代价。因此，安全从业者学习一点性能优化的手段也是非常重要的。这里博主主要在操作系统领域，相关的代码主要以C为主，所以性能优化也是围绕着语言相关特点。
+C语言从代码到可执行文件，再到最终的运行阶段，主要是两个部分组成——编译阶段和执行阶段。针对编译阶段，我们能做的就是尽可能的利用编译器特性和特殊编码技法来优化；执行阶段涉及到指令的热点运行，由于程序执行的局部性原理，我们的大量代码在执行时往往会重复一小段逻辑。因此，性能优化的...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2024/12/31</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class="abstract-tags">
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="总结">总结</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="性能">性能</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href="/2024/05/05/pointer-authentication-collection-1/">
             
                 <span>ARM安全特性PA(Pointer Authentication)的技术洞察</span>
@@ -664,39 +696,6 @@ module1 程序IO交互模块命令行与shel...
             <div class="abstract-tags">
     
         <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href="/2020/10/12/2020-tctf-final-jit/">
-            
-                <span>2020 TCTF final SecureJIT writeup</span>
-        </a>
-        <div class="abstract-content">
-            第一次打final 被打的头都炸了，555555。过去三周了，还是水一下这道签到题。
-题目情况作者搞到了一个ruby的jit——rubi，其中打了patch，让执行代码的区域变成不可写的情况。
-12345678910111213141516diff --git a/engine.c b/engine.cindex 79e83d2..2350d59 100644--- a/engine.c+++ b/engine.c@@ -137,6 +137,11 @@ static int execute(char *source)init();lex(source);parser();+ long ...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2020/10/12</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class="abstract-tags">
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="CTF">CTF</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags="fmt">fmt</a>
     
 </div>
             
@@ -1351,9 +1350,28 @@ module1 程序IO交互模块命令行与shel...
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 39
+        Total : 40
         </div>
         <!-- search  -->
         
@@ -1366,6 +1384,11 @@ module1 程序IO交互模块命令行与shel...
     
     <div class="archive-year"> 2024 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/31</span><a class="archive-post-title" href="/2024/12/31/C-language-performance-optimization-guide/">C语言性能优化指南</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1621,6 +1644,8 @@ module1 程序IO交互模块命令行与shel...
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
     
+        <span class="sidebar-tag-name" data-tags="Kernel"><span class="iconfont-archer">&#xe606;</span>Kernel</span>
+    
         <span class="sidebar-tag-name" data-tags="调试"><span class="iconfont-archer">&#xe606;</span>调试</span>
     
         <span class="sidebar-tag-name" data-tags="CTF"><span class="iconfont-archer">&#xe606;</span>CTF</span>
@@ -1629,13 +1654,11 @@ module1 程序IO交互模块命令行与shel...
     
         <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
     
-        <span class="sidebar-tag-name" data-tags="Kernel"><span class="iconfont-archer">&#xe606;</span>Kernel</span>
-    
         <span class="sidebar-tag-name" data-tags="fmt"><span class="iconfont-archer">&#xe606;</span>fmt</span>
     
-        <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
-    
         <span class="sidebar-tag-name" data-tags="算法"><span class="iconfont-archer">&#xe606;</span>算法</span>
+    
+        <span class="sidebar-tag-name" data-tags="闲聊"><span class="iconfont-archer">&#xe606;</span>闲聊</span>
     
         <span class="sidebar-tag-name" data-tags="代码审计"><span class="iconfont-archer">&#xe606;</span>代码审计</span>
     
@@ -1680,6 +1703,8 @@ module1 程序IO交互模块命令行与shel...
         <span class="sidebar-tag-name" data-tags="翻译"><span class="iconfont-archer">&#xe606;</span>翻译</span>
     
         <span class="sidebar-tag-name" data-tags="人生"><span class="iconfont-archer">&#xe606;</span>人生</span>
+    
+        <span class="sidebar-tag-name" data-tags="性能"><span class="iconfont-archer">&#xe606;</span>性能</span>
     
         <span class="sidebar-tag-name" data-tags="Linux"><span class="iconfont-archer">&#xe606;</span>Linux</span>
     
